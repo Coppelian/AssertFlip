@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "scikit-learn__scikit-learn-13142",
+    "problem_statement": [
+      "GaussianMixture predict and fit_predict disagree when n_init>1\n#### Description\r\nWhen `n_init` is specified in GaussianMixture, the results of fit_predict(X) and predict(X) are often different.  The `test_gaussian_mixture_fit_predict` unit test doesn't catch this because it does not set `n_init`.\r\n\r\n#### Steps/Code to Reproduce\r\n```\r\npython\r\nfrom sklearn.mixture import GaussianMixture\r\nfrom sklearn.utils.testing import assert_array_equal\r\nimport numpy\r\nX = numpy.random.randn(1000,5)\r\nprint 'no n_init'\r\ngm = GaussianMixture(n_components=5)\r\nc1 = gm.fit_predict(X)\r\nc2 = gm.predict(X)\r\nassert_array_equal(c1,c2)\r\nprint 'n_init=5'\r\ngm = GaussianMixture(n_components=5, n_init=5)\r\nc1 = gm.fit_predict(X)\r\nc2 = gm.predict(X)\r\nassert_array_equal(c1,c2)\r\n```\r\n\r\n#### Expected Results\r\n```\r\nno n_init\r\nn_init=5\r\n```\r\nNo exceptions.\r\n\r\n#### Actual Results\r\n```\r\nno n_init\r\nn_init=5\r\nTraceback (most recent call last):\r\n  File \"test_gm.py\", line 17, in <module>\r\n    assert_array_equal(c1,c2)\r\n  File \"/home/scott/.local/lib/python2.7/site-packages/numpy/testing/_private/utils.py\", line 872, in assert_array_equal\r\n    verbose=verbose, header='Arrays are not equal')\r\n  File \"/home/scott/.local/lib/python2.7/site-packages/numpy/testing/_private/utils.py\", line 796, in assert_array_compare\r\n    raise AssertionError(msg)\r\nAssertionError: \r\nArrays are not equal\r\n\r\n(mismatch 88.6%)\r\n x: array([4, 0, 1, 1, 1, 3, 3, 4, 4, 2, 0, 0, 1, 2, 0, 2, 0, 1, 3, 1, 1, 3,\r\n       2, 1, 0, 2, 1, 0, 2, 0, 3, 1, 2, 3, 3, 1, 0, 2, 2, 0, 3, 0, 2, 0,\r\n       4, 2, 3, 0, 4, 2, 4, 1, 0, 2, 2, 1, 3, 2, 1, 4, 0, 2, 2, 1, 1, 2,...\r\n y: array([4, 1, 0, 2, 2, 1, 1, 4, 4, 0, 4, 1, 0, 3, 1, 0, 2, 2, 1, 2, 0, 0,\r\n       1, 0, 4, 1, 0, 4, 0, 1, 1, 2, 3, 1, 4, 0, 1, 4, 4, 4, 0, 1, 0, 2,\r\n       4, 1, 1, 2, 4, 3, 4, 0, 2, 3, 2, 3, 0, 0, 2, 3, 3, 3, 3, 0, 3, 2,...\r\n```\r\n\r\n#### Versions\r\n```\r\nSystem:\r\n    python: 2.7.15rc1 (default, Nov 12 2018, 14:31:15)  [GCC 7.3.0]\r\n   machine: Linux-4.15.0-43-generic-x86_64-with-Ubuntu-18.04-bionic\r\nexecutable: /usr/bin/python\r\n\r\nBLAS:\r\n    macros: HAVE_CBLAS=None, NO_ATLAS_INFO=-1\r\ncblas_libs: cblas\r\n  lib_dirs: /usr/lib/x86_64-linux-gnu\r\n\r\nPython deps:\r\n    Cython: 0.28.5\r\n     scipy: 1.2.0\r\nsetuptools: 39.0.1\r\n       pip: 19.0.1\r\n     numpy: 1.16.0\r\n    pandas: 0.23.1\r\n   sklearn: 0.20.2\r\n```\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport numpy as np\nfrom sklearn.mixture import GaussianMixture\n\ndef test_gaussian_mixture_fit_predict_discrepancy():\n    # Generate random data with a fixed seed for reproducibility\n    rng = np.random.RandomState(42)\n    X = rng.randn(1000, 5)\n\n    # Initialize GaussianMixture with n_components=5 and n_init=5\n    gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n\n    # Fit and predict using fit_predict\n    c1 = gm.fit_predict(X)\n\n    # Predict using predict\n    c2 = gm.predict(X)\n\n    # Assert that the results are different, exposing the bug\n    assert not np.array_equal(c1, c2), \"BUG: fit_predict and predict should not agree when n_init > 1\"\n\n# Note: This test will pass if the bug is present, as it asserts the incorrect behavior.\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_wsqvsfsw.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 3209,
+      "num_statements": 67326,
+      "percent_covered": 4.52100960848989,
+      "percent_covered_display": "5",
+      "missing_lines": 64117,
+      "excluded_lines": 5,
+      "num_branches": 16350,
+      "num_partial_branches": 119,
+      "covered_branches": 574,
+      "missing_branches": 15776
+    },
+    "test_code": "import pytest\nimport numpy as np\nfrom sklearn.mixture import GaussianMixture\n\ndef test_gaussian_mixture_fit_predict_discrepancy():\n    # Generate random data with a fixed seed for reproducibility\n    rng = np.random.RandomState(42)\n    X = rng.randn(1000, 5)\n\n    # Initialize GaussianMixture with n_components=5 and n_init=5\n    gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n\n    # Fit and predict using fit_predict\n    c1 = gm.fit_predict(X)\n\n    # Predict using predict\n    c2 = gm.predict(X)\n\n    # Assert that the results are different, exposing the bug\n    assert not np.array_equal(c1, c2), \"BUG: fit_predict and predict should not agree when n_init > 1\"\n\n# Note: This test will pass if the bug is present, as it asserts the incorrect behavior.\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport numpy as np\nfrom sklearn.mixture import GaussianMixture\n\ndef test_gaussian_mixture_fit_predict_discrepancy():\n    # Generate random data with a fixed seed for reproducibility\n    rng = np.random.RandomState(42)\n    X = rng.randn(1000, 5)\n\n    # Initialize GaussianMixture with n_components=5 and n_init=5\n    gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n\n    # Fit and predict using fit_predict\n    c1 = gm.fit_predict(X)\n\n    # Predict using predict\n    c2 = gm.predict(X)\n\n    # Assert that the results are different, exposing the bug\n    assert not np.array_equal(c1, c2), \"BUG: fit_predict and predict should not agree when n_init > 1\"\n\n# Note: This test will pass if the bug is present, as it asserts the incorrect behavior.\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport numpy as np\nfrom sklearn.mixture import GaussianMixture\n\ndef test_gaussian_mixture_fit_predict_discrepancy():\n    # Generate random data with a fixed seed for reproducibility\n    rng = np.random.RandomState(42)\n    X = rng.randn(1000, 5)\n\n    # Initialize GaussianMixture with n_components=5 and n_init=5\n    gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n\n    # Fit and predict using fit_predict\n    c1 = gm.fit_predict(X)\n\n    # Predict using predict\n    c2 = gm.predict(X)\n\n    # Assert that the results are the same, which is the expected correct behavior\n    assert np.array_equal(c1, c2), \"fit_predict and predict should agree when n_init > 1\"\n\n# Note: This test will fail if the bug is present, as it asserts the correct behavior.\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_2bqy90ba.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_gaussian_mixture_fit_predict_discrepancy():\n        # Generate random data with a fixed seed for reproducibility\n        rng = np.random.RandomState(42)\n        X = rng.randn(1000, 5)\n    \n        # Initialize GaussianMixture with n_components=5 and n_init=5\n        gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n    \n        # Fit and predict using fit_predict\n        c1 = gm.fit_predict(X)\n    \n        # Predict using predict\n        c2 = gm.predict(X)\n    \n        # Assert that the results are the same, which is the expected correct behavior\n>       assert np.array_equal(c1, c2), \"fit_predict and predict should agree when n_init > 1\"\nE       AssertionError: fit_predict and predict should agree when n_init > 1\nE       assert False\nE        +  where False = <function array_equal at 0x7ffe647abd08>(array([4, 1, 3, 0, 3, 0, 1, 3, 3, 0, 4, 4, 3, 4, 1, 3, 1, 1, 3, 2, 2, 1,\\n       2, 4, 0, 3, 2, 3, 3, 4, 3, 1, 0, 1, 2,...4, 4, 4,\\n       0, 0, 2, 1, 3, 2, 1, 0, 1, 0, 2, 4, 2, 3, 1, 4, 1, 0, 0, 4, 0, 3,\\n       1, 0, 4, 0, 3, 2, 2, 4, 2, 1]), array([1, 4, 1, 1, 4, 2, 4, 3, 1, 1, 0, 0, 3, 2, 1, 1, 1, 4, 4, 1, 3, 4,\\n       0, 0, 2, 3, 0, 3, 0, 3, 0, 4, 2, 1, 0,...1, 3, 3,\\n       2, 2, 4, 4, 3, 0, 4, 2, 0, 2, 3, 0, 3, 3, 1, 0, 2, 3, 2, 1, 2, 3,\\n       1, 1, 3, 2, 4, 0, 4, 2, 0, 1]))\nE        +    where <function array_equal at 0x7ffe647abd08> = np.array_equal\n\nsklearn/tests/test_2bqy90ba.py:20: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 3209,
+      "num_statements": 67326,
+      "percent_covered": 4.52100960848989,
+      "percent_covered_display": "5",
+      "missing_lines": 64117,
+      "excluded_lines": 5,
+      "num_branches": 16350,
+      "num_partial_branches": 119,
+      "covered_branches": 574,
+      "missing_branches": 15776
+    },
+    "test_code": "import pytest\nimport numpy as np\nfrom sklearn.mixture import GaussianMixture\n\ndef test_gaussian_mixture_fit_predict_discrepancy():\n    # Generate random data with a fixed seed for reproducibility\n    rng = np.random.RandomState(42)\n    X = rng.randn(1000, 5)\n\n    # Initialize GaussianMixture with n_components=5 and n_init=5\n    gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n\n    # Fit and predict using fit_predict\n    c1 = gm.fit_predict(X)\n\n    # Predict using predict\n    c2 = gm.predict(X)\n\n    # Assert that the results are the same, which is the expected correct behavior\n    assert np.array_equal(c1, c2), \"fit_predict and predict should agree when n_init > 1\"\n\n# Note: This test will fail if the bug is present, as it asserts the correct behavior.\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport numpy as np\nfrom sklearn.mixture import GaussianMixture\n\ndef test_gaussian_mixture_fit_predict_discrepancy():\n    # Generate random data with a fixed seed for reproducibility\n    rng = np.random.RandomState(42)\n    X = rng.randn(1000, 5)\n\n    # Initialize GaussianMixture with n_components=5 and n_init=5\n    gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n\n    # Fit and predict using fit_predict\n    c1 = gm.fit_predict(X)\n\n    # Predict using predict\n    c2 = gm.predict(X)\n\n    # Assert that the results are the same, which is the expected correct behavior\n    assert np.array_equal(c1, c2), \"fit_predict and predict should agree when n_init > 1\"\n\n# Note: This test will fail if the bug is present, as it asserts the correct behavior.\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport numpy as np\nfrom sklearn.mixture import GaussianMixture\n\ndef test_gaussian_mixture_fit_predict_discrepancy():\n    # Generate random data with a fixed seed for reproducibility\n    rng = np.random.RandomState(42)\n    X = rng.randn(1000, 5)\n\n    # Initialize GaussianMixture with n_components=5 and n_init=5\n    gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n\n    # Fit and predict using fit_predict\n    c1 = gm.fit_predict(X)\n\n    # Predict using predict\n    c2 = gm.predict(X)\n\n    # Assert that the results are the same, which is the expected correct behavior\n    assert np.array_equal(c1, c2), \"fit_predict and predict should agree when n_init > 1\"\n\n# Note: This test will fail if the bug is present, as it asserts the correct behavior.\n",
+    "error": "    def test_gaussian_mixture_fit_predict_discrepancy():\n        # Generate random data with a fixed seed for reproducibility\n        rng = np.random.RandomState(42)\n        X = rng.randn(1000, 5)\n    \n        # Initialize GaussianMixture with n_components=5 and n_init=5\n        gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n    \n        # Fit and predict using fit_predict\n        c1 = gm.fit_predict(X)\n    \n        # Predict using predict\n        c2 = gm.predict(X)\n    \n        # Assert that the results are the same, which is the expected correct behavior\n>       assert np.array_equal(c1, c2), \"fit_predict and predict should agree when n_init > 1\"\nE       AssertionError: fit_predict and predict should agree when n_init > 1\nE       assert False\nE        +  where False = <function array_equal at 0x7ffe647abd08>(array([4, 1, 3, 0, 3, 0, 1, 3, 3, 0, 4, 4, 3, 4, 1, 3, 1, 1, 3, 2, 2, 1,\\n       2, 4, 0, 3, 2, 3, 3, 4, 3, 1, 0, 1, 2,...4, 4, 4,\\n       0, 0, 2, 1, 3, 2, 1, 0, 1, 0, 2, 4, 2, 3, 1, 4, 1, 0, 0, 4, 0, 3,\\n       1, 0, 4, 0, 3, 2, 2, 4, 2, 1]), array([1, 4, 1, 1, 4, 2, 4, 3, 1, 1, 0, 0, 3, 2, 1, 1, 1, 4, 4, 1, 3, 4,\\n       0, 0, 2, 3, 0, 3, 0, 3, 0, 4, 2, 1, 0,...1, 3, 3,\\n       2, 2, 4, 4, 3, 0, 4, 2, 0, 2, 3, 0, 3, 3, 1, 0, 2, 3, 2, 1, 2, 3,\\n       1, 1, 3, 2, 4, 0, 4, 2, 0, 1]))\nE        +    where <function array_equal at 0x7ffe647abd08> = np.array_equal\n\nsklearn/tests/test_2bqy90ba.py:20: AssertionError\n",
+    "revealing": true,
+    "reason": "The test is designed to check if the `fit_predict` and `predict` methods of the `GaussianMixture` class produce the same results when `n_init` is set to a value greater than 1. The issue ticket describes a problem where these methods disagree under such conditions, which is exactly what the test is asserting. The test generates random data, initializes a `GaussianMixture` with `n_components=5` and `n_init=5`, and then compares the results of `fit_predict` and `predict`. The test fails, indicating that the methods do not agree, which is consistent with the reported bug. Therefore, the test correctly reproduces the bug and is a valid test case."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport numpy as np\nfrom sklearn.mixture import GaussianMixture\n\ndef test_gaussian_mixture_fit_predict_discrepancy():\n    # Generate random data with a fixed seed for reproducibility\n    rng = np.random.RandomState(42)\n    X = rng.randn(1000, 5)\n\n    # Initialize GaussianMixture with n_components=5 and n_init=5\n    gm = GaussianMixture(n_components=5, n_init=5, random_state=42)\n\n    # Fit and predict using fit_predict\n    c1 = gm.fit_predict(X)\n\n    # Predict using predict\n    c2 = gm.predict(X)\n\n    # Assert that the results are the same, which is the expected correct behavior\n    assert np.array_equal(c1, c2), \"fit_predict and predict should agree when n_init > 1\"\n\n# Note: This test will fail if the bug is present, as it asserts the correct behavior.\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.0585625
+  }
+]

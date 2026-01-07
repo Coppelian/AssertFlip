@@ -1,0 +1,16 @@
+from sympy import symbols
+from sympy.printing.mathml import mathml
+
+def test_mathml_symbol_with_number():
+    # Define symbols with names ending in numbers
+    x2, y, z = symbols('x2 y z')
+    
+    # Create an expression using these symbols
+    expr = x2 * z + x2**3
+    
+    # Convert the expression to MathML format
+    mathml_output = mathml(expr, printer='presentation')
+    
+    # Check the MathML output to confirm the presence of the symbol 'x2'
+    # The test should pass only when 'x2' is correctly visible in the MathML output
+    assert '<mi>x2</mi>' in mathml_output

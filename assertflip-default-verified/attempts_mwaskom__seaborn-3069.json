@@ -1,0 +1,200 @@
+[
+  {
+    "instance_id": "mwaskom__seaborn-3069",
+    "problem_statement": [
+      "Nominal scale should be drawn the same way as categorical scales\nThree distinctive things happen on the categorical axis in seaborn's categorical plots:\r\n\r\n1. The scale is drawn to +/- 0.5 from the first and last tick, rather than using the normal margin logic\r\n2. A grid is not shown, even when it otherwise would be with the active style\r\n3. If on the y axis, the axis is inverted\r\n\r\nIt probably makes sense to have `so.Nominal` scales (including inferred ones) do this too. Some comments on implementation:\r\n\r\n1. This is actually trickier than you'd think; I may have posted an issue over in matplotlib about this at one point, or just discussed on their gitter. I believe the suggested approach is to add an invisible artist with sticky edges and set the margin to 0. Feels like a hack! I might have looked into setting the sticky edges _on the spine artist_ at one point?\r\n\r\n2. Probably straightforward to do in `Plotter._finalize_figure`. Always a good idea? How do we defer to the theme if the user wants to force a grid? Should the grid be something that is set in the scale object itself\r\n\r\n3. Probably straightforward to implement but I am not exactly sure where would be best.\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom seaborn._core.scales import Nominal\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor\n    \n    # Assert that the axis limits are not set to +/- 0.5 from the first and last tick\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are visible\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert grid_visible, \"Grid lines are incorrectly visible\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "--no-header",
+      "-rA",
+      "/testbed/tests/test_3ow5tteu.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_nominal_scale_axis_limits_and_grid():\n        # Create a sample dataset with nominal categories\n        data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n        # Initialize a seaborn plot using this dataset with a Nominal scale\n        fig, ax = plt.subplots()\n        sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n        # Render the plot\n        plt.draw()\n    \n        # Capture the axis properties\n        xlim = ax.get_xlim()\n>       grid_visible = ax.xaxis._gridOnMajor\nE       AttributeError: 'XAxis' object has no attribute '_gridOnMajor'\n\ntests/test_3ow5tteu.py:19: AttributeError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 1165,
+      "num_statements": 7301,
+      "percent_covered": 12.057553956834532,
+      "percent_covered_display": "12",
+      "missing_lines": 6136,
+      "excluded_lines": 29,
+      "num_branches": 3124,
+      "num_partial_branches": 66,
+      "covered_branches": 92,
+      "missing_branches": 3032
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom seaborn._core.scales import Nominal\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor\n    \n    # Assert that the axis limits are not set to +/- 0.5 from the first and last tick\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are visible\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert grid_visible, \"Grid lines are incorrectly visible\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "response": {
+      "content": "```python\nimport pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom seaborn._core.scales import Nominal\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are not set to +/- 0.5 from the first and last tick\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are visible\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert grid_visible, \"Grid lines are incorrectly visible\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom seaborn._core.scales import Nominal\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are not set to +/- 0.5 from the first and last tick\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are visible\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert grid_visible, \"Grid lines are incorrectly visible\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "--no-header",
+      "-rA",
+      "/testbed/tests/test_5xdib0sz.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_nominal_scale_axis_limits_and_grid():\n        # Create a sample dataset with nominal categories\n        data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n        # Initialize a seaborn plot using this dataset with a Nominal scale\n        fig, ax = plt.subplots()\n        sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n        # Render the plot\n        plt.draw()\n    \n        # Capture the axis properties\n        xlim = ax.get_xlim()\n        grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n        # Assert that the axis limits are not set to +/- 0.5 from the first and last tick\n        # BUG: This behavior is incorrect but currently happens due to the bug\n>       assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\nE       AssertionError: Axis limits are incorrectly set to +/- 0.5 from the first and last tick\nE       assert (-0.5, 2.5) != (-0.5, 2.5)\n\ntests/test_5xdib0sz.py:23: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 1166,
+      "num_statements": 7301,
+      "percent_covered": 12.06714628297362,
+      "percent_covered_display": "12",
+      "missing_lines": 6135,
+      "excluded_lines": 29,
+      "num_branches": 3124,
+      "num_partial_branches": 66,
+      "covered_branches": 92,
+      "missing_branches": 3032
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom seaborn._core.scales import Nominal\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are not set to +/- 0.5 from the first and last tick\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are visible\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert grid_visible, \"Grid lines are incorrectly visible\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "response": {
+      "content": "```python\nimport pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are incorrectly set to +/- 0.5 from the first and last tick\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert xlim == (-0.5, 2.5), \"Axis limits are not set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are incorrectly visible\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert not grid_visible, \"Grid lines are visible when they should not be\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are incorrectly set to +/- 0.5 from the first and last tick\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert xlim == (-0.5, 2.5), \"Axis limits are not set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are incorrectly visible\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert not grid_visible, \"Grid lines are visible when they should not be\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 3,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "--no-header",
+      "-rA",
+      "/testbed/tests/test_cv1hvl24.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 1070,
+      "num_statements": 6874,
+      "percent_covered": 11.796954314720812,
+      "percent_covered_display": "12",
+      "missing_lines": 5804,
+      "excluded_lines": 19,
+      "num_branches": 2976,
+      "num_partial_branches": 66,
+      "covered_branches": 92,
+      "missing_branches": 2884
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are incorrectly set to +/- 0.5 from the first and last tick\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert xlim == (-0.5, 2.5), \"Axis limits are not set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are incorrectly visible\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert not grid_visible, \"Grid lines are visible when they should not be\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are incorrectly set to +/- 0.5 from the first and last tick\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert xlim == (-0.5, 2.5), \"Axis limits are not set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are incorrectly visible\n    # BUG: This behavior is incorrect but currently happens due to the bug\n    assert not grid_visible, \"Grid lines are visible when they should not be\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are correctly set to the normal margin logic\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are not visible\n    assert grid_visible, \"Grid lines are not visible when they should be\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "--no-header",
+      "-rA",
+      "/testbed/tests/test_mun42emd.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_nominal_scale_axis_limits_and_grid():\n        # Create a sample dataset with nominal categories\n        data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n        # Initialize a seaborn plot using this dataset with a Nominal scale\n        fig, ax = plt.subplots()\n        sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n        # Render the plot\n        plt.draw()\n    \n        # Capture the axis properties\n        xlim = ax.get_xlim()\n        grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n        # Assert that the axis limits are correctly set to the normal margin logic\n>       assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\nE       AssertionError: Axis limits are incorrectly set to +/- 0.5 from the first and last tick\nE       assert (-0.5, 2.5) != (-0.5, 2.5)\n\ntests/test_mun42emd.py:21: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 1068,
+      "num_statements": 6874,
+      "percent_covered": 11.776649746192893,
+      "percent_covered_display": "12",
+      "missing_lines": 5806,
+      "excluded_lines": 19,
+      "num_branches": 2976,
+      "num_partial_branches": 66,
+      "covered_branches": 92,
+      "missing_branches": 2884
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are correctly set to the normal margin logic\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are not visible\n    assert grid_visible, \"Grid lines are not visible when they should be\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are correctly set to the normal margin logic\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are not visible\n    assert grid_visible, \"Grid lines are not visible when they should be\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are correctly set to the normal margin logic\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are not visible\n    assert grid_visible, \"Grid lines are not visible when they should be\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n",
+    "error": "    def test_nominal_scale_axis_limits_and_grid():\n        # Create a sample dataset with nominal categories\n        data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n        # Initialize a seaborn plot using this dataset with a Nominal scale\n        fig, ax = plt.subplots()\n        sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n        # Render the plot\n        plt.draw()\n    \n        # Capture the axis properties\n        xlim = ax.get_xlim()\n        grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n        # Assert that the axis limits are correctly set to the normal margin logic\n>       assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\nE       AssertionError: Axis limits are incorrectly set to +/- 0.5 from the first and last tick\nE       assert (-0.5, 2.5) != (-0.5, 2.5)\n\ntests/test_mun42emd.py:21: AssertionError\n",
+    "revealing": true,
+    "reason": "The test is designed to verify the behavior of nominal scales in seaborn plots, specifically checking if the axis limits and grid visibility are handled as described in the issue ticket. The issue ticket mentions that nominal scales should behave like categorical scales, which have specific behaviors regarding axis limits and grid visibility. The test checks if the axis limits are set to +/- 0.5 from the first and last tick, which is the behavior of categorical scales, and asserts that this should not be the case for nominal scales. However, the test fails because the axis limits are indeed set to (-0.5, 2.5), which matches the behavior described for categorical scales. This indicates that the test is correctly reproducing the bug described in the issue ticket, as the nominal scale is not behaving as expected. Additionally, the test checks for grid visibility, which is another aspect mentioned in the issue ticket. The test is valid as it directly addresses the points raised in the issue ticket and the failure is due to the bug described."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef test_nominal_scale_axis_limits_and_grid():\n    # Create a sample dataset with nominal categories\n    data = {'Category': ['A', 'B', 'C'], 'Value': [1, 2, 3]}\n    \n    # Initialize a seaborn plot using this dataset with a Nominal scale\n    fig, ax = plt.subplots()\n    sns.barplot(x='Category', y='Value', data=data, ax=ax)\n    \n    # Render the plot\n    plt.draw()\n    \n    # Capture the axis properties\n    xlim = ax.get_xlim()\n    grid_visible = ax.xaxis._gridOnMajor if hasattr(ax.xaxis, '_gridOnMajor') else ax.xaxis.get_gridlines()[0].get_visible()\n    \n    # Assert that the axis limits are correctly set to the normal margin logic\n    assert xlim != (-0.5, 2.5), \"Axis limits are incorrectly set to +/- 0.5 from the first and last tick\"\n    \n    # Assert that grid lines are not visible\n    assert grid_visible, \"Grid lines are not visible when they should be\"\n    \n    # Cleanup: Close the plot to free resources\n    plt.close(fig)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.27958999999999995
+  }
+]

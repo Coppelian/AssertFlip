@@ -1,0 +1,26 @@
+import pytest
+import matplotlib.pyplot as plt
+from matplotlib import colormaps
+from matplotlib.colors import LinearSegmentedColormap
+
+def test_colormap_name_handling():
+    # Create a sample colormap data array
+    my_cmap_data = [[1.5e-03, 4.7e-04, 1.4e-02],
+                    [2.3e-03, 1.3e-03, 1.8e-02],
+                    [3.3e-03, 2.3e-03, 2.4e-02]]
+    
+    # Create a LinearSegmentedColormap with an internal name 'some_cmap_name'
+    my_cmap = LinearSegmentedColormap.from_list('some_cmap_name', my_cmap_data)
+    
+    # Register this colormap with a different name 'my_cmap_name' using the updated method
+    colormaps.register(name='my_cmap_name', cmap=my_cmap)
+    
+    # Set the colormap using the registered name
+    plt.set_cmap('my_cmap_name')
+    
+    # Attempt to plot an image using plt.imshow() and assert that no ValueError is raised
+    try:
+        plt.imshow([[1, 1], [2, 2]])
+        plt.show()
+    except ValueError:
+        pytest.fail("ValueError raised unexpectedly")

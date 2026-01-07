@@ -1,0 +1,35 @@
+from sympy.utilities.pytest import raises
+
+# Assuming the Morse code dictionary is accessible as `morse_code_dict`
+morse_code_dict = {
+    "--.": "G", "....": "H", 
+    "..": "I", ".---": "J", 
+    "-.-": "K", ".-..": "L", 
+    "--": "M", "-.": "N", 
+    "---": "O", ".--.": "P", 
+    "--.-": "Q", ".-.": "R", 
+    "...": "S", "-": "T", 
+    "..-": "U", "...-": "V", 
+    ".--": "W", "-..-": "X", 
+    "-.--": "Y", "--..": "Z", 
+    "-----": "0", "----": "1", 
+    "..---": "2", "...--": "3", 
+    "....-": "4", ".....": "5", 
+    "-....": "6", "--...": "7", 
+    "---..": "8", "----.": "9", 
+    ".-.-.-": ".", "--..--": ",", 
+    "---...": ":", "-.-.-.": ";", 
+    "..--..": "?", "-....-": "-", 
+    "..--.-": "_", "-.--.": "(", 
+    "-.--.-": ")", ".----.": "\'", 
+    "-...-": "=", ".-.-.": "+"
+}
+
+def test_morse_code_bug_exposure():
+    # Test encoding of "1"
+    encoded = [k for k, v in morse_code_dict.items() if v == "1"]
+    assert encoded == [".----"]  # Correct behavior expected
+
+    # Test decoding of ".----"
+    decoded = morse_code_dict.get(".----", None)
+    assert decoded == "1"  # Correct behavior expected

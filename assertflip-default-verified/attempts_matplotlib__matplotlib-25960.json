@@ -1,0 +1,196 @@
+[
+  {
+    "instance_id": "matplotlib__matplotlib-25960",
+    "problem_statement": [
+      "[Bug]: wspace and hspace in subfigures not working\n### Bug summary\n\n`wspace` and `hspace` in `Figure.subfigures` do nothing.\n\n### Code for reproduction\n\n```python\nimport matplotlib.pyplot as plt\r\n\r\nfigs = plt.figure().subfigures(2, 2, wspace=0, hspace=0)\r\nfor fig in figs.flat:\r\n    fig.subplots().plot([1, 2])\r\nplt.show()\n```\n\n\n### Actual outcome\n\nSame figure independently of the values of hspace and wspace.\n\n### Expected outcome\n\nhttps://github.com/matplotlib/matplotlib/blob/b3bd929cf07ea35479fded8f739126ccc39edd6d/lib/matplotlib/figure.py#L1550-L1554\n\n### Additional information\n\n_No response_\n\n### Operating system\n\nOS/X\n\n### Matplotlib Version\n\n3.7.1\n\n### Matplotlib Backend\n\nMacOSX\n\n### Python version\n\nPython 3.10.9\n\n### Jupyter version\n\n_No response_\n\n### Installation\n\nconda\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to not affect the layout\n    # BUG: The layout should reflect the specified wspace and hspace, but it does not\n    assert fig.subplotpars.wspace == 0.5\n    assert fig.subplotpars.hspace == 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/lib/matplotlib/tests/test_srupkff9.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_subfigures_wspace_hspace_bug():\n        # Create a figure with subfigures using specific wspace and hspace\n        fig = plt.figure()\n        subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n        # Iterate over subfigures and add a simple plot to each\n        for subfig in subfigs.flat:\n            ax = subfig.subplots()\n            ax.plot([1, 2])\n    \n        # Check the layout properties to confirm the bug\n        # We expect the wspace and hspace to not affect the layout\n        # BUG: The layout should reflect the specified wspace and hspace, but it does not\n>       assert fig.subplotpars.wspace == 0.5\nE       assert 0.2 == 0.5\nE        +  where 0.2 = <matplotlib.figure.SubplotParams object at 0x7fff7aa88450>.wspace\nE        +    where <matplotlib.figure.SubplotParams object at 0x7fff7aa88450> = <Figure size 640x480 with 4 Axes>.subplotpars\n\nlib/matplotlib/tests/test_srupkff9.py:17: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 11222,
+      "num_statements": 75558,
+      "percent_covered": 13.318744502370684,
+      "percent_covered_display": "13",
+      "missing_lines": 64336,
+      "excluded_lines": 423,
+      "num_branches": 17664,
+      "num_partial_branches": 678,
+      "covered_branches": 1194,
+      "missing_branches": 16470
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to not affect the layout\n    # BUG: The layout should reflect the specified wspace and hspace, but it does not\n    assert fig.subplotpars.wspace == 0.5\n    assert fig.subplotpars.hspace == 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "response": {
+      "content": "```python\nimport pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to not affect the layout\n    # BUG: The layout should reflect the specified wspace and hspace, but it does not\n    for subfig in subfigs.flat:\n        assert subfig.subplotpars.wspace == 0.5\n        assert subfig.subplotpars.hspace == 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to not affect the layout\n    # BUG: The layout should reflect the specified wspace and hspace, but it does not\n    for subfig in subfigs.flat:\n        assert subfig.subplotpars.wspace == 0.5\n        assert subfig.subplotpars.hspace == 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/lib/matplotlib/tests/test_nbw94ips.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_subfigures_wspace_hspace_bug():\n        # Create a figure with subfigures using specific wspace and hspace\n        fig = plt.figure()\n        subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n        # Iterate over subfigures and add a simple plot to each\n        for subfig in subfigs.flat:\n            ax = subfig.subplots()\n            ax.plot([1, 2])\n    \n        # Check the layout properties to confirm the bug\n        # We expect the wspace and hspace to not affect the layout\n        # BUG: The layout should reflect the specified wspace and hspace, but it does not\n        for subfig in subfigs.flat:\n>           assert subfig.subplotpars.wspace == 0.5\nE           assert 0.2 == 0.5\nE            +  where 0.2 = <matplotlib.figure.SubplotParams object at 0x7fff7aeb0e10>.wspace\nE            +    where <matplotlib.figure.SubplotParams object at 0x7fff7aeb0e10> = <matplotlib.figure.SubFigure object at 0x7fff7b2bc7d0>.subplotpars\n\nlib/matplotlib/tests/test_nbw94ips.py:18: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 10992,
+      "num_statements": 75559,
+      "percent_covered": 12.98578707428265,
+      "percent_covered_display": "13",
+      "missing_lines": 64567,
+      "excluded_lines": 423,
+      "num_branches": 17666,
+      "num_partial_branches": 650,
+      "covered_branches": 1114,
+      "missing_branches": 16552
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to not affect the layout\n    # BUG: The layout should reflect the specified wspace and hspace, but it does not\n    for subfig in subfigs.flat:\n        assert subfig.subplotpars.wspace == 0.5\n        assert subfig.subplotpars.hspace == 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "response": {
+      "content": "```python\nimport pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to not affect the layout\n    # BUG: The layout should reflect the specified wspace and hspace, but it does not\n    for subfig in subfigs.flat:\n        # Assert that the wspace and hspace are not as expected, confirming the bug\n        assert subfig.subplotpars.wspace != 0.5  # BUG: This should be 0.5 but is not\n        assert subfig.subplotpars.hspace != 0.5  # BUG: This should be 0.5 but is not\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to not affect the layout\n    # BUG: The layout should reflect the specified wspace and hspace, but it does not\n    for subfig in subfigs.flat:\n        # Assert that the wspace and hspace are not as expected, confirming the bug\n        assert subfig.subplotpars.wspace != 0.5  # BUG: This should be 0.5 but is not\n        assert subfig.subplotpars.hspace != 0.5  # BUG: This should be 0.5 but is not\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 3,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/lib/matplotlib/tests/test__c7ou5hd.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 11007,
+      "num_statements": 75559,
+      "percent_covered": 13.010458567980692,
+      "percent_covered_display": "13",
+      "missing_lines": 64552,
+      "excluded_lines": 423,
+      "num_branches": 17666,
+      "num_partial_branches": 656,
+      "covered_branches": 1122,
+      "missing_branches": 16544
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to not affect the layout\n    # BUG: The layout should reflect the specified wspace and hspace, but it does not\n    for subfig in subfigs.flat:\n        # Assert that the wspace and hspace are not as expected, confirming the bug\n        assert subfig.subplotpars.wspace != 0.5  # BUG: This should be 0.5 but is not\n        assert subfig.subplotpars.hspace != 0.5  # BUG: This should be 0.5 but is not\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to not affect the layout\n    # BUG: The layout should reflect the specified wspace and hspace, but it does not\n    for subfig in subfigs.flat:\n        # Assert that the wspace and hspace are not as expected, confirming the bug\n        assert subfig.subplotpars.wspace != 0.5  # BUG: This should be 0.5 but is not\n        assert subfig.subplotpars.hspace != 0.5  # BUG: This should be 0.5 but is not\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to affect the layout\n    for subfig in subfigs.flat:\n        # Assert that the wspace and hspace are as expected\n        assert subfig.subplotpars.wspace == 0.5  # This should be 0.5\n        assert subfig.subplotpars.hspace == 0.5  # This should be 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/lib/matplotlib/tests/test_cjxkwacb.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_subfigures_wspace_hspace_bug():\n        # Create a figure with subfigures using specific wspace and hspace\n        fig = plt.figure()\n        subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n        # Iterate over subfigures and add a simple plot to each\n        for subfig in subfigs.flat:\n            ax = subfig.subplots()\n            ax.plot([1, 2])\n    \n        # Check the layout properties to confirm the bug\n        # We expect the wspace and hspace to affect the layout\n        for subfig in subfigs.flat:\n            # Assert that the wspace and hspace are as expected\n>           assert subfig.subplotpars.wspace == 0.5  # This should be 0.5\nE           assert 0.2 == 0.5\nE            +  where 0.2 = <matplotlib.figure.SubplotParams object at 0x7fff7b9c0850>.wspace\nE            +    where <matplotlib.figure.SubplotParams object at 0x7fff7b9c0850> = <matplotlib.figure.SubFigure object at 0x7fff7aeadd10>.subplotpars\n\nlib/matplotlib/tests/test_cjxkwacb.py:18: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 10992,
+      "num_statements": 75559,
+      "percent_covered": 12.98578707428265,
+      "percent_covered_display": "13",
+      "missing_lines": 64567,
+      "excluded_lines": 423,
+      "num_branches": 17666,
+      "num_partial_branches": 650,
+      "covered_branches": 1114,
+      "missing_branches": 16552
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to affect the layout\n    for subfig in subfigs.flat:\n        # Assert that the wspace and hspace are as expected\n        assert subfig.subplotpars.wspace == 0.5  # This should be 0.5\n        assert subfig.subplotpars.hspace == 0.5  # This should be 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to affect the layout\n    for subfig in subfigs.flat:\n        # Assert that the wspace and hspace are as expected\n        assert subfig.subplotpars.wspace == 0.5  # This should be 0.5\n        assert subfig.subplotpars.hspace == 0.5  # This should be 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to affect the layout\n    for subfig in subfigs.flat:\n        # Assert that the wspace and hspace are as expected\n        assert subfig.subplotpars.wspace == 0.5  # This should be 0.5\n        assert subfig.subplotpars.hspace == 0.5  # This should be 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n",
+    "error": "    def test_subfigures_wspace_hspace_bug():\n        # Create a figure with subfigures using specific wspace and hspace\n        fig = plt.figure()\n        subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n        # Iterate over subfigures and add a simple plot to each\n        for subfig in subfigs.flat:\n            ax = subfig.subplots()\n            ax.plot([1, 2])\n    \n        # Check the layout properties to confirm the bug\n        # We expect the wspace and hspace to affect the layout\n        for subfig in subfigs.flat:\n            # Assert that the wspace and hspace are as expected\n>           assert subfig.subplotpars.wspace == 0.5  # This should be 0.5\nE           assert 0.2 == 0.5\nE            +  where 0.2 = <matplotlib.figure.SubplotParams object at 0x7fff7b9c0850>.wspace\nE            +    where <matplotlib.figure.SubplotParams object at 0x7fff7b9c0850> = <matplotlib.figure.SubFigure object at 0x7fff7aeadd10>.subplotpars\n\nlib/matplotlib/tests/test_cjxkwacb.py:18: AssertionError\n",
+    "revealing": true,
+    "reason": "The test is designed to verify if the `wspace` and `hspace` parameters in `Figure.subfigures` are functioning as expected. The test sets these parameters to 0.5 and then checks if the `subplotpars` of each subfigure reflects these values. The error indicates that the `wspace` is 0.2 instead of the expected 0.5, which aligns with the reported bug that `wspace` and `hspace` do not affect the layout. This suggests that the test correctly reproduces the bug as it demonstrates the discrepancy between the expected and actual values of `wspace` and `hspace`."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport matplotlib.pyplot as plt\n\ndef test_subfigures_wspace_hspace_bug():\n    # Create a figure with subfigures using specific wspace and hspace\n    fig = plt.figure()\n    subfigs = fig.subfigures(2, 2, wspace=0.5, hspace=0.5)\n    \n    # Iterate over subfigures and add a simple plot to each\n    for subfig in subfigs.flat:\n        ax = subfig.subplots()\n        ax.plot([1, 2])\n    \n    # Check the layout properties to confirm the bug\n    # We expect the wspace and hspace to affect the layout\n    for subfig in subfigs.flat:\n        # Assert that the wspace and hspace are as expected\n        assert subfig.subplotpars.wspace == 0.5  # This should be 0.5\n        assert subfig.subplotpars.hspace == 0.5  # This should be 0.5\n\n    # Cleanup: Close the figure to avoid state pollution\n    plt.close(fig)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.46533000000000013
+  }
+]

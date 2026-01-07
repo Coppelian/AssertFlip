@@ -1,0 +1,273 @@
+[
+  {
+    "instance_id": "django__django-15916",
+    "problem_statement": [
+      "Allow ModelForm meta to specify formfield_callback.\nDescription\n\t \n\t\t(last modified by Klaas-Jan Gorter)\n\t \nThe function django.forms.modelform_factory returns a form class based on the class it recieves as form argument. As an additional argument it accepts a formfield_callback function. When no callback is provided the class uses no callback instead of the formfield_callback of the base form provided.\nExample:\nfrom django import forms\nform django.db import models\nclass MyModel(forms.Model):\n\tactive = models.BooleanField()\n\tname = models.CharField(max_length=64, blank=True, null=True)\n\t\ndef all_required(field, **kwargs):\n\tformfield = field.formfield(**kwargs)\n\tformfield.required = True\n\treturn formfield\nclass MyForm(forms.ModelForm):\n\tformfield_callback = all_required\n\tclass Meta:\n\t\tmodel = MyModel\n\t\tformfield_callback = all_required\n\t\tfields = ['active', 'name']\nFactoryForm = forms.modelform_factory(MyModel, form=MyForm)\nThe expected behavior would be that the FactoryForm uses the formfield_callback specified in the Meta attribute of MyForm and that therefore the fields would be required in both the FactoryForm and MyForm. However, under the current behavior of modelform_factory the formfield_callback is overwritten (with the default argument None) before the new class is constructed and in FactoryForm the fields are not required.\nI believe this is a bug, because this behavior has been observed before in Ticket #18573 in Django 1.3. The test that was proposed there was incorrect, because under the expected behavior the callback should have been called four times not two times as was asserted. (I believe this test has been removed from version 2, because I find no equivalent test in tests/model_formsets_regress.)\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.forms.models import modelform_factory\nfrom django.db import models\n\nclass MyModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    formfield_callback = staticmethod(all_required)\n\n    class Meta:\n        model = MyModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormCallbackTest(SimpleTestCase):\n    def test_modelform_factory_ignores_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory does not use the formfield_callback specified\n        in the Meta class of the provided form class, resulting in fields not being\n        required in the FactoryForm.\n        \"\"\"\n        class MyModel(forms.Model):\n            active = forms.BooleanField()\n            name = forms.CharField(max_length=64, blank=True, null=True)\n\n        def all_required(field, **kwargs):\n            formfield = field.formfield(**kwargs)\n            formfield.required = True\n            return formfield\n\n        class MyForm(forms.ModelForm):\n            formfield_callback = all_required\n\n            class Meta:\n                model = MyModel\n                formfield_callback = all_required\n                fields = ['active', 'name']\n\n        FactoryForm = modelform_factory(MyModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are not required, which is the incorrect behavior\n        self.assertFalse(form.fields['active'].required)\n        self.assertFalse(form.fields['name'].required)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_w14j1khs"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "c296e053bd5a",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "Traceback (most recent call last):\n  File \"/testbed/tests/runtests.py\", line 773, in <module>\n    failures = django_tests(\n  File \"/testbed/tests/runtests.py\", line 432, in django_tests\n    failures = test_runner.run_tests(test_labels)\n  File \"/testbed/django/test/runner.py\", line 1037, in run_tests\n    suite = self.build_suite(test_labels, extra_tests)\n  File \"/testbed/django/test/runner.py\", line 888, in build_suite\n    tests = self.load_tests_for_label(label, discover_kwargs)\n  File \"/testbed/django/test/runner.py\", line 839, in load_tests_for_label\n    tests = self.test_loader.loadTestsFromName(label)\n  File \"/opt/miniconda3/envs/testbed/lib/python3.9/unittest/loader.py\", line 154, in loadTestsFromName\n    module = __import__(module_name)\n  File \"/testbed/tests/test_w14j1khs.py\", line 6, in <module>\n    class MyModel(models.Model):\n  File \"/testbed/django/db/models/base.py\", line 132, in __new__\n    raise RuntimeError(\nRuntimeError: Model class test_w14j1khs.MyModel doesn't declare an explicit app_label and isn't in an application in INSTALLED_APPS.\nTesting against Django installed in '/testbed/django'\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 13455,
+      "num_statements": 42886,
+      "percent_covered": 24.485906134154018,
+      "percent_covered_display": "24",
+      "missing_lines": 29431,
+      "excluded_lines": 0,
+      "num_branches": 14302,
+      "num_partial_branches": 278,
+      "covered_branches": 548,
+      "missing_branches": 13754
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.forms.models import modelform_factory\nfrom django.db import models\n\nclass MyModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    formfield_callback = staticmethod(all_required)\n\n    class Meta:\n        model = MyModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormCallbackTest(SimpleTestCase):\n    def test_modelform_factory_ignores_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory does not use the formfield_callback specified\n        in the Meta class of the provided form class, resulting in fields not being\n        required in the FactoryForm.\n        \"\"\"\n        class MyModel(forms.Model):\n            active = forms.BooleanField()\n            name = forms.CharField(max_length=64, blank=True, null=True)\n\n        def all_required(field, **kwargs):\n            formfield = field.formfield(**kwargs)\n            formfield.required = True\n            return formfield\n\n        class MyForm(forms.ModelForm):\n            formfield_callback = all_required\n\n            class Meta:\n                model = MyModel\n                formfield_callback = all_required\n                fields = ['active', 'name']\n\n        FactoryForm = modelform_factory(MyModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are not required, which is the incorrect behavior\n        self.assertFalse(form.fields['active'].required)\n        self.assertFalse(form.fields['name'].required)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "response": {
+      "content": "```python\nfrom django.test import SimpleTestCase\nfrom django import forms\nfrom django.forms.models import modelform_factory\nfrom django.db import models\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    formfield_callback = staticmethod(all_required)\n\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormCallbackTest(SimpleTestCase):\n    def test_modelform_factory_ignores_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory does not use the formfield_callback specified\n        in the Meta class of the provided form class, resulting in fields not being\n        required in the FactoryForm.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are not required, which is the incorrect behavior\n        self.assertFalse(form.fields['active'].required)\n        self.assertFalse(form.fields['name'].required)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n```\n",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.forms.models import modelform_factory\nfrom django.db import models\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    formfield_callback = staticmethod(all_required)\n\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormCallbackTest(SimpleTestCase):\n    def test_modelform_factory_ignores_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory does not use the formfield_callback specified\n        in the Meta class of the provided form class, resulting in fields not being\n        required in the FactoryForm.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are not required, which is the incorrect behavior\n        self.assertFalse(form.fields['active'].required)\n        self.assertFalse(form.fields['name'].required)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_1smxvynn"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "c296e053bd5a",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "Traceback (most recent call last):\n  File \"/testbed/tests/runtests.py\", line 773, in <module>\n    failures = django_tests(\n  File \"/testbed/tests/runtests.py\", line 432, in django_tests\n    failures = test_runner.run_tests(test_labels)\n  File \"/testbed/django/test/runner.py\", line 1037, in run_tests\n    suite = self.build_suite(test_labels, extra_tests)\n  File \"/testbed/django/test/runner.py\", line 888, in build_suite\n    tests = self.load_tests_for_label(label, discover_kwargs)\n  File \"/testbed/django/test/runner.py\", line 839, in load_tests_for_label\n    tests = self.test_loader.loadTestsFromName(label)\n  File \"/opt/miniconda3/envs/testbed/lib/python3.9/unittest/loader.py\", line 154, in loadTestsFromName\n    module = __import__(module_name)\n  File \"/testbed/tests/test_1smxvynn.py\", line 18, in <module>\n    class MyForm(forms.ModelForm):\n  File \"/testbed/django/forms/models.py\", line 306, in __new__\n    fields = fields_for_model(\n  File \"/testbed/django/forms/models.py\", line 226, in fields_for_model\n    raise TypeError(\"formfield_callback must be a function or callable\")\nTypeError: formfield_callback must be a function or callable\nTesting against Django installed in '/testbed/django'\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 13511,
+      "num_statements": 42875,
+      "percent_covered": 24.639278031376254,
+      "percent_covered_display": "25",
+      "missing_lines": 29364,
+      "excluded_lines": 0,
+      "num_branches": 14302,
+      "num_partial_branches": 293,
+      "covered_branches": 577,
+      "missing_branches": 13725
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.forms.models import modelform_factory\nfrom django.db import models\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    formfield_callback = staticmethod(all_required)\n\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormCallbackTest(SimpleTestCase):\n    def test_modelform_factory_ignores_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory does not use the formfield_callback specified\n        in the Meta class of the provided form class, resulting in fields not being\n        required in the FactoryForm.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are not required, which is the incorrect behavior\n        self.assertFalse(form.fields['active'].required)\n        self.assertFalse(form.fields['name'].required)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "response": {
+      "content": "\n\n```python\nfrom django.test import SimpleTestCase\nfrom django import forms\nfrom django.db import models\nfrom django.forms import modelform_factory\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormFactoryTest(SimpleTestCase):\n    def test_modelform_factory_ignores_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory does not use the formfield_callback specified\n        in the Meta class of the provided form class. The fields should not be\n        required, which is the incorrect behavior due to the bug.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are not required, which is the incorrect behavior\n        self.assertFalse(form.fields['active'].required)\n        self.assertFalse(form.fields['name'].required)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "reasoning_content": "\nThe issue in the ticket is that the `modelform_factory` function does not use the `formfield_callback` specified in the `Meta` class of the provided form class. Instead, it defaults to `None`, which results in the fields not being marked as required. The test should demonstrate that the `formfield_callback` in the `Meta` class is ignored, leading to fields not being required in the `FactoryForm`.\n\nTo expose this bug, I will write a test that:\n- Defines a simple Django model with a few fields.\n- Creates a `ModelForm` with a `formfield_callback` in its `Meta` class that marks fields as required.\n- Uses `modelform_factory` to generate a form class.\n- Asserts that the fields in the resulting form are not required, which is the incorrect behavior due to the bug.\n\nThe test will pass because the current behavior of `modelform_factory` is to ignore the `formfield_callback` in the `Meta` class, which is the bug we want to expose.\n\n",
+      "annotations": []
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.db import models\nfrom django.forms import modelform_factory\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormFactoryTest(SimpleTestCase):\n    def test_modelform_factory_ignores_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory does not use the formfield_callback specified\n        in the Meta class of the provided form class. The fields should not be\n        required, which is the incorrect behavior due to the bug.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are not required, which is the incorrect behavior\n        self.assertFalse(form.fields['active'].required)\n        self.assertFalse(form.fields['name'].required)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 3,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_owha_wig"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "c296e053bd5a",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 15299,
+      "num_statements": 44780,
+      "percent_covered": 27.459923536119124,
+      "percent_covered_display": "27",
+      "missing_lines": 29481,
+      "excluded_lines": 0,
+      "num_branches": 14856,
+      "num_partial_branches": 577,
+      "covered_branches": 1077,
+      "missing_branches": 13779
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.db import models\nfrom django.forms import modelform_factory\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormFactoryTest(SimpleTestCase):\n    def test_modelform_factory_ignores_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory does not use the formfield_callback specified\n        in the Meta class of the provided form class. The fields should not be\n        required, which is the incorrect behavior due to the bug.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are not required, which is the incorrect behavior\n        self.assertFalse(form.fields['active'].required)\n        self.assertFalse(form.fields['name'].required)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.db import models\nfrom django.forms import modelform_factory\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormFactoryTest(SimpleTestCase):\n    def test_modelform_factory_ignores_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory does not use the formfield_callback specified\n        in the Meta class of the provided form class. The fields should not be\n        required, which is the incorrect behavior due to the bug.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are not required, which is the incorrect behavior\n        self.assertFalse(form.fields['active'].required)\n        self.assertFalse(form.fields['name'].required)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.db import models\nfrom django.forms import modelform_factory\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormFactoryTest(SimpleTestCase):\n    def test_modelform_factory_uses_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory uses the formfield_callback specified\n        in the Meta class of the provided form class. The fields should be\n        required, which is the correct behavior once the bug is fixed.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are required, which is the correct behavior\n        self.assertTrue(form.fields['active'].required)\n        self.assertTrue(form.fields['name'].required)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_ak3n91cp"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "c296e053bd5a",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_modelform_factory_uses_meta_formfield_callback (test_ak3n91cp.ModelFormFactoryTest)\nTest that modelform_factory uses the formfield_callback specified ... FAIL\n\n======================================================================\nFAIL: test_modelform_factory_uses_meta_formfield_callback (test_ak3n91cp.ModelFormFactoryTest)\nTest that modelform_factory uses the formfield_callback specified\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_ak3n91cp.py\", line 35, in test_modelform_factory_uses_meta_formfield_callback\n    self.assertTrue(form.fields['active'].required)\nAssertionError: False is not true\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 15299,
+      "num_statements": 44780,
+      "percent_covered": 27.459923536119124,
+      "percent_covered_display": "27",
+      "missing_lines": 29481,
+      "excluded_lines": 0,
+      "num_branches": 14856,
+      "num_partial_branches": 577,
+      "covered_branches": 1077,
+      "missing_branches": 13779
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.db import models\nfrom django.forms import modelform_factory\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormFactoryTest(SimpleTestCase):\n    def test_modelform_factory_uses_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory uses the formfield_callback specified\n        in the Meta class of the provided form class. The fields should be\n        required, which is the correct behavior once the bug is fixed.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are required, which is the correct behavior\n        self.assertTrue(form.fields['active'].required)\n        self.assertTrue(form.fields['name'].required)\n"
+  },
+  {
+    "no_validation_ablation_test": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.db import models\nfrom django.forms import modelform_factory\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormFactoryTest(SimpleTestCase):\n    def test_modelform_factory_uses_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory uses the formfield_callback specified\n        in the Meta class of the provided form class. The fields should be\n        required, which is the correct behavior once the bug is fixed.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are required, which is the correct behavior\n        self.assertTrue(form.fields['active'].required)\n        self.assertTrue(form.fields['name'].required)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.db import models\nfrom django.forms import modelform_factory\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormFactoryTest(SimpleTestCase):\n    def test_modelform_factory_uses_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory uses the formfield_callback specified\n        in the Meta class of the provided form class. The fields should be\n        required, which is the correct behavior once the bug is fixed.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are required, which is the correct behavior\n        self.assertTrue(form.fields['active'].required)\n        self.assertTrue(form.fields['name'].required)\n",
+    "error": "test_modelform_factory_uses_meta_formfield_callback (test_ak3n91cp.ModelFormFactoryTest)\nTest that modelform_factory uses the formfield_callback specified ... FAIL\n\n======================================================================\nFAIL: test_modelform_factory_uses_meta_formfield_callback (test_ak3n91cp.ModelFormFactoryTest)\nTest that modelform_factory uses the formfield_callback specified\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_ak3n91cp.py\", line 35, in test_modelform_factory_uses_meta_formfield_callback\n    self.assertTrue(form.fields['active'].required)\nAssertionError: False is not true\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "revealing": true,
+    "reason": "The test is designed to verify that the modelform_factory function uses the formfield_callback specified in the Meta class of the provided form class. The test checks if the fields 'active' and 'name' are required, which would indicate that the formfield_callback was used. However, the test fails because the 'active' field is not required, suggesting that the formfield_callback was not applied. This aligns with the reported issue that modelform_factory does not use the formfield_callback from the Meta class of the provided form class. Therefore, the test correctly reproduces the bug described in the issue ticket."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "from django.test import SimpleTestCase\nfrom django import forms\nfrom django.db import models\nfrom django.forms import modelform_factory\n\nclass TestModel(models.Model):\n    active = models.BooleanField()\n    name = models.CharField(max_length=64, blank=True, null=True)\n\n    class Meta:\n        app_label = 'test_app'\n\ndef all_required(field, **kwargs):\n    formfield = field.formfield(**kwargs)\n    formfield.required = True\n    return formfield\n\nclass MyForm(forms.ModelForm):\n    class Meta:\n        model = TestModel\n        formfield_callback = all_required\n        fields = ['active', 'name']\n\nclass ModelFormFactoryTest(SimpleTestCase):\n    def test_modelform_factory_uses_meta_formfield_callback(self):\n        \"\"\"\n        Test that modelform_factory uses the formfield_callback specified\n        in the Meta class of the provided form class. The fields should be\n        required, which is the correct behavior once the bug is fixed.\n        \"\"\"\n        FactoryForm = modelform_factory(TestModel, form=MyForm)\n        form = FactoryForm()\n\n        # Check if the fields are required, which is the correct behavior\n        self.assertTrue(form.fields['active'].required)\n        self.assertTrue(form.fields['name'].required)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.113875
+  }
+]

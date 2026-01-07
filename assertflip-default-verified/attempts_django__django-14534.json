@@ -1,0 +1,148 @@
+[
+  {
+    "instance_id": "django__django-14534",
+    "problem_statement": [
+      "BoundWidget.id_for_label ignores id set by ChoiceWidget.options\nDescription\n\t\nIf you look at the implementation of BoundField.subwidgets\nclass BoundField:\n\t...\n\tdef subwidgets(self):\n\t\tid_ = self.field.widget.attrs.get('id') or self.auto_id\n\t\tattrs = {'id': id_} if id_ else {}\n\t\tattrs = self.build_widget_attrs(attrs)\n\t\treturn [\n\t\t\tBoundWidget(self.field.widget, widget, self.form.renderer)\n\t\t\tfor widget in self.field.widget.subwidgets(self.html_name, self.value(), attrs=attrs)\n\t\t]\none sees that self.field.widget.subwidgets(self.html_name, self.value(), attrs=attrs) returns a dict and assigns it to widget. Now widget['attrs']['id'] contains the \"id\" we would like to use when rendering the label of our CheckboxSelectMultiple.\nHowever BoundWidget.id_for_label() is implemented as\nclass BoundWidget:\n\t...\n\tdef id_for_label(self):\n\t\treturn 'id_%s_%s' % (self.data['name'], self.data['index'])\nignoring the id available through self.data['attrs']['id']. This re-implementation for rendering the \"id\" is confusing and presumably not intended. Nobody has probably realized that so far, because rarely the auto_id-argument is overridden when initializing a form. If however we do, one would assume that the method BoundWidget.id_for_label renders that string as specified through the auto_id format-string.\nBy changing the code from above to\nclass BoundWidget:\n\t...\n\tdef id_for_label(self):\n\t\treturn self.data['attrs']['id']\nthat function behaves as expected.\nPlease note that this error only occurs when rendering the subwidgets of a widget of type CheckboxSelectMultiple. This has nothing to do with the method BoundField.id_for_label().\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[('1', 'Option 1'), ('2', 'Option 2')]\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_id_for_label_uses_default_id_format(self):\n        # Create a form with a custom auto_id format\n        form = TestForm(auto_id='custom_id_%s')\n        \n        # Render the form to generate BoundWidget instances\n        rendered_form = form.as_p()\n        \n        # Access the BoundWidget instances for the CheckboxSelectMultiple widget\n        subwidgets = form['choices'].subwidgets\n        \n        # Iterate over the BoundWidget instances and call id_for_label\n        for widget in subwidgets:\n            id_for_label = widget.id_for_label\n            \n            # Assert that the id_for_label method returns the default ID format\n            # BUG: this behavior is incorrect but currently happens due to the bug\n            self.assertTrue(id_for_label.startswith('id_choices_'))\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_lavozign"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "6c74f1d4e3b3",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 15369,
+      "num_statements": 43328,
+      "percent_covered": 28.48703145776177,
+      "percent_covered_display": "28",
+      "missing_lines": 27959,
+      "excluded_lines": 0,
+      "num_branches": 16085,
+      "num_partial_branches": 698,
+      "covered_branches": 1556,
+      "missing_branches": 14529
+    },
+    "test_code": "from django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[('1', 'Option 1'), ('2', 'Option 2')]\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_id_for_label_uses_default_id_format(self):\n        # Create a form with a custom auto_id format\n        form = TestForm(auto_id='custom_id_%s')\n        \n        # Render the form to generate BoundWidget instances\n        rendered_form = form.as_p()\n        \n        # Access the BoundWidget instances for the CheckboxSelectMultiple widget\n        subwidgets = form['choices'].subwidgets\n        \n        # Iterate over the BoundWidget instances and call id_for_label\n        for widget in subwidgets:\n            id_for_label = widget.id_for_label\n            \n            # Assert that the id_for_label method returns the default ID format\n            # BUG: this behavior is incorrect but currently happens due to the bug\n            self.assertTrue(id_for_label.startswith('id_choices_'))\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[('1', 'Option 1'), ('2', 'Option 2')]\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_id_for_label_uses_default_id_format(self):\n        # Create a form with a custom auto_id format\n        form = TestForm(auto_id='custom_id_%s')\n        \n        # Render the form to generate BoundWidget instances\n        rendered_form = form.as_p()\n        \n        # Access the BoundWidget instances for the CheckboxSelectMultiple widget\n        subwidgets = form['choices'].subwidgets\n        \n        # Iterate over the BoundWidget instances and call id_for_label\n        for widget in subwidgets:\n            id_for_label = widget.id_for_label\n            \n            # Assert that the id_for_label method returns the default ID format\n            # BUG: this behavior is incorrect but currently happens due to the bug\n            self.assertTrue(id_for_label.startswith('id_choices_'))\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[('1', 'Option 1'), ('2', 'Option 2')]\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_id_for_label_uses_custom_id_format(self):\n        # Create a form with a custom auto_id format\n        form = TestForm(auto_id='custom_id_%s')\n        \n        # Render the form to generate BoundWidget instances\n        rendered_form = form.as_p()\n        \n        # Access the BoundWidget instances for the CheckboxSelectMultiple widget\n        subwidgets = form['choices'].subwidgets\n        \n        # Iterate over the BoundWidget instances and call id_for_label\n        for widget in subwidgets:\n            id_for_label = widget.id_for_label\n            \n            # Assert that the id_for_label method returns the custom ID format\n            self.assertTrue(id_for_label.startswith('custom_id_'))\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_vip66ywv"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "6c74f1d4e3b3",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_id_for_label_uses_custom_id_format (test_vip66ywv.BoundWidgetIdForLabelTest) ... FAIL\n\n======================================================================\nFAIL: test_id_for_label_uses_custom_id_format (test_vip66ywv.BoundWidgetIdForLabelTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_vip66ywv.py\", line 26, in test_id_for_label_uses_custom_id_format\n    self.assertTrue(id_for_label.startswith('custom_id_'))\nAssertionError: False is not true\n\n----------------------------------------------------------------------\nRan 1 test in 0.007s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 15370,
+      "num_statements": 43328,
+      "percent_covered": 28.48703145776177,
+      "percent_covered_display": "28",
+      "missing_lines": 27958,
+      "excluded_lines": 0,
+      "num_branches": 16085,
+      "num_partial_branches": 699,
+      "covered_branches": 1555,
+      "missing_branches": 14530
+    },
+    "test_code": "from django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[('1', 'Option 1'), ('2', 'Option 2')]\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_id_for_label_uses_custom_id_format(self):\n        # Create a form with a custom auto_id format\n        form = TestForm(auto_id='custom_id_%s')\n        \n        # Render the form to generate BoundWidget instances\n        rendered_form = form.as_p()\n        \n        # Access the BoundWidget instances for the CheckboxSelectMultiple widget\n        subwidgets = form['choices'].subwidgets\n        \n        # Iterate over the BoundWidget instances and call id_for_label\n        for widget in subwidgets:\n            id_for_label = widget.id_for_label\n            \n            # Assert that the id_for_label method returns the custom ID format\n            self.assertTrue(id_for_label.startswith('custom_id_'))\n"
+  },
+  {
+    "no_validation_ablation_test": "from django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[('1', 'Option 1'), ('2', 'Option 2')]\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_id_for_label_uses_custom_id_format(self):\n        # Create a form with a custom auto_id format\n        form = TestForm(auto_id='custom_id_%s')\n        \n        # Render the form to generate BoundWidget instances\n        rendered_form = form.as_p()\n        \n        # Access the BoundWidget instances for the CheckboxSelectMultiple widget\n        subwidgets = form['choices'].subwidgets\n        \n        # Iterate over the BoundWidget instances and call id_for_label\n        for widget in subwidgets:\n            id_for_label = widget.id_for_label\n            \n            # Assert that the id_for_label method returns the custom ID format\n            self.assertTrue(id_for_label.startswith('custom_id_'))\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[('1', 'Option 1'), ('2', 'Option 2')]\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_id_for_label_uses_custom_id_format(self):\n        # Create a form with a custom auto_id format\n        form = TestForm(auto_id='custom_id_%s')\n        \n        # Render the form to generate BoundWidget instances\n        rendered_form = form.as_p()\n        \n        # Access the BoundWidget instances for the CheckboxSelectMultiple widget\n        subwidgets = form['choices'].subwidgets\n        \n        # Iterate over the BoundWidget instances and call id_for_label\n        for widget in subwidgets:\n            id_for_label = widget.id_for_label\n            \n            # Assert that the id_for_label method returns the custom ID format\n            self.assertTrue(id_for_label.startswith('custom_id_'))\n",
+    "error": "test_id_for_label_uses_custom_id_format (test_vip66ywv.BoundWidgetIdForLabelTest) ... FAIL\n\n======================================================================\nFAIL: test_id_for_label_uses_custom_id_format (test_vip66ywv.BoundWidgetIdForLabelTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_vip66ywv.py\", line 26, in test_id_for_label_uses_custom_id_format\n    self.assertTrue(id_for_label.startswith('custom_id_'))\nAssertionError: False is not true\n\n----------------------------------------------------------------------\nRan 1 test in 0.007s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "revealing": true,
+    "reason": "The test is designed to verify that the `id_for_label` method of `BoundWidget` returns an ID that starts with a custom prefix ('custom_id_') when a custom `auto_id` format is provided to the form. The test sets up a form with a `CheckboxSelectMultiple` widget and a custom `auto_id` format, then checks if the `id_for_label` method of each subwidget returns an ID starting with 'custom_id_'. The failure occurs because the `id_for_label` method does not use the custom ID format, which aligns with the reported issue that `id_for_label` ignores the ID set by `ChoiceWidget.options`. Therefore, the test correctly reproduces the bug described in the issue ticket."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "from django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[('1', 'Option 1'), ('2', 'Option 2')]\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_id_for_label_uses_custom_id_format(self):\n        # Create a form with a custom auto_id format\n        form = TestForm(auto_id='custom_id_%s')\n        \n        # Render the form to generate BoundWidget instances\n        rendered_form = form.as_p()\n        \n        # Access the BoundWidget instances for the CheckboxSelectMultiple widget\n        subwidgets = form['choices'].subwidgets\n        \n        # Iterate over the BoundWidget instances and call id_for_label\n        for widget in subwidgets:\n            id_for_label = widget.id_for_label\n            \n            # Assert that the id_for_label method returns the custom ID format\n            self.assertTrue(id_for_label.startswith('custom_id_'))\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.0409925
+  }
+]

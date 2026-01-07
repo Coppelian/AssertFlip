@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "pydata__xarray-4356",
+    "problem_statement": [
+      "sum: min_count is not available for reduction with more than one dimensions\n**Is your feature request related to a problem? Please describe.**\r\n\r\n`sum` with `min_count` errors when passing more than one dim:\r\n\r\n```python\r\nimport xarray as xr\r\nda = xr.DataArray([[1., 2, 3], [4, 5, 6]])\r\nda.sum([\"dim_0\", \"dim_1\"], min_count=1)\r\n```\r\n\r\n**Describe the solution you'd like**\r\nThe logic to calculate the number of valid elements is here:\r\nhttps://github.com/pydata/xarray/blob/1be777fe725a85b8cc0f65a2bc41f4bc2ba18043/xarray/core/nanops.py#L35\r\n\r\nI *think* this can be fixed by replacing\r\n\r\n`mask.shape[axis]` with `np.take(a.shape, axis).prod()`\r\n\r\n**Additional context**\r\nPotentially relevant for #4351\r\n\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_sum_with_min_count_multiple_dimensions():\n    # Create a 2D DataArray\n    da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n    # Attempt to sum over multiple dimensions with min_count\n    with pytest.raises(ValueError, match=\"min_count is not available for reduction with more than one dimensions.\"):\n        # This should raise a ValueError due to the bug\n        da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/xarray/tests/test_s4enc6jc.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 3471,
+      "num_statements": 14788,
+      "percent_covered": 16.73403766651355,
+      "percent_covered_display": "17",
+      "missing_lines": 11317,
+      "excluded_lines": 63,
+      "num_branches": 6982,
+      "num_partial_branches": 89,
+      "covered_branches": 172,
+      "missing_branches": 6810
+    },
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_sum_with_min_count_multiple_dimensions():\n    # Create a 2D DataArray\n    da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n    # Attempt to sum over multiple dimensions with min_count\n    with pytest.raises(ValueError, match=\"min_count is not available for reduction with more than one dimensions.\"):\n        # This should raise a ValueError due to the bug\n        da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_sum_with_min_count_multiple_dimensions():\n    # Create a 2D DataArray\n    da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n    # Attempt to sum over multiple dimensions with min_count\n    with pytest.raises(ValueError, match=\"min_count is not available for reduction with more than one dimensions.\"):\n        # This should raise a ValueError due to the bug\n        da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_sum_with_min_count_multiple_dimensions():\n    # Create a 2D DataArray\n    da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n    # Attempt to sum over multiple dimensions with min_count\n    result = da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n    \n    # Check if the result is as expected when the bug is fixed\n    expected_result = xr.DataArray(21.0)\n    xr.testing.assert_identical(result, expected_result)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/xarray/tests/test_k_ql12ps.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_sum_with_min_count_multiple_dimensions():\n        # Create a 2D DataArray\n        da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n        # Attempt to sum over multiple dimensions with min_count\n>       result = da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n\nxarray/tests/test_k_ql12ps.py:9: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nxarray/core/common.py:46: in wrapped_func\n    return self.reduce(func, dim, axis, skipna=skipna, **kwargs)\nxarray/core/dataarray.py:2347: in reduce\n    var = self.variable.reduce(func, dim, axis, keep_attrs, keepdims, **kwargs)\nxarray/core/variable.py:1640: in reduce\n    data = func(input_data, axis=axis, **kwargs)\nxarray/core/duck_array_ops.py:335: in f\n    return func(values, axis=axis, **kwargs)\nxarray/core/nanops.py:115: in nansum\n    return _maybe_null_out(result, axis, mask, min_count)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nresult = 21.0, axis = (0, 1)\nmask = array([[False, False, False],\n       [False, False, False]])\nmin_count = 1\n\n    def _maybe_null_out(result, axis, mask, min_count=1):\n        \"\"\"\n        xarray version of pandas.core.nanops._maybe_null_out\n        \"\"\"\n        if hasattr(axis, \"__len__\"):  # if tuple or list\n>           raise ValueError(\n                \"min_count is not available for reduction with more than one dimensions.\"\n            )\nE           ValueError: min_count is not available for reduction with more than one dimensions.\n\nxarray/core/nanops.py:30: ValueError\n=============================== warnings summary ===============================\nxarray/__init__.py:1\n  /testbed/xarray/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html\n    import pkg_resources\n\nxarray/core/dask_array_compat.py:16\nxarray/core/dask_array_compat.py:16\n  /testbed/xarray/core/dask_array_compat.py:16: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) >= LooseVersion(\"2.0.0\"):\n\nxarray/core/dask_array_compat.py:149\nxarray/core/dask_array_compat.py:149\n  /testbed/xarray/core/dask_array_compat.py:149: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) >= LooseVersion(\"2.8.1\"):\n\nxarray/core/dask_array_compat.py:186\nxarray/core/dask_array_compat.py:186\n  /testbed/xarray/core/dask_array_compat.py:186: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) > LooseVersion(\"2.9.0\"):\n\nxarray/core/pdcompat.py:45\n  /testbed/xarray/core/pdcompat.py:45: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(pd.__version__) < \"0.25.0\":\n\n../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345\n  /opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    other = LooseVersion(other)\n\nxarray/tests/__init__.py:58\nxarray/tests/__init__.py:58\n  /testbed/xarray/tests/__init__.py:58: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    return version.LooseVersion(vstring)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 3471,
+      "num_statements": 14788,
+      "percent_covered": 16.73403766651355,
+      "percent_covered_display": "17",
+      "missing_lines": 11317,
+      "excluded_lines": 63,
+      "num_branches": 6982,
+      "num_partial_branches": 89,
+      "covered_branches": 172,
+      "missing_branches": 6810
+    },
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_sum_with_min_count_multiple_dimensions():\n    # Create a 2D DataArray\n    da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n    # Attempt to sum over multiple dimensions with min_count\n    result = da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n    \n    # Check if the result is as expected when the bug is fixed\n    expected_result = xr.DataArray(21.0)\n    xr.testing.assert_identical(result, expected_result)\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport xarray as xr\n\ndef test_sum_with_min_count_multiple_dimensions():\n    # Create a 2D DataArray\n    da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n    # Attempt to sum over multiple dimensions with min_count\n    result = da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n    \n    # Check if the result is as expected when the bug is fixed\n    expected_result = xr.DataArray(21.0)\n    xr.testing.assert_identical(result, expected_result)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_sum_with_min_count_multiple_dimensions():\n    # Create a 2D DataArray\n    da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n    # Attempt to sum over multiple dimensions with min_count\n    result = da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n    \n    # Check if the result is as expected when the bug is fixed\n    expected_result = xr.DataArray(21.0)\n    xr.testing.assert_identical(result, expected_result)\n",
+    "error": "    def test_sum_with_min_count_multiple_dimensions():\n        # Create a 2D DataArray\n        da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n        # Attempt to sum over multiple dimensions with min_count\n>       result = da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n\nxarray/tests/test_k_ql12ps.py:9: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nxarray/core/common.py:46: in wrapped_func\n    return self.reduce(func, dim, axis, skipna=skipna, **kwargs)\nxarray/core/dataarray.py:2347: in reduce\n    var = self.variable.reduce(func, dim, axis, keep_attrs, keepdims, **kwargs)\nxarray/core/variable.py:1640: in reduce\n    data = func(input_data, axis=axis, **kwargs)\nxarray/core/duck_array_ops.py:335: in f\n    return func(values, axis=axis, **kwargs)\nxarray/core/nanops.py:115: in nansum\n    return _maybe_null_out(result, axis, mask, min_count)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nresult = 21.0, axis = (0, 1)\nmask = array([[False, False, False],\n       [False, False, False]])\nmin_count = 1\n\n    def _maybe_null_out(result, axis, mask, min_count=1):\n        \"\"\"\n        xarray version of pandas.core.nanops._maybe_null_out\n        \"\"\"\n        if hasattr(axis, \"__len__\"):  # if tuple or list\n>           raise ValueError(\n                \"min_count is not available for reduction with more than one dimensions.\"\n            )\nE           ValueError: min_count is not available for reduction with more than one dimensions.\n\nxarray/core/nanops.py:30: ValueError\n=============================== warnings summary ===============================\nxarray/__init__.py:1\n  /testbed/xarray/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html\n    import pkg_resources\n\nxarray/core/dask_array_compat.py:16\nxarray/core/dask_array_compat.py:16\n  /testbed/xarray/core/dask_array_compat.py:16: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) >= LooseVersion(\"2.0.0\"):\n\nxarray/core/dask_array_compat.py:149\nxarray/core/dask_array_compat.py:149\n  /testbed/xarray/core/dask_array_compat.py:149: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) >= LooseVersion(\"2.8.1\"):\n\nxarray/core/dask_array_compat.py:186\nxarray/core/dask_array_compat.py:186\n  /testbed/xarray/core/dask_array_compat.py:186: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) > LooseVersion(\"2.9.0\"):\n\nxarray/core/pdcompat.py:45\n  /testbed/xarray/core/pdcompat.py:45: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(pd.__version__) < \"0.25.0\":\n\n../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345\n  /opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    other = LooseVersion(other)\n\nxarray/tests/__init__.py:58\nxarray/tests/__init__.py:58\n  /testbed/xarray/tests/__init__.py:58: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    return version.LooseVersion(vstring)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n",
+    "revealing": true,
+    "reason": "The test is designed to reproduce a bug related to the `sum` function in xarray when using `min_count` with multiple dimensions. The error message in the test output matches the issue described in the ticket, indicating that the test is correctly reproducing the bug. The test attempts to sum over two dimensions with `min_count=1`, which is expected to raise a ValueError according to the current implementation. The test checks if the result matches the expected output when the bug is fixed, which is a valid approach to ensure the bug is addressed. Therefore, the test is valid and correctly reveals the bug."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport xarray as xr\n\ndef test_sum_with_min_count_multiple_dimensions():\n    # Create a 2D DataArray\n    da = xr.DataArray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dims=[\"dim_0\", \"dim_1\"])\n    \n    # Attempt to sum over multiple dimensions with min_count\n    result = da.sum(dim=[\"dim_0\", \"dim_1\"], min_count=1)\n    \n    # Check if the result is as expected when the bug is fixed\n    expected_result = xr.DataArray(21.0)\n    xr.testing.assert_identical(result, expected_result)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.05263750000000001
+  }
+]

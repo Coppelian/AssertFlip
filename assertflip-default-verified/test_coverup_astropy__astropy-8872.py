@@ -1,0 +1,17 @@
+import pytest
+import numpy as np
+from astropy import units as u
+from astropy.units import Quantity
+
+def test_quantity_float16_dtype_bug():
+    # Create a Quantity using np.float16
+    value = np.float16(1)
+    quantity = Quantity(value, unit=u.km)
+
+    # Retrieve the dtype of the resulting Quantity
+    dtype = quantity.dtype
+
+    # Assert that the dtype is float16, which is the expected correct behavior
+    assert dtype == np.float16, "BUG: np.float16 should not be upgraded to np.float64"
+
+    # Cleanup steps if necessary (not needed in this case as no state pollution occurs)

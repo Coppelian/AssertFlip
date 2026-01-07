@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "matplotlib__matplotlib-23314",
+    "problem_statement": [
+      "[Bug]: set_visible() not working for 3d projection \n### Bug summary\r\n\r\nin the subplot projection=\"3d\" the set_visible function doesn't work even if the value is set to False\r\n\r\n### Code for reproduction\r\n\r\n```python\r\nimport matplotlib.pyplot as plt\r\nfrom matplotlib.gridspec import GridSpec\r\n\r\nfig, (ax1, ax2) = plt.subplots(1, 2, subplot_kw={'projection': '3d'})\r\nax1.scatter(1,1,1)\r\nax2.scatter(1,1,1, c='r')\r\nax1.set_visible(False)\r\n\r\nplt.show()\r\n# Thanks Tim for your help! \r\n```\r\n\r\n\r\n### Actual outcome\r\n\r\nthe subplot remains visible which should not happen if the value is set to False\r\n\r\n### Expected outcome\r\n\r\nthe subplot is not visible if the value is set to False\r\n\r\n### Additional information\r\n\r\n_No response_\r\n\r\n### Operating system\r\n\r\n_No response_\r\n\r\n### Matplotlib Version\r\n\r\n3.4.2\r\n\r\n### Matplotlib Backend\r\n\r\nQt5Agg\r\n\r\n### Python version\r\n\r\n3.8.10\r\n\r\n### Jupyter version\r\n\r\n_No response_\r\n\r\n### Installation\r\n\r\n_No response_\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\n\ndef test_set_visible_on_3d_projection():\n    # Create a figure and a 3D subplot\n    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n    # Add a scatter plot to the subplot\n    ax.scatter([1], [1], [1])\n    \n    # Set the visibility of the subplot to False\n    ax.set_visible(False)\n    \n    # Assert that the visibility attribute is set to False\n    assert not ax.get_visible(), \"The visibility attribute should be False\"\n    \n    # Save the figure to check if the subplot is still visible\n    fig.savefig('test_output.png')\n    \n    # BUG: The subplot is still visible in the saved figure despite set_visible(False)\n    # This confirms the bug as the subplot should not be visible.\n\n    # Cleanup: Close the figure to avoid resource warnings\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/lib/matplotlib/tests/test_7wk6g69d.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 12857,
+      "num_statements": 77949,
+      "percent_covered": 15.038390806986191,
+      "percent_covered_display": "15",
+      "missing_lines": 65092,
+      "excluded_lines": 403,
+      "num_branches": 18298,
+      "num_partial_branches": 963,
+      "covered_branches": 1617,
+      "missing_branches": 16681
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\n\ndef test_set_visible_on_3d_projection():\n    # Create a figure and a 3D subplot\n    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n    # Add a scatter plot to the subplot\n    ax.scatter([1], [1], [1])\n    \n    # Set the visibility of the subplot to False\n    ax.set_visible(False)\n    \n    # Assert that the visibility attribute is set to False\n    assert not ax.get_visible(), \"The visibility attribute should be False\"\n    \n    # Save the figure to check if the subplot is still visible\n    fig.savefig('test_output.png')\n    \n    # BUG: The subplot is still visible in the saved figure despite set_visible(False)\n    # This confirms the bug as the subplot should not be visible.\n\n    # Cleanup: Close the figure to avoid resource warnings\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\n\ndef test_set_visible_on_3d_projection():\n    # Create a figure and a 3D subplot\n    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n    # Add a scatter plot to the subplot\n    ax.scatter([1], [1], [1])\n    \n    # Set the visibility of the subplot to False\n    ax.set_visible(False)\n    \n    # Assert that the visibility attribute is set to False\n    assert not ax.get_visible(), \"The visibility attribute should be False\"\n    \n    # Save the figure to check if the subplot is still visible\n    fig.savefig('test_output.png')\n    \n    # BUG: The subplot is still visible in the saved figure despite set_visible(False)\n    # This confirms the bug as the subplot should not be visible.\n\n    # Cleanup: Close the figure to avoid resource warnings\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\nfrom PIL import Image\nimport numpy as np\n\ndef test_set_visible_on_3d_projection():\n    # Create a figure and a 3D subplot\n    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n    # Add a scatter plot to the subplot\n    ax.scatter([1], [1], [1])\n    \n    # Set the visibility of the subplot to False\n    ax.set_visible(False)\n    \n    # Save the figure to check if the subplot is still visible\n    fig.savefig('test_output.png')\n    \n    # Open the saved image and convert it to a numpy array\n    img = Image.open('test_output.png')\n    img_array = np.array(img)\n    \n    # Check if the image is completely white (assuming white background)\n    # If the subplot is not visible, the image should be all white\n    assert np.all(img_array == 255), \"The subplot should not be visible in the saved figure\"\n    \n    # Cleanup: Close the figure to avoid resource warnings\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/lib/matplotlib/tests/test_rngkp91y.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_set_visible_on_3d_projection():\n        # Create a figure and a 3D subplot\n        fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n        # Add a scatter plot to the subplot\n        ax.scatter([1], [1], [1])\n    \n        # Set the visibility of the subplot to False\n        ax.set_visible(False)\n    \n        # Save the figure to check if the subplot is still visible\n        fig.savefig('test_output.png')\n    \n        # Open the saved image and convert it to a numpy array\n        img = Image.open('test_output.png')\n        img_array = np.array(img)\n    \n        # Check if the image is completely white (assuming white background)\n        # If the subplot is not visible, the image should be all white\n>       assert np.all(img_array == 255), \"The subplot should not be visible in the saved figure\"\nE       AssertionError: The subplot should not be visible in the saved figure\nE       assert False\nE        +  where False = <function all at 0x7ffff3791ab0>(array([[[255, 255, 255, 255],\\n        [255, 255, 255, 255],\\n        [255, 255, 255, 255],\\n        ...,\\n        [255, 2...,\\n        ...,\\n        [255, 255, 255, 255],\\n        [255, 255, 255, 255],\\n        [255, 255, 255, 255]]], dtype=uint8) == 255)\nE        +    where <function all at 0x7ffff3791ab0> = np.all\n\nlib/matplotlib/tests/test_rngkp91y.py:26: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 12635,
+      "num_statements": 77953,
+      "percent_covered": 14.720886016768658,
+      "percent_covered_display": "15",
+      "missing_lines": 65318,
+      "excluded_lines": 403,
+      "num_branches": 18298,
+      "num_partial_branches": 930,
+      "covered_branches": 1534,
+      "missing_branches": 16764
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\nfrom PIL import Image\nimport numpy as np\n\ndef test_set_visible_on_3d_projection():\n    # Create a figure and a 3D subplot\n    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n    # Add a scatter plot to the subplot\n    ax.scatter([1], [1], [1])\n    \n    # Set the visibility of the subplot to False\n    ax.set_visible(False)\n    \n    # Save the figure to check if the subplot is still visible\n    fig.savefig('test_output.png')\n    \n    # Open the saved image and convert it to a numpy array\n    img = Image.open('test_output.png')\n    img_array = np.array(img)\n    \n    # Check if the image is completely white (assuming white background)\n    # If the subplot is not visible, the image should be all white\n    assert np.all(img_array == 255), \"The subplot should not be visible in the saved figure\"\n    \n    # Cleanup: Close the figure to avoid resource warnings\n    plt.close(fig)\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\nfrom PIL import Image\nimport numpy as np\n\ndef test_set_visible_on_3d_projection():\n    # Create a figure and a 3D subplot\n    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n    # Add a scatter plot to the subplot\n    ax.scatter([1], [1], [1])\n    \n    # Set the visibility of the subplot to False\n    ax.set_visible(False)\n    \n    # Save the figure to check if the subplot is still visible\n    fig.savefig('test_output.png')\n    \n    # Open the saved image and convert it to a numpy array\n    img = Image.open('test_output.png')\n    img_array = np.array(img)\n    \n    # Check if the image is completely white (assuming white background)\n    # If the subplot is not visible, the image should be all white\n    assert np.all(img_array == 255), \"The subplot should not be visible in the saved figure\"\n    \n    # Cleanup: Close the figure to avoid resource warnings\n    plt.close(fig)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\nfrom PIL import Image\nimport numpy as np\n\ndef test_set_visible_on_3d_projection():\n    # Create a figure and a 3D subplot\n    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n    # Add a scatter plot to the subplot\n    ax.scatter([1], [1], [1])\n    \n    # Set the visibility of the subplot to False\n    ax.set_visible(False)\n    \n    # Save the figure to check if the subplot is still visible\n    fig.savefig('test_output.png')\n    \n    # Open the saved image and convert it to a numpy array\n    img = Image.open('test_output.png')\n    img_array = np.array(img)\n    \n    # Check if the image is completely white (assuming white background)\n    # If the subplot is not visible, the image should be all white\n    assert np.all(img_array == 255), \"The subplot should not be visible in the saved figure\"\n    \n    # Cleanup: Close the figure to avoid resource warnings\n    plt.close(fig)\n",
+    "error": "    def test_set_visible_on_3d_projection():\n        # Create a figure and a 3D subplot\n        fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n        # Add a scatter plot to the subplot\n        ax.scatter([1], [1], [1])\n    \n        # Set the visibility of the subplot to False\n        ax.set_visible(False)\n    \n        # Save the figure to check if the subplot is still visible\n        fig.savefig('test_output.png')\n    \n        # Open the saved image and convert it to a numpy array\n        img = Image.open('test_output.png')\n        img_array = np.array(img)\n    \n        # Check if the image is completely white (assuming white background)\n        # If the subplot is not visible, the image should be all white\n>       assert np.all(img_array == 255), \"The subplot should not be visible in the saved figure\"\nE       AssertionError: The subplot should not be visible in the saved figure\nE       assert False\nE        +  where False = <function all at 0x7ffff3791ab0>(array([[[255, 255, 255, 255],\\n        [255, 255, 255, 255],\\n        [255, 255, 255, 255],\\n        ...,\\n        [255, 2...,\\n        ...,\\n        [255, 255, 255, 255],\\n        [255, 255, 255, 255],\\n        [255, 255, 255, 255]]], dtype=uint8) == 255)\nE        +    where <function all at 0x7ffff3791ab0> = np.all\n\nlib/matplotlib/tests/test_rngkp91y.py:26: AssertionError\n",
+    "revealing": true,
+    "reason": "The test is designed to verify if the `set_visible(False)` method works correctly for a 3D subplot in Matplotlib. The test creates a 3D subplot, adds a scatter plot, sets the subplot's visibility to False, and then saves the figure to an image file. It checks if the image is completely white, which would indicate that the subplot is not visible. However, the test fails because the image is not completely white, suggesting that the subplot is still visible. This aligns with the reported bug that `set_visible(False)` does not work for 3D projections. Therefore, the test correctly reproduces the reported bug and is a valid test case."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\nfrom PIL import Image\nimport numpy as np\n\ndef test_set_visible_on_3d_projection():\n    # Create a figure and a 3D subplot\n    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})\n    \n    # Add a scatter plot to the subplot\n    ax.scatter([1], [1], [1])\n    \n    # Set the visibility of the subplot to False\n    ax.set_visible(False)\n    \n    # Save the figure to check if the subplot is still visible\n    fig.savefig('test_output.png')\n    \n    # Open the saved image and convert it to a numpy array\n    img = Image.open('test_output.png')\n    img_array = np.array(img)\n    \n    # Check if the image is completely white (assuming white background)\n    # If the subplot is not visible, the image should be all white\n    assert np.all(img_array == 255), \"The subplot should not be visible in the saved figure\"\n    \n    # Cleanup: Close the figure to avoid resource warnings\n    plt.close(fig)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.43428750000000005
+  }
+]

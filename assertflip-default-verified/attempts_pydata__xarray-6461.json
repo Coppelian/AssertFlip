@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "pydata__xarray-6461",
+    "problem_statement": [
+      "xr.where with scalar as second argument fails with keep_attrs=True\n### What happened?\n\n``` python\r\nimport xarray as xr\r\n\r\nxr.where(xr.DataArray([1, 2, 3]) > 0, 1, 0)\r\n```\r\n\r\nfails with\r\n\r\n```\r\n   1809 if keep_attrs is True:\r\n   1810     # keep the attributes of x, the second parameter, by default to\r\n   1811     # be consistent with the `where` method of `DataArray` and `Dataset`\r\n-> 1812     keep_attrs = lambda attrs, context: attrs[1]\r\n   1814 # alignment for three arguments is complicated, so don't support it yet\r\n   1815 return apply_ufunc(\r\n   1816     duck_array_ops.where,\r\n   1817     cond,\r\n   (...)\r\n   1823     keep_attrs=keep_attrs,\r\n   1824 )\r\n\r\nIndexError: list index out of range\r\n```\r\n\r\nThe workaround is to pass `keep_attrs=False`\n\n### What did you expect to happen?\n\n_No response_\n\n### Minimal Complete Verifiable Example\n\n_No response_\n\n### Relevant log output\n\n_No response_\n\n### Anything else we need to know?\n\n_No response_\n\n### Environment\n\nxarray 2022.3.0\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_where_with_scalar_and_keep_attrs():\n    # Setup: Create a condition DataArray\n    cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n    # Scalars for x and y\n    x = 1\n    y = 0\n    \n    # Test: Expect an IndexError when keep_attrs=True\n    with pytest.raises(IndexError, match=\"list index out of range\"):\n        # This should raise an IndexError due to the bug\n        xr.where(cond, x, y, keep_attrs=True)\n\n    # Cleanup: No specific cleanup required\n\n# The test will pass if the IndexError is raised, indicating the bug is present.\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/xarray/tests/test_20_4zef3.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 4856,
+      "num_statements": 18697,
+      "percent_covered": 19.906632950787785,
+      "percent_covered_display": "20",
+      "missing_lines": 13841,
+      "excluded_lines": 63,
+      "num_branches": 7008,
+      "num_partial_branches": 171,
+      "covered_branches": 261,
+      "missing_branches": 6747
+    },
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_where_with_scalar_and_keep_attrs():\n    # Setup: Create a condition DataArray\n    cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n    # Scalars for x and y\n    x = 1\n    y = 0\n    \n    # Test: Expect an IndexError when keep_attrs=True\n    with pytest.raises(IndexError, match=\"list index out of range\"):\n        # This should raise an IndexError due to the bug\n        xr.where(cond, x, y, keep_attrs=True)\n\n    # Cleanup: No specific cleanup required\n\n# The test will pass if the IndexError is raised, indicating the bug is present.\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_where_with_scalar_and_keep_attrs():\n    # Setup: Create a condition DataArray\n    cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n    # Scalars for x and y\n    x = 1\n    y = 0\n    \n    # Test: Expect an IndexError when keep_attrs=True\n    with pytest.raises(IndexError, match=\"list index out of range\"):\n        # This should raise an IndexError due to the bug\n        xr.where(cond, x, y, keep_attrs=True)\n\n    # Cleanup: No specific cleanup required\n\n# The test will pass if the IndexError is raised, indicating the bug is present.\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_where_with_scalar_and_keep_attrs():\n    # Setup: Create a condition DataArray\n    cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n    # Scalars for x and y\n    x = 1\n    y = 0\n    \n    # Test: Expect no error when keep_attrs=True\n    try:\n        # This should not raise an error when the bug is fixed\n        result = xr.where(cond, x, y, keep_attrs=True)\n        # Check if the result is as expected\n        expected = xr.DataArray([1, 0, 1], dims=[\"dim\"])\n        xr.testing.assert_equal(result, expected)\n    except IndexError:\n        pytest.fail(\"IndexError was raised, indicating the bug is present\")\n\n    # Cleanup: No specific cleanup required\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/xarray/tests/test_c_4ufjav.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_where_with_scalar_and_keep_attrs():\n        # Setup: Create a condition DataArray\n        cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n        # Scalars for x and y\n        x = 1\n        y = 0\n    \n        # Test: Expect no error when keep_attrs=True\n        try:\n            # This should not raise an error when the bug is fixed\n>           result = xr.where(cond, x, y, keep_attrs=True)\n\n/testbed/xarray/tests/test_c_4ufjav.py:15: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/testbed/xarray/core/computation.py:1835: in where\n    return apply_ufunc(\n/testbed/xarray/core/computation.py:1179: in apply_ufunc\n    return apply_dataarray_vfunc(\n/testbed/xarray/core/computation.py:293: in apply_dataarray_vfunc\n    result_var = func(*data_vars)\n/testbed/xarray/core/computation.py:763: in apply_variable_ufunc\n    attrs = merge_attrs(\n/testbed/xarray/core/merge.py:611: in merge_attrs\n    return combine_attrs(variable_attrs, context=context)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nattrs = [{}], context = None\n\n>   keep_attrs = lambda attrs, context: attrs[1]\nE   IndexError: list index out of range\n\n/testbed/xarray/core/computation.py:1832: IndexError\n\nDuring handling of the above exception, another exception occurred:\n\n    def test_where_with_scalar_and_keep_attrs():\n        # Setup: Create a condition DataArray\n        cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n        # Scalars for x and y\n        x = 1\n        y = 0\n    \n        # Test: Expect no error when keep_attrs=True\n        try:\n            # This should not raise an error when the bug is fixed\n            result = xr.where(cond, x, y, keep_attrs=True)\n            # Check if the result is as expected\n            expected = xr.DataArray([1, 0, 1], dims=[\"dim\"])\n            xr.testing.assert_equal(result, expected)\n        except IndexError:\n>           pytest.fail(\"IndexError was raised, indicating the bug is present\")\nE           Failed: IndexError was raised, indicating the bug is present\n\n/testbed/xarray/tests/test_c_4ufjav.py:20: Failed\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 4856,
+      "num_statements": 18697,
+      "percent_covered": 19.906632950787785,
+      "percent_covered_display": "20",
+      "missing_lines": 13841,
+      "excluded_lines": 63,
+      "num_branches": 7008,
+      "num_partial_branches": 171,
+      "covered_branches": 261,
+      "missing_branches": 6747
+    },
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_where_with_scalar_and_keep_attrs():\n    # Setup: Create a condition DataArray\n    cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n    # Scalars for x and y\n    x = 1\n    y = 0\n    \n    # Test: Expect no error when keep_attrs=True\n    try:\n        # This should not raise an error when the bug is fixed\n        result = xr.where(cond, x, y, keep_attrs=True)\n        # Check if the result is as expected\n        expected = xr.DataArray([1, 0, 1], dims=[\"dim\"])\n        xr.testing.assert_equal(result, expected)\n    except IndexError:\n        pytest.fail(\"IndexError was raised, indicating the bug is present\")\n\n    # Cleanup: No specific cleanup required\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport xarray as xr\n\ndef test_where_with_scalar_and_keep_attrs():\n    # Setup: Create a condition DataArray\n    cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n    # Scalars for x and y\n    x = 1\n    y = 0\n    \n    # Test: Expect no error when keep_attrs=True\n    try:\n        # This should not raise an error when the bug is fixed\n        result = xr.where(cond, x, y, keep_attrs=True)\n        # Check if the result is as expected\n        expected = xr.DataArray([1, 0, 1], dims=[\"dim\"])\n        xr.testing.assert_equal(result, expected)\n    except IndexError:\n        pytest.fail(\"IndexError was raised, indicating the bug is present\")\n\n    # Cleanup: No specific cleanup required\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_where_with_scalar_and_keep_attrs():\n    # Setup: Create a condition DataArray\n    cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n    # Scalars for x and y\n    x = 1\n    y = 0\n    \n    # Test: Expect no error when keep_attrs=True\n    try:\n        # This should not raise an error when the bug is fixed\n        result = xr.where(cond, x, y, keep_attrs=True)\n        # Check if the result is as expected\n        expected = xr.DataArray([1, 0, 1], dims=[\"dim\"])\n        xr.testing.assert_equal(result, expected)\n    except IndexError:\n        pytest.fail(\"IndexError was raised, indicating the bug is present\")\n\n    # Cleanup: No specific cleanup required\n",
+    "error": "    def test_where_with_scalar_and_keep_attrs():\n        # Setup: Create a condition DataArray\n        cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n        # Scalars for x and y\n        x = 1\n        y = 0\n    \n        # Test: Expect no error when keep_attrs=True\n        try:\n            # This should not raise an error when the bug is fixed\n>           result = xr.where(cond, x, y, keep_attrs=True)\n\n/testbed/xarray/tests/test_c_4ufjav.py:15: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/testbed/xarray/core/computation.py:1835: in where\n    return apply_ufunc(\n/testbed/xarray/core/computation.py:1179: in apply_ufunc\n    return apply_dataarray_vfunc(\n/testbed/xarray/core/computation.py:293: in apply_dataarray_vfunc\n    result_var = func(*data_vars)\n/testbed/xarray/core/computation.py:763: in apply_variable_ufunc\n    attrs = merge_attrs(\n/testbed/xarray/core/merge.py:611: in merge_attrs\n    return combine_attrs(variable_attrs, context=context)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nattrs = [{}], context = None\n\n>   keep_attrs = lambda attrs, context: attrs[1]\nE   IndexError: list index out of range\n\n/testbed/xarray/core/computation.py:1832: IndexError\n\nDuring handling of the above exception, another exception occurred:\n\n    def test_where_with_scalar_and_keep_attrs():\n        # Setup: Create a condition DataArray\n        cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n        # Scalars for x and y\n        x = 1\n        y = 0\n    \n        # Test: Expect no error when keep_attrs=True\n        try:\n            # This should not raise an error when the bug is fixed\n            result = xr.where(cond, x, y, keep_attrs=True)\n            # Check if the result is as expected\n            expected = xr.DataArray([1, 0, 1], dims=[\"dim\"])\n            xr.testing.assert_equal(result, expected)\n        except IndexError:\n>           pytest.fail(\"IndexError was raised, indicating the bug is present\")\nE           Failed: IndexError was raised, indicating the bug is present\n\n/testbed/xarray/tests/test_c_4ufjav.py:20: Failed\n",
+    "revealing": true,
+    "reason": "The test is designed to reproduce a bug in the `xr.where` function when using scalars for the second and third arguments and setting `keep_attrs=True`. The test sets up a condition using a DataArray and attempts to call `xr.where` with scalar values for `x` and `y`, expecting no error if the bug is fixed. However, the test fails with an `IndexError`, which matches the error described in the issue ticket. This indicates that the test correctly reproduces the bug. The test is valid because it directly addresses the reported issue by using the same conditions and parameters that trigger the bug, and it includes an assertion to verify the expected output if the bug were fixed."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport xarray as xr\n\ndef test_where_with_scalar_and_keep_attrs():\n    # Setup: Create a condition DataArray\n    cond = xr.DataArray([True, False, True], dims=[\"dim\"])\n    \n    # Scalars for x and y\n    x = 1\n    y = 0\n    \n    # Test: Expect no error when keep_attrs=True\n    try:\n        # This should not raise an error when the bug is fixed\n        result = xr.where(cond, x, y, keep_attrs=True)\n        # Check if the result is as expected\n        expected = xr.DataArray([1, 0, 1], dims=[\"dim\"])\n        xr.testing.assert_equal(result, expected)\n    except IndexError:\n        pytest.fail(\"IndexError was raised, indicating the bug is present\")\n\n    # Cleanup: No specific cleanup required\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.044175000000000006
+  }
+]

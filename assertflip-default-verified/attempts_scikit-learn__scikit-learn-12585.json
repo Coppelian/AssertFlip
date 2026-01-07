@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "scikit-learn__scikit-learn-12585",
+    "problem_statement": [
+      "clone fails for parameters that are estimator types\n#### Description\r\n\r\n`clone` fails when one or more instance parameters are estimator types (i.e. not instances, but classes). \r\n\r\nI know this is a somewhat unusual use case, but I'm working on a project that provides wrappers for sklearn estimators (https://github.com/phausamann/sklearn-xarray) and I'd like to store the wrapped estimators as their classes - not their instances - as a parameter inside of a wrapper that behaves like an estimator itself. \r\n\r\n#### Steps/Code to Reproduce\r\n\r\n    from sklearn.preprocessing import StandardScaler\r\n    from sklearn.base import clone\r\n    clone(StandardScaler(with_mean=StandardScaler))\r\n\r\n#### Expected Results\r\n\r\nNo error.\r\n\r\n#### Actual Results\r\n```\r\nTraceback (most recent call last):\r\n...\r\n  File \"...\\lib\\site-packages\\sklearn\\base.py\", line 62, in clone\r\n    new_object_params[name] = clone(param, safe=False)\r\n  File \"...\\lib\\site-packages\\sklearn\\base.py\", line 60, in clone\r\n    new_object_params = estimator.get_params(deep=False)\r\nTypeError: get_params() missing 1 required positional argument: 'self'\r\n```\r\n\r\n#### Possible fix\r\n\r\nChange `base.py`, line 51 to: \r\n\r\n    elif not hasattr(estimator, 'get_params') or isinstance(estimator, type):\r\n\r\nI'm not sure whether this might break stuff in other places, however. I'd happily submit a PR if this change is desired.\r\n\r\n#### Versions\r\n\r\n    sklearn: 0.20.0\r\n\r\n\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.base import clone\n\ndef test_clone_with_class_type_parameter():\n    # Attempt to clone an estimator with a class type parameter\n    try:\n        clone(StandardScaler(with_mean=StandardScaler))\n    except TypeError as e:\n        # BUG: this behavior is incorrect but currently happens due to the bug\n        assert \"get_params() missing 1 required positional argument: 'self'\" in str(e)\n    else:\n        # If no exception is raised, the test should fail because the bug is not exposed\n        pytest.fail(\"TypeError was expected but not raised\")\n\n# Note: The test will pass because the current behavior is to raise a TypeError,\n# which is incorrect and demonstrates the presence of the bug.\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_z77g2ssv.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 786,
+      "num_statements": 66542,
+      "percent_covered": 1.1072831671199759,
+      "percent_covered_display": "1",
+      "missing_lines": 65756,
+      "excluded_lines": 5,
+      "num_branches": 16183,
+      "num_partial_branches": 20,
+      "covered_branches": 130,
+      "missing_branches": 16053
+    },
+    "test_code": "import pytest\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.base import clone\n\ndef test_clone_with_class_type_parameter():\n    # Attempt to clone an estimator with a class type parameter\n    try:\n        clone(StandardScaler(with_mean=StandardScaler))\n    except TypeError as e:\n        # BUG: this behavior is incorrect but currently happens due to the bug\n        assert \"get_params() missing 1 required positional argument: 'self'\" in str(e)\n    else:\n        # If no exception is raised, the test should fail because the bug is not exposed\n        pytest.fail(\"TypeError was expected but not raised\")\n\n# Note: The test will pass because the current behavior is to raise a TypeError,\n# which is incorrect and demonstrates the presence of the bug.\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.base import clone\n\ndef test_clone_with_class_type_parameter():\n    # Attempt to clone an estimator with a class type parameter\n    try:\n        clone(StandardScaler(with_mean=StandardScaler))\n    except TypeError as e:\n        # BUG: this behavior is incorrect but currently happens due to the bug\n        assert \"get_params() missing 1 required positional argument: 'self'\" in str(e)\n    else:\n        # If no exception is raised, the test should fail because the bug is not exposed\n        pytest.fail(\"TypeError was expected but not raised\")\n\n# Note: The test will pass because the current behavior is to raise a TypeError,\n# which is incorrect and demonstrates the presence of the bug.\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.base import clone\n\ndef test_clone_with_class_type_parameter():\n    # Attempt to clone an estimator with a class type parameter\n    try:\n        clone(StandardScaler(with_mean=StandardScaler))\n    except TypeError as e:\n        # If a TypeError is raised, the test should fail because the bug is present\n        pytest.fail(\"TypeError was raised, indicating the presence of the bug\")\n    else:\n        # No exception should be raised, indicating the bug is fixed\n        pass\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_egzwi2f6.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_clone_with_class_type_parameter():\n        # Attempt to clone an estimator with a class type parameter\n        try:\n>           clone(StandardScaler(with_mean=StandardScaler))\n\nsklearn/tests/test_egzwi2f6.py:8: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nestimator = StandardScaler(copy=True,\n        with_mean=<class 'sklearn.preprocessing.data.StandardScaler'>,\n        with_std=True)\nsafe = True\n\n    def clone(estimator, safe=True):\n        \"\"\"Constructs a new estimator with the same parameters.\n    \n        Clone does a deep copy of the model in an estimator\n        without actually copying attached data. It yields a new estimator\n        with the same parameters that has not been fit on any data.\n    \n        Parameters\n        ----------\n        estimator : estimator object, or list, tuple or set of objects\n            The estimator or group of estimators to be cloned\n    \n        safe : boolean, optional\n            If safe is false, clone will fall back to a deep copy on objects\n            that are not estimators.\n    \n        \"\"\"\n        estimator_type = type(estimator)\n        # XXX: not handling dictionaries\n        if estimator_type in (list, tuple, set, frozenset):\n            return estimator_type([clone(e, safe=safe) for e in estimator])\n        elif not hasattr(estimator, 'get_params'):\n            if not safe:\n                return copy.deepcopy(estimator)\n            else:\n                raise TypeError(\"Cannot clone object '%s' (type %s): \"\n                                \"it does not seem to be a scikit-learn estimator \"\n                                \"as it does not implement a 'get_params' methods.\"\n                                % (repr(estimator), type(estimator)))\n        klass = estimator.__class__\n        new_object_params = estimator.get_params(deep=False)\n        for name, param in six.iteritems(new_object_params):\n>           new_object_params[name] = clone(param, safe=False)\n\nsklearn/base.py:62: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nestimator = <class 'sklearn.preprocessing.data.StandardScaler'>, safe = False\n\n    def clone(estimator, safe=True):\n        \"\"\"Constructs a new estimator with the same parameters.\n    \n        Clone does a deep copy of the model in an estimator\n        without actually copying attached data. It yields a new estimator\n        with the same parameters that has not been fit on any data.\n    \n        Parameters\n        ----------\n        estimator : estimator object, or list, tuple or set of objects\n            The estimator or group of estimators to be cloned\n    \n        safe : boolean, optional\n            If safe is false, clone will fall back to a deep copy on objects\n            that are not estimators.\n    \n        \"\"\"\n        estimator_type = type(estimator)\n        # XXX: not handling dictionaries\n        if estimator_type in (list, tuple, set, frozenset):\n            return estimator_type([clone(e, safe=safe) for e in estimator])\n        elif not hasattr(estimator, 'get_params'):\n            if not safe:\n                return copy.deepcopy(estimator)\n            else:\n                raise TypeError(\"Cannot clone object '%s' (type %s): \"\n                                \"it does not seem to be a scikit-learn estimator \"\n                                \"as it does not implement a 'get_params' methods.\"\n                                % (repr(estimator), type(estimator)))\n        klass = estimator.__class__\n>       new_object_params = estimator.get_params(deep=False)\nE       TypeError: get_params() missing 1 required positional argument: 'self'\n\nsklearn/base.py:60: TypeError\n\nDuring handling of the above exception, another exception occurred:\n\n    def test_clone_with_class_type_parameter():\n        # Attempt to clone an estimator with a class type parameter\n        try:\n            clone(StandardScaler(with_mean=StandardScaler))\n        except TypeError as e:\n            # If a TypeError is raised, the test should fail because the bug is present\n>           pytest.fail(\"TypeError was raised, indicating the presence of the bug\")\nE           Failed: TypeError was raised, indicating the presence of the bug\n\nsklearn/tests/test_egzwi2f6.py:11: Failed\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 807,
+      "num_statements": 66542,
+      "percent_covered": 1.1435478996675732,
+      "percent_covered_display": "1",
+      "missing_lines": 65735,
+      "excluded_lines": 5,
+      "num_branches": 16183,
+      "num_partial_branches": 23,
+      "covered_branches": 139,
+      "missing_branches": 16044
+    },
+    "test_code": "import pytest\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.base import clone\n\ndef test_clone_with_class_type_parameter():\n    # Attempt to clone an estimator with a class type parameter\n    try:\n        clone(StandardScaler(with_mean=StandardScaler))\n    except TypeError as e:\n        # If a TypeError is raised, the test should fail because the bug is present\n        pytest.fail(\"TypeError was raised, indicating the presence of the bug\")\n    else:\n        # No exception should be raised, indicating the bug is fixed\n        pass\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.base import clone\n\ndef test_clone_with_class_type_parameter():\n    # Attempt to clone an estimator with a class type parameter\n    try:\n        clone(StandardScaler(with_mean=StandardScaler))\n    except TypeError as e:\n        # If a TypeError is raised, the test should fail because the bug is present\n        pytest.fail(\"TypeError was raised, indicating the presence of the bug\")\n    else:\n        # No exception should be raised, indicating the bug is fixed\n        pass\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.base import clone\n\ndef test_clone_with_class_type_parameter():\n    # Attempt to clone an estimator with a class type parameter\n    try:\n        clone(StandardScaler(with_mean=StandardScaler))\n    except TypeError as e:\n        # If a TypeError is raised, the test should fail because the bug is present\n        pytest.fail(\"TypeError was raised, indicating the presence of the bug\")\n    else:\n        # No exception should be raised, indicating the bug is fixed\n        pass\n",
+    "error": "    def test_clone_with_class_type_parameter():\n        # Attempt to clone an estimator with a class type parameter\n        try:\n>           clone(StandardScaler(with_mean=StandardScaler))\n\nsklearn/tests/test_egzwi2f6.py:8: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nestimator = StandardScaler(copy=True,\n        with_mean=<class 'sklearn.preprocessing.data.StandardScaler'>,\n        with_std=True)\nsafe = True\n\n    def clone(estimator, safe=True):\n        \"\"\"Constructs a new estimator with the same parameters.\n    \n        Clone does a deep copy of the model in an estimator\n        without actually copying attached data. It yields a new estimator\n        with the same parameters that has not been fit on any data.\n    \n        Parameters\n        ----------\n        estimator : estimator object, or list, tuple or set of objects\n            The estimator or group of estimators to be cloned\n    \n        safe : boolean, optional\n            If safe is false, clone will fall back to a deep copy on objects\n            that are not estimators.\n    \n        \"\"\"\n        estimator_type = type(estimator)\n        # XXX: not handling dictionaries\n        if estimator_type in (list, tuple, set, frozenset):\n            return estimator_type([clone(e, safe=safe) for e in estimator])\n        elif not hasattr(estimator, 'get_params'):\n            if not safe:\n                return copy.deepcopy(estimator)\n            else:\n                raise TypeError(\"Cannot clone object '%s' (type %s): \"\n                                \"it does not seem to be a scikit-learn estimator \"\n                                \"as it does not implement a 'get_params' methods.\"\n                                % (repr(estimator), type(estimator)))\n        klass = estimator.__class__\n        new_object_params = estimator.get_params(deep=False)\n        for name, param in six.iteritems(new_object_params):\n>           new_object_params[name] = clone(param, safe=False)\n\nsklearn/base.py:62: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nestimator = <class 'sklearn.preprocessing.data.StandardScaler'>, safe = False\n\n    def clone(estimator, safe=True):\n        \"\"\"Constructs a new estimator with the same parameters.\n    \n        Clone does a deep copy of the model in an estimator\n        without actually copying attached data. It yields a new estimator\n        with the same parameters that has not been fit on any data.\n    \n        Parameters\n        ----------\n        estimator : estimator object, or list, tuple or set of objects\n            The estimator or group of estimators to be cloned\n    \n        safe : boolean, optional\n            If safe is false, clone will fall back to a deep copy on objects\n            that are not estimators.\n    \n        \"\"\"\n        estimator_type = type(estimator)\n        # XXX: not handling dictionaries\n        if estimator_type in (list, tuple, set, frozenset):\n            return estimator_type([clone(e, safe=safe) for e in estimator])\n        elif not hasattr(estimator, 'get_params'):\n            if not safe:\n                return copy.deepcopy(estimator)\n            else:\n                raise TypeError(\"Cannot clone object '%s' (type %s): \"\n                                \"it does not seem to be a scikit-learn estimator \"\n                                \"as it does not implement a 'get_params' methods.\"\n                                % (repr(estimator), type(estimator)))\n        klass = estimator.__class__\n>       new_object_params = estimator.get_params(deep=False)\nE       TypeError: get_params() missing 1 required positional argument: 'self'\n\nsklearn/base.py:60: TypeError\n\nDuring handling of the above exception, another exception occurred:\n\n    def test_clone_with_class_type_parameter():\n        # Attempt to clone an estimator with a class type parameter\n        try:\n            clone(StandardScaler(with_mean=StandardScaler))\n        except TypeError as e:\n            # If a TypeError is raised, the test should fail because the bug is present\n>           pytest.fail(\"TypeError was raised, indicating the presence of the bug\")\nE           Failed: TypeError was raised, indicating the presence of the bug\n\nsklearn/tests/test_egzwi2f6.py:11: Failed\n",
+    "revealing": true,
+    "reason": "The test is designed to reproduce a specific bug where the `clone` function in scikit-learn fails when an estimator is initialized with a class type parameter instead of an instance. The test attempts to clone a `StandardScaler` object with a class type parameter (`StandardScaler` itself) for `with_mean`. According to the issue ticket, this should not raise an error, but it currently does, resulting in a `TypeError`. The test correctly identifies this behavior as a failure, indicating the presence of the bug. The error message in the test output matches the description in the issue ticket, confirming that the test is valid and successfully reproduces the reported bug."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.base import clone\n\ndef test_clone_with_class_type_parameter():\n    # Attempt to clone an estimator with a class type parameter\n    try:\n        clone(StandardScaler(with_mean=StandardScaler))\n    except TypeError as e:\n        # If a TypeError is raised, the test should fail because the bug is present\n        pytest.fail(\"TypeError was raised, indicating the presence of the bug\")\n    else:\n        # No exception should be raised, indicating the bug is fixed\n        pass\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.040080000000000005
+  }
+]
