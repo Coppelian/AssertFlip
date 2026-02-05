@@ -1,0 +1,272 @@
+[
+  {
+    "instance_id": "django__django-15037",
+    "problem_statement": [
+      "Foreign key to a specific field is not handled in inspectdb\nDescription\n\t \n\t\t(last modified by Tim Graham)\n\t \nif you have a DB like that\nCREATE TABLE foo ( id serial primary key, other_id int UNIQUE);\nCREATE TABLE bar (\n\tid serial primary key, other_id int,\n\tconstraint myconst \n\tFOREIGN KEY(other_id) references foo(other_id)\n);\nthe generated model for the bar table will have the other_id be a FK to foo and not foo(other_id).\nI'm attaching a potential fix for this. Sorry I had no time for the UTs.\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(SimpleTestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo'\n        # and not 'foo(other_id)'.\n        self.assertIn(\"other_id = models.ForeignKey(foo\", output)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_c88u487f"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "114cf101a676",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_inspectdb_foreign_key_to_specific_field (test_c88u487f.InspectDBForeignKeyTest) ... FAIL\n\n======================================================================\nFAIL: test_inspectdb_foreign_key_to_specific_field (test_c88u487f.InspectDBForeignKeyTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_c88u487f.py\", line 8, in setUp\n    with connection.cursor() as cursor:\n  File \"/testbed/django/test/testcases.py\", line 148, in __call__\n    raise AssertionError(self.message)\nAssertionError: Database queries to 'default' are not allowed in SimpleTestCase subclasses. Either subclass TestCase or TransactionTestCase to ensure proper test isolation or add 'default' to test_c88u487f.InspectDBForeignKeyTest.databases to silence this failure.\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 14673,
+      "num_statements": 43520,
+      "percent_covered": 27.058356079190133,
+      "percent_covered_display": "27",
+      "missing_lines": 28847,
+      "excluded_lines": 0,
+      "num_branches": 14366,
+      "num_partial_branches": 524,
+      "covered_branches": 990,
+      "missing_branches": 13376
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(SimpleTestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo'\n        # and not 'foo(other_id)'.\n        self.assertIn(\"other_id = models.ForeignKey(foo\", output)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "response": {
+      "content": "```python\nfrom django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo'\n        # and not 'foo(other_id)'.\n        self.assertIn(\"other_id = models.ForeignKey(foo\", output)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo'\n        # and not 'foo(other_id)'.\n        self.assertIn(\"other_id = models.ForeignKey(foo\", output)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_4ntaq8ab"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "114cf101a676",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): other.\nOperations to perform:\n  Synchronize unmigrated apps: auth, contenttypes, messages, sessions, staticfiles\n  Apply all migrations: admin, sites\nSynchronizing apps without migrations:\n  Creating tables...\n    Creating table django_content_type\n    Creating table auth_permission\n    Creating table auth_group\n    Creating table auth_user\n    Creating table django_session\n    Running deferred SQL...\nRunning migrations:\n  Applying admin.0001_initial... OK\n  Applying admin.0002_logentry_remove_auto_add... OK\n  Applying admin.0003_logentry_add_action_flag_choices... OK\n  Applying sites.0001_initial... OK\n  Applying sites.0002_alter_domain_unique... OK\nSystem check identified no issues (0 silenced).\ntest_inspectdb_foreign_key_to_specific_field (test_4ntaq8ab.InspectDBForeignKeyTest) ... FAIL\n\n======================================================================\nFAIL: test_inspectdb_foreign_key_to_specific_field (test_4ntaq8ab.InspectDBForeignKeyTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_4ntaq8ab.py\", line 35, in test_inspectdb_foreign_key_to_specific_field\n    self.assertIn(\"other_id = models.ForeignKey(foo\", output)\nAssertionError: 'other_id = models.ForeignKey(foo' not found in \"# This is an auto-generated Django model module.\\n# You'll have to do the following manually to clean this up:\\n#   * Rearrange models' order\\n#   * Make sure each model has one field with primary_key=True\\n#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior\\n#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table\\n# Feel free to rename the models, but don't rename db_table values or field names.\\nfrom django.db import models\\n\\n\\nclass AuthGroup(models.Model):\\n    name = models.CharField(unique=True, max_length=150)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_group'\\n\\n\\nclass AuthGroupPermissions(models.Model):\\n    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)\\n    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_group_permissions'\\n        unique_together = (('group', 'permission'),)\\n\\n\\nclass AuthPermission(models.Model):\\n    name = models.CharField(max_length=255)\\n    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)\\n    codename = models.CharField(max_length=100)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_permission'\\n        unique_together = (('content_type', 'codename'),)\\n\\n\\nclass AuthUser(models.Model):\\n    password = models.CharField(max_length=128)\\n    last_login = models.DateTimeField(blank=True, null=True)\\n    is_superuser = models.BooleanField()\\n    username = models.CharField(unique=True, max_length=150)\\n    first_name = models.CharField(max_length=150)\\n    last_name = models.CharField(max_length=150)\\n    email = models.CharField(max_length=254)\\n    is_staff = models.BooleanField()\\n    is_active = models.BooleanField()\\n    date_joined = models.DateTimeField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_user'\\n\\n\\nclass AuthUserGroups(models.Model):\\n    user = models.ForeignKey(AuthUser, models.DO_NOTHING)\\n    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_user_groups'\\n        unique_together = (('user', 'group'),)\\n\\n\\nclass AuthUserUserPermissions(models.Model):\\n    user = models.ForeignKey(AuthUser, models.DO_NOTHING)\\n    permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_user_user_permissions'\\n        unique_together = (('user', 'permission'),)\\n\\n\\nclass Bar(models.Model):\\n    id = models.TextField(primary_key=True, blank=True, null=True)  # This field type is a guess.\\n    other_id = models.IntegerField(blank=True, null=True)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'bar'\\n\\n\\nclass DjangoAdminLog(models.Model):\\n    action_time = models.DateTimeField()\\n    object_id = models.TextField(blank=True, null=True)\\n    object_repr = models.CharField(max_length=200)\\n    change_message = models.TextField()\\n    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)\\n    user = models.ForeignKey(AuthUser, models.DO_NOTHING)\\n    action_flag = models.PositiveSmallIntegerField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_admin_log'\\n\\n\\nclass DjangoContentType(models.Model):\\n    app_label = models.CharField(max_length=100)\\n    model = models.CharField(max_length=100)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_content_type'\\n        unique_together = (('app_label', 'model'),)\\n\\n\\nclass DjangoMigrations(models.Model):\\n    app = models.CharField(max_length=255)\\n    name = models.CharField(max_length=255)\\n    applied = models.DateTimeField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_migrations'\\n\\n\\nclass DjangoSession(models.Model):\\n    session_key = models.CharField(primary_key=True, max_length=40)\\n    session_data = models.TextField()\\n    expire_date = models.DateTimeField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_session'\\n\\n\\nclass DjangoSite(models.Model):\\n    name = models.CharField(max_length=50)\\n    domain = models.CharField(unique=True, max_length=100)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_site'\\n\\n\\nclass Foo(models.Model):\\n    id = models.TextField(primary_key=True, blank=True, null=True)  # This field type is a guess.\\n    other_id = models.IntegerField(unique=True, blank=True, null=True)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'foo'\\n\"\n\n----------------------------------------------------------------------\nRan 1 test in 0.116s\n\nFAILED (failures=1)\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 18474,
+      "num_statements": 46551,
+      "percent_covered": 33.358437354783916,
+      "percent_covered_display": "33",
+      "missing_lines": 28077,
+      "excluded_lines": 0,
+      "num_branches": 15856,
+      "num_partial_branches": 1204,
+      "covered_branches": 2344,
+      "missing_branches": 13512
+    },
+    "test_code": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo'\n        # and not 'foo(other_id)'.\n        self.assertIn(\"other_id = models.ForeignKey(foo\", output)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "response": {
+      "content": "```python\nfrom django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo'\n        # and not 'foo(other_id)'.\n        self.assertIn(\"other_id = models.IntegerField(blank=True, null=True)\", output)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo'\n        # and not 'foo(other_id)'.\n        self.assertIn(\"other_id = models.IntegerField(blank=True, null=True)\", output)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 3,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_w0587u0t"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "114cf101a676",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 18473,
+      "num_statements": 46551,
+      "percent_covered": 33.35683497043601,
+      "percent_covered_display": "33",
+      "missing_lines": 28078,
+      "excluded_lines": 0,
+      "num_branches": 15856,
+      "num_partial_branches": 1204,
+      "covered_branches": 2344,
+      "missing_branches": 13512
+    },
+    "test_code": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo'\n        # and not 'foo(other_id)'.\n        self.assertIn(\"other_id = models.IntegerField(blank=True, null=True)\", output)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo'\n        # and not 'foo(other_id)'.\n        self.assertIn(\"other_id = models.IntegerField(blank=True, null=True)\", output)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo(other_id)'\n        self.assertIn(\"other_id = models.ForeignKey(foo, to_field='other_id', on_delete=models.DO_NOTHING)\", output)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_64v7p6_4"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "114cf101a676",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): other.\nOperations to perform:\n  Synchronize unmigrated apps: auth, contenttypes, messages, sessions, staticfiles\n  Apply all migrations: admin, sites\nSynchronizing apps without migrations:\n  Creating tables...\n    Creating table django_content_type\n    Creating table auth_permission\n    Creating table auth_group\n    Creating table auth_user\n    Creating table django_session\n    Running deferred SQL...\nRunning migrations:\n  Applying admin.0001_initial... OK\n  Applying admin.0002_logentry_remove_auto_add... OK\n  Applying admin.0003_logentry_add_action_flag_choices... OK\n  Applying sites.0001_initial... OK\n  Applying sites.0002_alter_domain_unique... OK\nSystem check identified no issues (0 silenced).\ntest_inspectdb_foreign_key_to_specific_field (test_64v7p6_4.InspectDBForeignKeyTest) ... FAIL\n\n======================================================================\nFAIL: test_inspectdb_foreign_key_to_specific_field (test_64v7p6_4.InspectDBForeignKeyTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_64v7p6_4.py\", line 34, in test_inspectdb_foreign_key_to_specific_field\n    self.assertIn(\"other_id = models.ForeignKey(foo, to_field='other_id', on_delete=models.DO_NOTHING)\", output)\nAssertionError: \"other_id = models.ForeignKey(foo, to_field='other_id', on_delete=models.DO_NOTHING)\" not found in \"# This is an auto-generated Django model module.\\n# You'll have to do the following manually to clean this up:\\n#   * Rearrange models' order\\n#   * Make sure each model has one field with primary_key=True\\n#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior\\n#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table\\n# Feel free to rename the models, but don't rename db_table values or field names.\\nfrom django.db import models\\n\\n\\nclass AuthGroup(models.Model):\\n    name = models.CharField(unique=True, max_length=150)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_group'\\n\\n\\nclass AuthGroupPermissions(models.Model):\\n    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)\\n    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_group_permissions'\\n        unique_together = (('group', 'permission'),)\\n\\n\\nclass AuthPermission(models.Model):\\n    name = models.CharField(max_length=255)\\n    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)\\n    codename = models.CharField(max_length=100)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_permission'\\n        unique_together = (('content_type', 'codename'),)\\n\\n\\nclass AuthUser(models.Model):\\n    password = models.CharField(max_length=128)\\n    last_login = models.DateTimeField(blank=True, null=True)\\n    is_superuser = models.BooleanField()\\n    username = models.CharField(unique=True, max_length=150)\\n    first_name = models.CharField(max_length=150)\\n    last_name = models.CharField(max_length=150)\\n    email = models.CharField(max_length=254)\\n    is_staff = models.BooleanField()\\n    is_active = models.BooleanField()\\n    date_joined = models.DateTimeField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_user'\\n\\n\\nclass AuthUserGroups(models.Model):\\n    user = models.ForeignKey(AuthUser, models.DO_NOTHING)\\n    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_user_groups'\\n        unique_together = (('user', 'group'),)\\n\\n\\nclass AuthUserUserPermissions(models.Model):\\n    user = models.ForeignKey(AuthUser, models.DO_NOTHING)\\n    permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_user_user_permissions'\\n        unique_together = (('user', 'permission'),)\\n\\n\\nclass Bar(models.Model):\\n    id = models.TextField(primary_key=True, blank=True, null=True)  # This field type is a guess.\\n    other_id = models.IntegerField(blank=True, null=True)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'bar'\\n\\n\\nclass DjangoAdminLog(models.Model):\\n    action_time = models.DateTimeField()\\n    object_id = models.TextField(blank=True, null=True)\\n    object_repr = models.CharField(max_length=200)\\n    change_message = models.TextField()\\n    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)\\n    user = models.ForeignKey(AuthUser, models.DO_NOTHING)\\n    action_flag = models.PositiveSmallIntegerField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_admin_log'\\n\\n\\nclass DjangoContentType(models.Model):\\n    app_label = models.CharField(max_length=100)\\n    model = models.CharField(max_length=100)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_content_type'\\n        unique_together = (('app_label', 'model'),)\\n\\n\\nclass DjangoMigrations(models.Model):\\n    app = models.CharField(max_length=255)\\n    name = models.CharField(max_length=255)\\n    applied = models.DateTimeField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_migrations'\\n\\n\\nclass DjangoSession(models.Model):\\n    session_key = models.CharField(primary_key=True, max_length=40)\\n    session_data = models.TextField()\\n    expire_date = models.DateTimeField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_session'\\n\\n\\nclass DjangoSite(models.Model):\\n    name = models.CharField(max_length=50)\\n    domain = models.CharField(unique=True, max_length=100)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_site'\\n\\n\\nclass Foo(models.Model):\\n    id = models.TextField(primary_key=True, blank=True, null=True)  # This field type is a guess.\\n    other_id = models.IntegerField(unique=True, blank=True, null=True)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'foo'\\n\"\n\n----------------------------------------------------------------------\nRan 1 test in 0.115s\n\nFAILED (failures=1)\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 18474,
+      "num_statements": 46551,
+      "percent_covered": 33.358437354783916,
+      "percent_covered_display": "33",
+      "missing_lines": 28077,
+      "excluded_lines": 0,
+      "num_branches": 15856,
+      "num_partial_branches": 1204,
+      "covered_branches": 2344,
+      "missing_branches": 13512
+    },
+    "test_code": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo(other_id)'\n        self.assertIn(\"other_id = models.ForeignKey(foo, to_field='other_id', on_delete=models.DO_NOTHING)\", output)\n"
+  },
+  {
+    "no_validation_ablation_test": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo(other_id)'\n        self.assertIn(\"other_id = models.ForeignKey(foo, to_field='other_id', on_delete=models.DO_NOTHING)\", output)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo(other_id)'\n        self.assertIn(\"other_id = models.ForeignKey(foo, to_field='other_id', on_delete=models.DO_NOTHING)\", output)\n",
+    "error": "Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): other.\nOperations to perform:\n  Synchronize unmigrated apps: auth, contenttypes, messages, sessions, staticfiles\n  Apply all migrations: admin, sites\nSynchronizing apps without migrations:\n  Creating tables...\n    Creating table django_content_type\n    Creating table auth_permission\n    Creating table auth_group\n    Creating table auth_user\n    Creating table django_session\n    Running deferred SQL...\nRunning migrations:\n  Applying admin.0001_initial... OK\n  Applying admin.0002_logentry_remove_auto_add... OK\n  Applying admin.0003_logentry_add_action_flag_choices... OK\n  Applying sites.0001_initial... OK\n  Applying sites.0002_alter_domain_unique... OK\nSystem check identified no issues (0 silenced).\ntest_inspectdb_foreign_key_to_specific_field (test_64v7p6_4.InspectDBForeignKeyTest) ... FAIL\n\n======================================================================\nFAIL: test_inspectdb_foreign_key_to_specific_field (test_64v7p6_4.InspectDBForeignKeyTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_64v7p6_4.py\", line 34, in test_inspectdb_foreign_key_to_specific_field\n    self.assertIn(\"other_id = models.ForeignKey(foo, to_field='other_id', on_delete=models.DO_NOTHING)\", output)\nAssertionError: \"other_id = models.ForeignKey(foo, to_field='other_id', on_delete=models.DO_NOTHING)\" not found in \"# This is an auto-generated Django model module.\\n# You'll have to do the following manually to clean this up:\\n#   * Rearrange models' order\\n#   * Make sure each model has one field with primary_key=True\\n#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior\\n#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table\\n# Feel free to rename the models, but don't rename db_table values or field names.\\nfrom django.db import models\\n\\n\\nclass AuthGroup(models.Model):\\n    name = models.CharField(unique=True, max_length=150)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_group'\\n\\n\\nclass AuthGroupPermissions(models.Model):\\n    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)\\n    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_group_permissions'\\n        unique_together = (('group', 'permission'),)\\n\\n\\nclass AuthPermission(models.Model):\\n    name = models.CharField(max_length=255)\\n    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)\\n    codename = models.CharField(max_length=100)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_permission'\\n        unique_together = (('content_type', 'codename'),)\\n\\n\\nclass AuthUser(models.Model):\\n    password = models.CharField(max_length=128)\\n    last_login = models.DateTimeField(blank=True, null=True)\\n    is_superuser = models.BooleanField()\\n    username = models.CharField(unique=True, max_length=150)\\n    first_name = models.CharField(max_length=150)\\n    last_name = models.CharField(max_length=150)\\n    email = models.CharField(max_length=254)\\n    is_staff = models.BooleanField()\\n    is_active = models.BooleanField()\\n    date_joined = models.DateTimeField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_user'\\n\\n\\nclass AuthUserGroups(models.Model):\\n    user = models.ForeignKey(AuthUser, models.DO_NOTHING)\\n    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_user_groups'\\n        unique_together = (('user', 'group'),)\\n\\n\\nclass AuthUserUserPermissions(models.Model):\\n    user = models.ForeignKey(AuthUser, models.DO_NOTHING)\\n    permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'auth_user_user_permissions'\\n        unique_together = (('user', 'permission'),)\\n\\n\\nclass Bar(models.Model):\\n    id = models.TextField(primary_key=True, blank=True, null=True)  # This field type is a guess.\\n    other_id = models.IntegerField(blank=True, null=True)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'bar'\\n\\n\\nclass DjangoAdminLog(models.Model):\\n    action_time = models.DateTimeField()\\n    object_id = models.TextField(blank=True, null=True)\\n    object_repr = models.CharField(max_length=200)\\n    change_message = models.TextField()\\n    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)\\n    user = models.ForeignKey(AuthUser, models.DO_NOTHING)\\n    action_flag = models.PositiveSmallIntegerField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_admin_log'\\n\\n\\nclass DjangoContentType(models.Model):\\n    app_label = models.CharField(max_length=100)\\n    model = models.CharField(max_length=100)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_content_type'\\n        unique_together = (('app_label', 'model'),)\\n\\n\\nclass DjangoMigrations(models.Model):\\n    app = models.CharField(max_length=255)\\n    name = models.CharField(max_length=255)\\n    applied = models.DateTimeField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_migrations'\\n\\n\\nclass DjangoSession(models.Model):\\n    session_key = models.CharField(primary_key=True, max_length=40)\\n    session_data = models.TextField()\\n    expire_date = models.DateTimeField()\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_session'\\n\\n\\nclass DjangoSite(models.Model):\\n    name = models.CharField(max_length=50)\\n    domain = models.CharField(unique=True, max_length=100)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'django_site'\\n\\n\\nclass Foo(models.Model):\\n    id = models.TextField(primary_key=True, blank=True, null=True)  # This field type is a guess.\\n    other_id = models.IntegerField(unique=True, blank=True, null=True)\\n\\n    class Meta:\\n        managed = False\\n        db_table = 'foo'\\n\"\n\n----------------------------------------------------------------------\nRan 1 test in 0.115s\n\nFAILED (failures=1)\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n",
+    "revealing": true,
+    "reason": "The test is designed to verify that the Django management command 'inspectdb' correctly generates a model for the 'bar' table with a ForeignKey field 'other_id' that references the 'other_id' field in the 'foo' table. The issue ticket describes a problem where the generated model incorrectly references the entire 'foo' table instead of the specific 'other_id' field. The test sets up the database schema as described in the issue, runs the 'inspectdb' command, and checks the output for the expected ForeignKey definition. The test fails because the expected ForeignKey definition is not found in the output, which aligns with the reported issue. Therefore, the test correctly reproduces the bug described in the issue ticket."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "from django.test import TestCase\nfrom django.db import connection\nfrom django.core.management import call_command\nfrom io import StringIO\n\nclass InspectDBForeignKeyTest(TestCase):\n    def setUp(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"\"\"\n                CREATE TABLE foo (\n                    id serial PRIMARY KEY,\n                    other_id int UNIQUE\n                );\n            \"\"\")\n            cursor.execute(\"\"\"\n                CREATE TABLE bar (\n                    id serial PRIMARY KEY,\n                    other_id int,\n                    CONSTRAINT myconst FOREIGN KEY(other_id) REFERENCES foo(other_id)\n                );\n            \"\"\")\n\n    def tearDown(self):\n        with connection.cursor() as cursor:\n            cursor.execute(\"DROP TABLE bar;\")\n            cursor.execute(\"DROP TABLE foo;\")\n\n    def test_inspectdb_foreign_key_to_specific_field(self):\n        out = StringIO()\n        call_command('inspectdb', stdout=out)\n        output = out.getvalue()\n\n        # Check that the generated model for 'bar' has 'other_id' as a ForeignKey to 'foo(other_id)'\n        self.assertIn(\"other_id = models.ForeignKey(foo, to_field='other_id', on_delete=models.DO_NOTHING)\", output)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.11525250000000001
+  }
+]

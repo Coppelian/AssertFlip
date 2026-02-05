@@ -1,0 +1,22 @@
+import pytest
+import xarray as xr
+
+def test_where_with_scalar_and_keep_attrs():
+    # Setup: Create a condition DataArray
+    cond = xr.DataArray([True, False, True], dims=["dim"])
+    
+    # Scalars for x and y
+    x = 1
+    y = 0
+    
+    # Test: Expect no error when keep_attrs=True
+    try:
+        # This should not raise an error when the bug is fixed
+        result = xr.where(cond, x, y, keep_attrs=True)
+        # Check if the result is as expected
+        expected = xr.DataArray([1, 0, 1], dims=["dim"])
+        xr.testing.assert_equal(result, expected)
+    except IndexError:
+        pytest.fail("IndexError was raised, indicating the bug is present")
+
+    # Cleanup: No specific cleanup required

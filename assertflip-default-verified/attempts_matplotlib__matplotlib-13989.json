@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "matplotlib__matplotlib-13989",
+    "problem_statement": [
+      "hist() no longer respects range=... when density=True\n<!--To help us understand and resolve your issue, please fill out the form to the best of your ability.-->\r\n<!--You can feel free to delete the sections that do not apply.-->\r\n\r\n### Bug report\r\n\r\n**Bug summary**\r\n\r\n<!--A short 1-2 sentences that succinctly describes the bug-->\r\n\r\n**Code for reproduction**\r\n\r\n<!--A minimum code snippet required to reproduce the bug.\r\nPlease make sure to minimize the number of dependencies required, and provide\r\nany necessary plotted data.\r\nAvoid using threads, as Matplotlib is (explicitly) not thread-safe.-->\r\n\r\n```python\r\n_, bins, _ = plt.hist(np.random.rand(10), \"auto\", range=(0, 1), density=True)\r\nprint(bins)\r\n```\r\n\r\n**Actual outcome**\r\n\r\n<!--The output produced by the above code, which may be a screenshot, console output, etc.-->\r\n\r\n```\r\n[0.00331535 0.18930174 0.37528813 0.56127453 0.74726092 0.93324731]\r\n```\r\n\r\n**Expected outcome**\r\n\r\nSome array where the first value is 0 and the last one is 1.\r\n\r\nNote that this bug doesn't happen if density=False.\r\n\r\nBisects to https://github.com/matplotlib/matplotlib/pull/8638/commits/239be7b18e311c57a1393b6eeefc62b7cc629339 (#8638).\r\n\r\n**Matplotlib version**\r\n<!--Please specify your platform and versions of the relevant libraries you are using:-->\r\n  * Operating system: linux\r\n  * Matplotlib version: master\r\n  * Matplotlib backend (`print(matplotlib.get_backend())`): any\r\n  * Python version: 37\r\n  * Jupyter version (if applicable): no\r\n  * Other libraries: numpy 1.16.2\r\n\r\n<!--Please tell us how you installed matplotlib and python e.g., from source, pip, conda-->\r\n<!--If you installed from conda, please specify which channel you used if not the default-->\r\n\r\n\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ndef test_hist_density_range_bug():\n    # Set a random seed for reproducibility\n    np.random.seed(0)\n    \n    # Generate random data\n    data = np.random.rand(10)\n    \n    # Create a histogram with density=True and range=(0, 1)\n    _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n    # Assert that the first bin edge is not 0 and the last bin edge is not 1\n    # BUG: this behavior is incorrect but currently happens due to the bug\n    assert bins[0] != 0, \"BUG: The first bin edge should be 0 but it is not.\"\n    assert bins[-1] != 1, \"BUG: The last bin edge should be 1 but it is not.\"\n\n    # Cleanup: Close the plot to avoid state pollution\n    plt.close()\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/lib/matplotlib/tests/test_5go96v75.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 10793,
+      "num_statements": 69576,
+      "percent_covered": 13.82448295136948,
+      "percent_covered_display": "14",
+      "missing_lines": 58783,
+      "excluded_lines": 313,
+      "num_branches": 19874,
+      "num_partial_branches": 773,
+      "covered_branches": 1573,
+      "missing_branches": 18301
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ndef test_hist_density_range_bug():\n    # Set a random seed for reproducibility\n    np.random.seed(0)\n    \n    # Generate random data\n    data = np.random.rand(10)\n    \n    # Create a histogram with density=True and range=(0, 1)\n    _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n    # Assert that the first bin edge is not 0 and the last bin edge is not 1\n    # BUG: this behavior is incorrect but currently happens due to the bug\n    assert bins[0] != 0, \"BUG: The first bin edge should be 0 but it is not.\"\n    assert bins[-1] != 1, \"BUG: The last bin edge should be 1 but it is not.\"\n\n    # Cleanup: Close the plot to avoid state pollution\n    plt.close()\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ndef test_hist_density_range_bug():\n    # Set a random seed for reproducibility\n    np.random.seed(0)\n    \n    # Generate random data\n    data = np.random.rand(10)\n    \n    # Create a histogram with density=True and range=(0, 1)\n    _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n    # Assert that the first bin edge is not 0 and the last bin edge is not 1\n    # BUG: this behavior is incorrect but currently happens due to the bug\n    assert bins[0] != 0, \"BUG: The first bin edge should be 0 but it is not.\"\n    assert bins[-1] != 1, \"BUG: The last bin edge should be 1 but it is not.\"\n\n    # Cleanup: Close the plot to avoid state pollution\n    plt.close()\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ndef test_hist_density_range_bug():\n    # Set a random seed for reproducibility\n    np.random.seed(0)\n    \n    # Generate random data\n    data = np.random.rand(10)\n    \n    # Create a histogram with density=True and range=(0, 1)\n    _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n    # Assert that the first bin edge is 0 and the last bin edge is 1\n    assert bins[0] == 0, \"The first bin edge should be 0.\"\n    assert bins[-1] == 1, \"The last bin edge should be 1.\"\n\n    # Cleanup: Close the plot to avoid state pollution\n    plt.close()\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/lib/matplotlib/tests/test_fa5v_6mx.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_hist_density_range_bug():\n        # Set a random seed for reproducibility\n        np.random.seed(0)\n    \n        # Generate random data\n        data = np.random.rand(10)\n    \n        # Create a histogram with density=True and range=(0, 1)\n        _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n        # Assert that the first bin edge is 0 and the last bin edge is 1\n>       assert bins[0] == 0, \"The first bin edge should be 0.\"\nE       AssertionError: The first bin edge should be 0.\nE       assert 0.3834415188257777 == 0\n\nlib/matplotlib/tests/test_fa5v_6mx.py:16: AssertionError\n=============================== warnings summary ===============================\nlib/matplotlib/__init__.py:195\nlib/matplotlib/__init__.py:195\nlib/matplotlib/__init__.py:195\nlib/matplotlib/__init__.py:195\nlib/matplotlib/__init__.py:195\n  /testbed/lib/matplotlib/__init__.py:195: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(module.__version__) < minver:\n\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\nlib/matplotlib/tests/test_fa5v_6mx.py::test_hist_density_range_bug\n  /opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    other = LooseVersion(other)\n\nlib/matplotlib/tests/test_fa5v_6mx.py::test_hist_density_range_bug\n  /testbed/lib/matplotlib/__init__.py:321: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    version = LooseVersion(match.group(1))\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 10559,
+      "num_statements": 69576,
+      "percent_covered": 13.449972051425377,
+      "percent_covered_display": "13",
+      "missing_lines": 59017,
+      "excluded_lines": 313,
+      "num_branches": 19874,
+      "num_partial_branches": 744,
+      "covered_branches": 1472,
+      "missing_branches": 18402
+    },
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ndef test_hist_density_range_bug():\n    # Set a random seed for reproducibility\n    np.random.seed(0)\n    \n    # Generate random data\n    data = np.random.rand(10)\n    \n    # Create a histogram with density=True and range=(0, 1)\n    _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n    # Assert that the first bin edge is 0 and the last bin edge is 1\n    assert bins[0] == 0, \"The first bin edge should be 0.\"\n    assert bins[-1] == 1, \"The last bin edge should be 1.\"\n\n    # Cleanup: Close the plot to avoid state pollution\n    plt.close()\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ndef test_hist_density_range_bug():\n    # Set a random seed for reproducibility\n    np.random.seed(0)\n    \n    # Generate random data\n    data = np.random.rand(10)\n    \n    # Create a histogram with density=True and range=(0, 1)\n    _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n    # Assert that the first bin edge is 0 and the last bin edge is 1\n    assert bins[0] == 0, \"The first bin edge should be 0.\"\n    assert bins[-1] == 1, \"The last bin edge should be 1.\"\n\n    # Cleanup: Close the plot to avoid state pollution\n    plt.close()\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ndef test_hist_density_range_bug():\n    # Set a random seed for reproducibility\n    np.random.seed(0)\n    \n    # Generate random data\n    data = np.random.rand(10)\n    \n    # Create a histogram with density=True and range=(0, 1)\n    _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n    # Assert that the first bin edge is 0 and the last bin edge is 1\n    assert bins[0] == 0, \"The first bin edge should be 0.\"\n    assert bins[-1] == 1, \"The last bin edge should be 1.\"\n\n    # Cleanup: Close the plot to avoid state pollution\n    plt.close()\n",
+    "error": "    def test_hist_density_range_bug():\n        # Set a random seed for reproducibility\n        np.random.seed(0)\n    \n        # Generate random data\n        data = np.random.rand(10)\n    \n        # Create a histogram with density=True and range=(0, 1)\n        _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n        # Assert that the first bin edge is 0 and the last bin edge is 1\n>       assert bins[0] == 0, \"The first bin edge should be 0.\"\nE       AssertionError: The first bin edge should be 0.\nE       assert 0.3834415188257777 == 0\n\nlib/matplotlib/tests/test_fa5v_6mx.py:16: AssertionError\n=============================== warnings summary ===============================\nlib/matplotlib/__init__.py:195\nlib/matplotlib/__init__.py:195\nlib/matplotlib/__init__.py:195\nlib/matplotlib/__init__.py:195\nlib/matplotlib/__init__.py:195\n  /testbed/lib/matplotlib/__init__.py:195: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(module.__version__) < minver:\n\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\n../opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346\nlib/matplotlib/tests/test_fa5v_6mx.py::test_hist_density_range_bug\n  /opt/miniconda3/envs/testbed/lib/python3.7/site-packages/setuptools/_distutils/version.py:346: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    other = LooseVersion(other)\n\nlib/matplotlib/tests/test_fa5v_6mx.py::test_hist_density_range_bug\n  /testbed/lib/matplotlib/__init__.py:321: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    version = LooseVersion(match.group(1))\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n",
+    "revealing": true,
+    "reason": "The test code is designed to reproduce a bug related to the `plt.hist` function in Matplotlib, where the `range` parameter is not respected when `density=True`. The test sets up a histogram with a specified range of (0, 1) and checks if the bin edges respect this range. The test fails because the first bin edge is not 0, which aligns with the reported issue that the range is not respected. The test is valid as it directly tests the behavior described in the issue ticket, and the failure indicates that the bug is present."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ndef test_hist_density_range_bug():\n    # Set a random seed for reproducibility\n    np.random.seed(0)\n    \n    # Generate random data\n    data = np.random.rand(10)\n    \n    # Create a histogram with density=True and range=(0, 1)\n    _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)\n    \n    # Assert that the first bin edge is 0 and the last bin edge is 1\n    assert bins[0] == 0, \"The first bin edge should be 0.\"\n    assert bins[-1] == 1, \"The last bin edge should be 1.\"\n\n    # Cleanup: Close the plot to avoid state pollution\n    plt.close()\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.098975
+  }
+]

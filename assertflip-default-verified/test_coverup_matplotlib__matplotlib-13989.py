@@ -1,0 +1,20 @@
+import pytest
+import matplotlib.pyplot as plt
+import numpy as np
+
+def test_hist_density_range_bug():
+    # Set a random seed for reproducibility
+    np.random.seed(0)
+    
+    # Generate random data
+    data = np.random.rand(10)
+    
+    # Create a histogram with density=True and range=(0, 1)
+    _, bins, _ = plt.hist(data, bins='auto', range=(0, 1), density=True)
+    
+    # Assert that the first bin edge is 0 and the last bin edge is 1
+    assert bins[0] == 0, "The first bin edge should be 0."
+    assert bins[-1] == 1, "The last bin edge should be 1."
+
+    # Cleanup: Close the plot to avoid state pollution
+    plt.close()

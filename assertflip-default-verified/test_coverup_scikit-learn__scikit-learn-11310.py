@@ -1,0 +1,22 @@
+import pytest
+from sklearn.datasets import load_iris
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+
+def test_missing_refit_time_attribute():
+    # Load a simple dataset
+    X, y = load_iris(return_X_y=True)
+    
+    # Set up the estimator and parameter grid
+    estimator = RandomForestClassifier()
+    param_grid = {'n_estimators': [2, 3]}
+    
+    # Initialize GridSearchCV
+    grid_search = GridSearchCV(estimator=estimator, param_grid=param_grid, refit=True)
+    
+    # Fit the model
+    grid_search.fit(X, y)
+    
+    # Check if the refit_time_ attribute exists and is a float
+    assert hasattr(grid_search, 'refit_time_'), "refit_time_ attribute is missing"
+    assert isinstance(grid_search.refit_time_, float), "refit_time_ should be a float"

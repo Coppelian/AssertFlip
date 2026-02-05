@@ -1,0 +1,22 @@
+from django.test import SimpleTestCase
+from django.db.models.query_utils import RegisterLookupMixin
+
+class MockLookup:
+    lookup_name = 'mock_lookup'
+
+class TestRegisterLookupMixin(SimpleTestCase):
+    def test_unregister_lookup_clears_cache(self):
+        class TestClass(RegisterLookupMixin):
+            pass
+
+        # Register the mock lookup
+        TestClass.register_lookup(MockLookup)
+        
+        # Verify the lookup is cached
+        self.assertIn('mock_lookup', TestClass.get_lookups())
+        
+        # Unregister the lookup
+        TestClass._unregister_lookup(MockLookup)
+        
+        # The lookup should not be retrievable after unregistering
+        self.assertNotIn('mock_lookup', TestClass.get_lookups())

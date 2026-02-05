@@ -1,0 +1,761 @@
+[
+  {
+    "instance_id": "django__django-11848",
+    "problem_statement": [
+      "django.utils.http.parse_http_date two digit year check is incorrect\nDescription\n\t \n\t\t(last modified by Ad Timmering)\n\t \nRFC 850 does not mention this, but in RFC 7231 (and there's something similar in RFC 2822), there's the following quote:\nRecipients of a timestamp value in rfc850-date format, which uses a\ntwo-digit year, MUST interpret a timestamp that appears to be more\nthan 50 years in the future as representing the most recent year in\nthe past that had the same last two digits.\nCurrent logic is hard coded to consider 0-69 to be in 2000-2069, and 70-99 to be 1970-1999, instead of comparing versus the current year.\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        date_string = \"Sun, 06 Nov 74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 2074)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sun, 06 Nov 99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_0mntrxyu"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_parse_http_date_two_digit_year_bug (test_0mntrxyu.ParseHttpDateTests) ... ERROR\n\n======================================================================\nERROR: test_parse_http_date_two_digit_year_bug (test_0mntrxyu.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_0mntrxyu.py\", line 12, in test_parse_http_date_two_digit_year_bug\n    parsed_timestamp = parse_http_date(date_string)\n  File \"/testbed/django/utils/http.py\", line 175, in parse_http_date\n    raise ValueError(\"%r is not in a valid HTTP date format\" % date)\nValueError: 'Sun, 06 Nov 74 08:49:37 GMT' is not in a valid HTTP date format\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (errors=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 12915,
+      "num_statements": 39339,
+      "percent_covered": 28.732918365886814,
+      "percent_covered_display": "29",
+      "missing_lines": 26424,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 504,
+      "covered_branches": 3149,
+      "missing_branches": 13420
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        date_string = \"Sun, 06 Nov 74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 2074)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sun, 06 Nov 99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "response": {
+      "content": "```python\nfrom django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 2074)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 2074)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_lyuszj_9"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_parse_http_date_two_digit_year_bug (test_lyuszj_9.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_lyuszj_9.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_lyuszj_9.py\", line 17, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # BUG: this behavior is incorrect but currently happens due to the bug\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 12929,
+      "num_statements": 39339,
+      "percent_covered": 28.76153681047435,
+      "percent_covered_display": "29",
+      "missing_lines": 26410,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 506,
+      "covered_branches": 3151,
+      "missing_branches": 13418
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 2074)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "response": {
+      "content": "```python\nfrom django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 3,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_uh4wjoi9"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 12932,
+      "num_statements": 39339,
+      "percent_covered": 28.766902768834512,
+      "percent_covered_display": "29",
+      "missing_lines": 26407,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 506,
+      "covered_branches": 3151,
+      "missing_branches": 13418
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior due to the bug\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074 if within 50 years of current year\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2099)  # Correct behavior should interpret '99' as 2099 if within 50 years of current year\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_n9q2c6u5"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_parse_http_date_two_digit_year_bug (test_n9q2c6u5.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_n9q2c6u5.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_n9q2c6u5.py\", line 17, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074 if within 50 years of current year\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 12929,
+      "num_statements": 39339,
+      "percent_covered": 28.76153681047435,
+      "percent_covered_display": "29",
+      "missing_lines": 26410,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 506,
+      "covered_branches": 3151,
+      "missing_branches": 13418
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074 if within 50 years of current year\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2099)  # Correct behavior should interpret '99' as 2099 if within 50 years of current year\n"
+  },
+  {
+    "no_validation_ablation_test": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074 if within 50 years of current year\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2099)  # Correct behavior should interpret '99' as 2099 if within 50 years of current year\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Current year for reference\n        current_year = datetime.datetime.now().year\n\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074 if within 50 years of current year\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2099)  # Correct behavior should interpret '99' as 2099 if within 50 years of current year\n",
+    "error": "test_parse_http_date_two_digit_year_bug (test_n9q2c6u5.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_n9q2c6u5.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_n9q2c6u5.py\", line 17, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074 if within 50 years of current year\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "revealing": false,
+    "reason": "The test is designed to verify the behavior of the `parse_http_date` function when handling two-digit years in HTTP date strings, as per the issue ticket. The issue ticket describes a problem where the function incorrectly interprets two-digit years based on a hardcoded range (0-69 as 2000-2069 and 70-99 as 1970-1999) instead of using the current year to determine if the year should be in the past or future. The test attempts to check this by asserting that the year '74' should be interpreted as 2074 and '99' as 2099, assuming they are within 50 years of the current year. However, the test is incorrect because it misinterprets the RFC requirement. According to RFC 7231, a two-digit year that appears to be more than 50 years in the future should be interpreted as the most recent year in the past with the same last two digits. Therefore, '74' should be interpreted as 1974, not 2074, and '99' should be interpreted as 1999, not 2099. The test fails because it incorrectly expects the opposite behavior, which is not aligned with the RFC specification. Thus, the test does not correctly reproduce the bug as described in the issue ticket."
+  },
+  {
+    "phase": "generation_feedback",
+    "generation_attempt": 1,
+    "feedback": "Previous test was rejected \u2014 trying a different approach."
+  },
+  {
+    "generation_attempt": 1
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_cg5usykc"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 12931,
+      "num_statements": 39338,
+      "percent_covered": 28.76562863326596,
+      "percent_covered_display": "29",
+      "missing_lines": 26407,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 506,
+      "covered_branches": 3151,
+      "missing_branches": 13418
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2099)  # Correct behavior should interpret '99' as 2099\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_jwmod8f5"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_parse_http_date_two_digit_year_bug (test_jwmod8f5.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_jwmod8f5.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_jwmod8f5.py\", line 14, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 12928,
+      "num_statements": 39338,
+      "percent_covered": 28.760262578925715,
+      "percent_covered_display": "29",
+      "missing_lines": 26410,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 506,
+      "covered_branches": 3151,
+      "missing_branches": 13418
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2099)  # Correct behavior should interpret '99' as 2099\n"
+  },
+  {
+    "no_validation_ablation_test": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2099)  # Correct behavior should interpret '99' as 2099\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974, not 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074\n\n        # Test case: Year '99' should be interpreted as 1999, not 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2099)  # Correct behavior should interpret '99' as 2099\n",
+    "error": "test_parse_http_date_two_digit_year_bug (test_jwmod8f5.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_jwmod8f5.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_jwmod8f5.py\", line 14, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # Correct behavior should interpret '74' as 2074\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "revealing": false,
+    "reason": "The test is designed to check the behavior of the `parse_http_date` function when dealing with two-digit years, specifically to see if it correctly interprets years according to the rules outlined in RFC 7231. The issue ticket describes a problem where the function is hardcoded to interpret years 0-69 as 2000-2069 and 70-99 as 1970-1999, which is incorrect according to the RFC. The test code, however, asserts that the year '74' should be interpreted as 2074 and '99' as 2099, which contradicts the RFC's guidance that years more than 50 years in the future should be interpreted as the most recent past year with the same last two digits. Therefore, the test is incorrect because it does not align with the RFC's requirements. The failure of the test is due to this incorrect assertion, not because it reveals the bug described in the issue ticket."
+  },
+  {
+    "phase": "generation_feedback",
+    "generation_attempt": 2,
+    "feedback": "Previous test was rejected \u2014 trying a different approach."
+  },
+  {
+    "generation_attempt": 2
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974, but due to the bug, it is interpreted as 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 2074)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, but due to the bug, it is interpreted as 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 2099)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_bx9feh3f"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_parse_http_date_two_digit_year_bug (test_bx9feh3f.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_bx9feh3f.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_bx9feh3f.py\", line 14, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # BUG: this behavior is incorrect but currently happens due to the bug\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 12928,
+      "num_statements": 39338,
+      "percent_covered": 28.760262578925715,
+      "percent_covered_display": "29",
+      "missing_lines": 26410,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 506,
+      "covered_branches": 3151,
+      "missing_branches": 13418
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974, but due to the bug, it is interpreted as 2074\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 2074)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999, but due to the bug, it is interpreted as 2099\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 2099)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "response": {
+      "content": "```python\nfrom django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974 according to the current buggy logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999 according to the current buggy logic\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974 according to the current buggy logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999 according to the current buggy logic\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_ohlh85xj"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 12931,
+      "num_statements": 39338,
+      "percent_covered": 28.76562863326596,
+      "percent_covered_display": "29",
+      "missing_lines": 26407,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 506,
+      "covered_branches": 3151,
+      "missing_branches": 13418
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974 according to the current buggy logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999 according to the current buggy logic\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974 according to the current buggy logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '99' should be interpreted as 1999 according to the current buggy logic\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1999)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 2074 according to the correct logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior according to RFC 7231\n\n        # Test case: Year '99' should be interpreted as 1999 according to the correct logic\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 1999)  # Correct behavior according to RFC 7231\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_vmkg4714"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_parse_http_date_two_digit_year_bug (test_vmkg4714.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_vmkg4714.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_vmkg4714.py\", line 14, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # Correct behavior according to RFC 7231\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 12928,
+      "num_statements": 39338,
+      "percent_covered": 28.760262578925715,
+      "percent_covered_display": "29",
+      "missing_lines": 26410,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 506,
+      "covered_branches": 3151,
+      "missing_branches": 13418
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 2074 according to the correct logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior according to RFC 7231\n\n        # Test case: Year '99' should be interpreted as 1999 according to the correct logic\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 1999)  # Correct behavior according to RFC 7231\n"
+  },
+  {
+    "no_validation_ablation_test": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 2074 according to the correct logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior according to RFC 7231\n\n        # Test case: Year '99' should be interpreted as 1999 according to the correct logic\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 1999)  # Correct behavior according to RFC 7231\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 2074 according to the correct logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior according to RFC 7231\n\n        # Test case: Year '99' should be interpreted as 1999 according to the correct logic\n        date_string = \"Sunday, 06-Nov-99 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 1999)  # Correct behavior according to RFC 7231\n",
+    "error": "test_parse_http_date_two_digit_year_bug (test_vmkg4714.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_vmkg4714.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_vmkg4714.py\", line 14, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # Correct behavior according to RFC 7231\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "revealing": false,
+    "reason": "The test is designed to verify the behavior of the `parse_http_date` function when handling two-digit years in date strings, as per the RFC 7231 specification. According to the issue ticket, the current implementation of `parse_http_date` interprets two-digit years from 0-69 as 2000-2069 and 70-99 as 1970-1999, which is incorrect. The correct behavior, as per RFC 7231, is to interpret a two-digit year that appears to be more than 50 years in the future as representing the most recent year in the past with the same last two digits. The test case checks if the year '74' is interpreted as 2074, which is incorrect according to RFC 7231. Instead, it should be interpreted as 1974, which is what the current implementation does. Therefore, the test case is incorrect in its expectation for the year '74'. The test case for the year '99' is correct, as it expects 1999, which aligns with the current implementation and RFC 7231. The test failure is due to the incorrect expectation for the year '74', not because of a bug in the `parse_http_date` function."
+  },
+  {
+    "phase": "generation_feedback",
+    "generation_attempt": 3,
+    "feedback": "Previous test was rejected \u2014 trying a different approach."
+  },
+  {
+    "generation_attempt": 3
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974 according to the current buggy logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '50' should be interpreted as 2050 according to the current buggy logic\n        date_string = \"Sunday, 06-Nov-50 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 2050)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_ks4uijp9"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 12932,
+      "num_statements": 39338,
+      "percent_covered": 28.76920600282612,
+      "percent_covered_display": "29",
+      "missing_lines": 26406,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 505,
+      "covered_branches": 3152,
+      "missing_branches": 13417
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974 according to the current buggy logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '50' should be interpreted as 2050 according to the current buggy logic\n        date_string = \"Sunday, 06-Nov-50 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 2050)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 1974 according to the current buggy logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 1974)  # BUG: this behavior is incorrect but currently happens due to the bug\n\n        # Test case: Year '50' should be interpreted as 2050 according to the current buggy logic\n        date_string = \"Sunday, 06-Nov-50 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the incorrect behavior\n        self.assertEqual(parsed_year, 2050)  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 2074 according to the correct logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior: should be interpreted as 2074\n\n        # Test case: Year '50' should be interpreted as 1950 according to the correct logic\n        date_string = \"Sunday, 06-Nov-50 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 1950)  # Correct behavior: should be interpreted as 1950\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_z6fajhfl"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "e9cf60c6a39e",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_parse_http_date_two_digit_year_bug (test_z6fajhfl.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_z6fajhfl.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_z6fajhfl.py\", line 14, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # Correct behavior: should be interpreted as 2074\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 12928,
+      "num_statements": 39338,
+      "percent_covered": 28.760262578925715,
+      "percent_covered_display": "29",
+      "missing_lines": 26410,
+      "excluded_lines": 0,
+      "num_branches": 16569,
+      "num_partial_branches": 506,
+      "covered_branches": 3151,
+      "missing_branches": 13418
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 2074 according to the correct logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior: should be interpreted as 2074\n\n        # Test case: Year '50' should be interpreted as 1950 according to the correct logic\n        date_string = \"Sunday, 06-Nov-50 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 1950)  # Correct behavior: should be interpreted as 1950\n"
+  },
+  {
+    "no_validation_ablation_test": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 2074 according to the correct logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior: should be interpreted as 2074\n\n        # Test case: Year '50' should be interpreted as 1950 according to the correct logic\n        date_string = \"Sunday, 06-Nov-50 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 1950)  # Correct behavior: should be interpreted as 1950\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 2074 according to the correct logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior: should be interpreted as 2074\n\n        # Test case: Year '50' should be interpreted as 1950 according to the correct logic\n        date_string = \"Sunday, 06-Nov-50 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 1950)  # Correct behavior: should be interpreted as 1950\n",
+    "error": "test_parse_http_date_two_digit_year_bug (test_z6fajhfl.ParseHttpDateTests) ... FAIL\n\n======================================================================\nFAIL: test_parse_http_date_two_digit_year_bug (test_z6fajhfl.ParseHttpDateTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_z6fajhfl.py\", line 14, in test_parse_http_date_two_digit_year_bug\n    self.assertEqual(parsed_year, 2074)  # Correct behavior: should be interpreted as 2074\nAssertionError: 1974 != 2074\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "revealing": true,
+    "reason": "The test is designed to verify the behavior of the `parse_http_date` function when handling two-digit years in the RFC850 date format. According to the issue ticket, the current implementation incorrectly interprets years '70-99' as 1970-1999, instead of using the logic from RFC 7231, which states that years should be interpreted as the most recent past year with the same last two digits if they appear to be more than 50 years in the future. The test case checks if the year '74' is interpreted as 2074, which is incorrect according to the current implementation but correct according to the RFC 7231 logic. The test fails because the current implementation returns 1974, confirming the bug. The test is valid as it correctly reproduces the issue described in the ticket."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "from django.test import SimpleTestCase\nfrom django.utils.http import parse_http_date\nimport datetime\n\nclass ParseHttpDateTests(SimpleTestCase):\n    def test_parse_http_date_two_digit_year_bug(self):\n        # Test case: Year '74' should be interpreted as 2074 according to the correct logic\n        # Using RFC850_DATE format: 'Sunday, 06-Nov-74 08:49:37 GMT'\n        date_string = \"Sunday, 06-Nov-74 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 2074)  # Correct behavior: should be interpreted as 2074\n\n        # Test case: Year '50' should be interpreted as 1950 according to the correct logic\n        date_string = \"Sunday, 06-Nov-50 08:49:37 GMT\"\n        parsed_timestamp = parse_http_date(date_string)\n        parsed_year = datetime.datetime.utcfromtimestamp(parsed_timestamp).year\n\n        # Assert the correct behavior\n        self.assertEqual(parsed_year, 1950)  # Correct behavior: should be interpreted as 1950\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.23246
+  }
+]

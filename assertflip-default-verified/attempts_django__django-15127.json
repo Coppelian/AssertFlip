@@ -1,0 +1,148 @@
+[
+  {
+    "instance_id": "django__django-15127",
+    "problem_statement": [
+      "LEVEL_TAGS not updated when using @override_settings\nDescription\n\t\nWhen reading messages inside tests, new message tags created using @override_settings is not updated.\nThat causes the django.contrib.messages.storage.base.Message.level_tag property results to be an empty string and not know the new tags.\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase, override_settings\nfrom django.contrib.messages.storage.base import Message\n\nclass MessageLevelTagOverrideTests(SimpleTestCase):\n    @override_settings(MESSAGE_TAGS={50: 'custom_tag'})\n    def test_level_tag_with_override_settings(self):\n        \"\"\"\n        Test that the level_tag property does not update with @override_settings.\n        \"\"\"\n        # Create a Message instance with a level that should map to the overridden tag\n        message = Message(level=50, message=\"Test message\")\n\n        # Assert that the level_tag is an empty string, indicating the bug\n        self.assertEqual(message.level_tag, '')  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_5edfo99d"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "f10f58924043",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 14837,
+      "num_statements": 43641,
+      "percent_covered": 27.363415516617565,
+      "percent_covered_display": "27",
+      "missing_lines": 28804,
+      "excluded_lines": 0,
+      "num_branches": 14400,
+      "num_partial_branches": 563,
+      "covered_branches": 1045,
+      "missing_branches": 13355
+    },
+    "test_code": "from django.test import SimpleTestCase, override_settings\nfrom django.contrib.messages.storage.base import Message\n\nclass MessageLevelTagOverrideTests(SimpleTestCase):\n    @override_settings(MESSAGE_TAGS={50: 'custom_tag'})\n    def test_level_tag_with_override_settings(self):\n        \"\"\"\n        Test that the level_tag property does not update with @override_settings.\n        \"\"\"\n        # Create a Message instance with a level that should map to the overridden tag\n        message = Message(level=50, message=\"Test message\")\n\n        # Assert that the level_tag is an empty string, indicating the bug\n        self.assertEqual(message.level_tag, '')  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django.test import SimpleTestCase, override_settings\nfrom django.contrib.messages.storage.base import Message\n\nclass MessageLevelTagOverrideTests(SimpleTestCase):\n    @override_settings(MESSAGE_TAGS={50: 'custom_tag'})\n    def test_level_tag_with_override_settings(self):\n        \"\"\"\n        Test that the level_tag property does not update with @override_settings.\n        \"\"\"\n        # Create a Message instance with a level that should map to the overridden tag\n        message = Message(level=50, message=\"Test message\")\n\n        # Assert that the level_tag is an empty string, indicating the bug\n        self.assertEqual(message.level_tag, '')  # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase, override_settings\nfrom django.contrib.messages.storage.base import Message\n\nclass MessageLevelTagOverrideTests(SimpleTestCase):\n    @override_settings(MESSAGE_TAGS={50: 'custom_tag'})\n    def test_level_tag_with_override_settings(self):\n        \"\"\"\n        Test that the level_tag property updates with @override_settings.\n        \"\"\"\n        # Create a Message instance with a level that should map to the overridden tag\n        message = Message(level=50, message=\"Test message\")\n\n        # Assert that the level_tag is 'custom_tag', indicating the bug is fixed\n        self.assertEqual(message.level_tag, 'custom_tag')\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_0lfjmx1u"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "f10f58924043",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_level_tag_with_override_settings (test_0lfjmx1u.MessageLevelTagOverrideTests)\nTest that the level_tag property updates with @override_settings. ... FAIL\n\n======================================================================\nFAIL: test_level_tag_with_override_settings (test_0lfjmx1u.MessageLevelTagOverrideTests)\nTest that the level_tag property updates with @override_settings.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/django/test/utils.py\", line 437, in inner\n    return func(*args, **kwargs)\n  File \"/testbed/tests/test_0lfjmx1u.py\", line 14, in test_level_tag_with_override_settings\n    self.assertEqual(message.level_tag, 'custom_tag')\nAssertionError: '' != 'custom_tag'\n+ custom_tag\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 14838,
+      "num_statements": 43641,
+      "percent_covered": 27.365138436622388,
+      "percent_covered_display": "27",
+      "missing_lines": 28803,
+      "excluded_lines": 0,
+      "num_branches": 14400,
+      "num_partial_branches": 563,
+      "covered_branches": 1045,
+      "missing_branches": 13355
+    },
+    "test_code": "from django.test import SimpleTestCase, override_settings\nfrom django.contrib.messages.storage.base import Message\n\nclass MessageLevelTagOverrideTests(SimpleTestCase):\n    @override_settings(MESSAGE_TAGS={50: 'custom_tag'})\n    def test_level_tag_with_override_settings(self):\n        \"\"\"\n        Test that the level_tag property updates with @override_settings.\n        \"\"\"\n        # Create a Message instance with a level that should map to the overridden tag\n        message = Message(level=50, message=\"Test message\")\n\n        # Assert that the level_tag is 'custom_tag', indicating the bug is fixed\n        self.assertEqual(message.level_tag, 'custom_tag')\n"
+  },
+  {
+    "no_validation_ablation_test": "from django.test import SimpleTestCase, override_settings\nfrom django.contrib.messages.storage.base import Message\n\nclass MessageLevelTagOverrideTests(SimpleTestCase):\n    @override_settings(MESSAGE_TAGS={50: 'custom_tag'})\n    def test_level_tag_with_override_settings(self):\n        \"\"\"\n        Test that the level_tag property updates with @override_settings.\n        \"\"\"\n        # Create a Message instance with a level that should map to the overridden tag\n        message = Message(level=50, message=\"Test message\")\n\n        # Assert that the level_tag is 'custom_tag', indicating the bug is fixed\n        self.assertEqual(message.level_tag, 'custom_tag')\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django.test import SimpleTestCase, override_settings\nfrom django.contrib.messages.storage.base import Message\n\nclass MessageLevelTagOverrideTests(SimpleTestCase):\n    @override_settings(MESSAGE_TAGS={50: 'custom_tag'})\n    def test_level_tag_with_override_settings(self):\n        \"\"\"\n        Test that the level_tag property updates with @override_settings.\n        \"\"\"\n        # Create a Message instance with a level that should map to the overridden tag\n        message = Message(level=50, message=\"Test message\")\n\n        # Assert that the level_tag is 'custom_tag', indicating the bug is fixed\n        self.assertEqual(message.level_tag, 'custom_tag')\n",
+    "error": "test_level_tag_with_override_settings (test_0lfjmx1u.MessageLevelTagOverrideTests)\nTest that the level_tag property updates with @override_settings. ... FAIL\n\n======================================================================\nFAIL: test_level_tag_with_override_settings (test_0lfjmx1u.MessageLevelTagOverrideTests)\nTest that the level_tag property updates with @override_settings.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/django/test/utils.py\", line 437, in inner\n    return func(*args, **kwargs)\n  File \"/testbed/tests/test_0lfjmx1u.py\", line 14, in test_level_tag_with_override_settings\n    self.assertEqual(message.level_tag, 'custom_tag')\nAssertionError: '' != 'custom_tag'\n+ custom_tag\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "revealing": true,
+    "reason": "The test is designed to verify that the `level_tag` property of a `Message` object correctly reflects the overridden settings provided by the `@override_settings` decorator. The test sets a custom message tag for a message level of 50 and expects the `level_tag` property to return 'custom_tag'. However, the test fails because the `level_tag` property returns an empty string instead of 'custom_tag'. This failure directly corresponds to the issue described in the ticket, where new message tags created using `@override_settings` are not updated, resulting in the `level_tag` property being incorrect. Therefore, the test correctly reproduces the reported bug and is a valid test case."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "from django.test import SimpleTestCase, override_settings\nfrom django.contrib.messages.storage.base import Message\n\nclass MessageLevelTagOverrideTests(SimpleTestCase):\n    @override_settings(MESSAGE_TAGS={50: 'custom_tag'})\n    def test_level_tag_with_override_settings(self):\n        \"\"\"\n        Test that the level_tag property updates with @override_settings.\n        \"\"\"\n        # Create a Message instance with a level that should map to the overridden tag\n        message = Message(level=50, message=\"Test message\")\n\n        # Assert that the level_tag is 'custom_tag', indicating the bug is fixed\n        self.assertEqual(message.level_tag, 'custom_tag')\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.031315
+  }
+]

@@ -1,0 +1,207 @@
+[
+  {
+    "instance_id": "scikit-learn__scikit-learn-13496",
+    "problem_statement": [
+      "Expose warm_start in Isolation forest\nIt seems to me that `sklearn.ensemble.IsolationForest` supports incremental addition of new trees with the `warm_start` parameter of its parent class, `sklearn.ensemble.BaseBagging`.\r\n\r\nEven though this parameter is not exposed in `__init__()` , it gets inherited from `BaseBagging` and one can use it by changing it to `True` after initialization. To make it work, you have to also increment `n_estimators` on every iteration. \r\n\r\nIt took me a while to notice that it actually works, and I had to inspect the source code of both `IsolationForest` and `BaseBagging`. Also, it looks to me that the behavior is in-line with `sklearn.ensemble.BaseForest` that is behind e.g. `sklearn.ensemble.RandomForestClassifier`.\r\n\r\nTo make it more easier to use, I'd suggest to:\r\n* expose `warm_start` in `IsolationForest.__init__()`, default `False`;\r\n* document it in the same way as it is documented for `RandomForestClassifier`, i.e. say:\r\n```py\r\n    warm_start : bool, optional (default=False)\r\n        When set to ``True``, reuse the solution of the previous call to fit\r\n        and add more estimators to the ensemble, otherwise, just fit a whole\r\n        new forest. See :term:`the Glossary <warm_start>`.\r\n```\r\n* add a test to make sure it works properly;\r\n* possibly also mention in the \"IsolationForest example\" documentation entry;\r\n\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_incremented\n    assert n_estimators_after_second_fit == n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_incremented\"\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_7axlyuti.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 3370,
+      "num_statements": 69515,
+      "percent_covered": 4.683208362789296,
+      "percent_covered_display": "5",
+      "missing_lines": 66145,
+      "excluded_lines": 5,
+      "num_branches": 16772,
+      "num_partial_branches": 138,
+      "covered_branches": 671,
+      "missing_branches": 16101
+    },
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_incremented\n    assert n_estimators_after_second_fit == n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_incremented\"\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_incremented\n    assert n_estimators_after_second_fit == n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_incremented\"\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_initial + n_estimators_incremented\n    assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_initial + n_estimators_incremented\"\n\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_wyqxoqm8.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_isolation_forest_warm_start():\n        # Create a synthetic dataset\n        X = np.random.rand(100, 2)\n    \n        # Initial number of estimators\n        n_estimators_initial = 10\n        n_estimators_incremented = 20\n    \n        # Initialize IsolationForest without warm_start in __init__\n        model = IsolationForest(n_estimators=n_estimators_initial)\n    \n        # Manually set warm_start to True\n        model.warm_start = True\n    \n        # Fit the model with the initial number of estimators\n        model.fit(X)\n    \n        # Store the number of estimators after the first fit\n        n_estimators_after_first_fit = len(model.estimators_)\n    \n        # Increment n_estimators\n        model.n_estimators = n_estimators_incremented\n    \n        # Fit the model again with the same data\n        model.fit(X)\n    \n        # Store the number of estimators after the second fit\n        n_estimators_after_second_fit = len(model.estimators_)\n    \n        # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n        assert n_estimators_after_first_fit == n_estimators_initial, \\\n            \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n    \n        # Assert that the number of estimators after the second fit is equal to n_estimators_initial + n_estimators_incremented\n>       assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n            \"BUG: The number of estimators after the second fit should be equal to n_estimators_initial + n_estimators_incremented\"\nE       AssertionError: BUG: The number of estimators after the second fit should be equal to n_estimators_initial + n_estimators_incremented\nE       assert 20 == (10 + 20)\n\nsklearn/tests/test_wyqxoqm8.py:39: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 3370,
+      "num_statements": 69515,
+      "percent_covered": 4.683208362789296,
+      "percent_covered_display": "5",
+      "missing_lines": 66145,
+      "excluded_lines": 5,
+      "num_branches": 16772,
+      "num_partial_branches": 138,
+      "covered_branches": 671,
+      "missing_branches": 16101
+    },
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_initial + n_estimators_incremented\n    assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_initial + n_estimators_incremented\"\n\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_initial + n_estimators_incremented\n    assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_initial + n_estimators_incremented\"\n\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_initial + n_estimators_incremented\n    assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_initial + n_estimators_incremented\"\n\n",
+    "error": "    def test_isolation_forest_warm_start():\n        # Create a synthetic dataset\n        X = np.random.rand(100, 2)\n    \n        # Initial number of estimators\n        n_estimators_initial = 10\n        n_estimators_incremented = 20\n    \n        # Initialize IsolationForest without warm_start in __init__\n        model = IsolationForest(n_estimators=n_estimators_initial)\n    \n        # Manually set warm_start to True\n        model.warm_start = True\n    \n        # Fit the model with the initial number of estimators\n        model.fit(X)\n    \n        # Store the number of estimators after the first fit\n        n_estimators_after_first_fit = len(model.estimators_)\n    \n        # Increment n_estimators\n        model.n_estimators = n_estimators_incremented\n    \n        # Fit the model again with the same data\n        model.fit(X)\n    \n        # Store the number of estimators after the second fit\n        n_estimators_after_second_fit = len(model.estimators_)\n    \n        # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n        assert n_estimators_after_first_fit == n_estimators_initial, \\\n            \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n    \n        # Assert that the number of estimators after the second fit is equal to n_estimators_initial + n_estimators_incremented\n>       assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n            \"BUG: The number of estimators after the second fit should be equal to n_estimators_initial + n_estimators_incremented\"\nE       AssertionError: BUG: The number of estimators after the second fit should be equal to n_estimators_initial + n_estimators_incremented\nE       assert 20 == (10 + 20)\n\nsklearn/tests/test_wyqxoqm8.py:39: AssertionError\n",
+    "revealing": false,
+    "reason": "The test is attempting to verify the behavior of the `warm_start` parameter in the `IsolationForest` class, which is not directly exposed in the `__init__` method but can be set manually after initialization. The test sets `warm_start` to `True` and expects that after fitting the model twice with an incremented number of estimators, the total number of estimators should be the sum of the initial and incremented values. However, the test fails because the number of estimators after the second fit is not as expected. The failure is due to a misunderstanding of how the `warm_start` parameter works. When `warm_start` is set to `True`, the model should retain the existing estimators and add new ones, but the test incorrectly assumes that the total number of estimators should be the sum of the initial and incremented values, rather than the incremented value alone. This indicates that the test does not correctly reproduce the bug described in the issue ticket, as it misunderstands the expected behavior of the `warm_start` parameter."
+  },
+  {
+    "phase": "generation_feedback",
+    "generation_attempt": 1,
+    "feedback": "Previous test was rejected \u2014 trying a different approach."
+  },
+  {
+    "generation_attempt": 1
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start_behavior():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_incremented\n    # BUG: this behavior is incorrect but currently happens due to the bug\n    assert n_estimators_after_second_fit == n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_incremented\"\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_bkq6aa43.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 3370,
+      "num_statements": 69515,
+      "percent_covered": 4.683208362789296,
+      "percent_covered_display": "5",
+      "missing_lines": 66145,
+      "excluded_lines": 5,
+      "num_branches": 16772,
+      "num_partial_branches": 138,
+      "covered_branches": 671,
+      "missing_branches": 16101
+    },
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start_behavior():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_incremented\n    # BUG: this behavior is incorrect but currently happens due to the bug\n    assert n_estimators_after_second_fit == n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_incremented\"\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start_behavior():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to n_estimators_incremented\n    # BUG: this behavior is incorrect but currently happens due to the bug\n    assert n_estimators_after_second_fit == n_estimators_incremented, \\\n        \"BUG: The number of estimators after the second fit should be equal to n_estimators_incremented\"\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start_behavior():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to the sum of initial and incremented\n    assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n        \"The number of estimators after the second fit should be equal to the sum of n_estimators_initial and n_estimators_incremented\"\n\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_4wcuyjcb.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_isolation_forest_warm_start_behavior():\n        # Create a synthetic dataset\n        X = np.random.rand(100, 2)\n    \n        # Initial number of estimators\n        n_estimators_initial = 10\n        n_estimators_incremented = 20\n    \n        # Initialize IsolationForest without warm_start in __init__\n        model = IsolationForest(n_estimators=n_estimators_initial)\n    \n        # Manually set warm_start to True\n        model.warm_start = True\n    \n        # Fit the model with the initial number of estimators\n        model.fit(X)\n    \n        # Store the number of estimators after the first fit\n        n_estimators_after_first_fit = len(model.estimators_)\n    \n        # Increment n_estimators\n        model.n_estimators = n_estimators_incremented\n    \n        # Fit the model again with the same data\n        model.fit(X)\n    \n        # Store the number of estimators after the second fit\n        n_estimators_after_second_fit = len(model.estimators_)\n    \n        # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n        assert n_estimators_after_first_fit == n_estimators_initial, \\\n            \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n    \n        # Assert that the number of estimators after the second fit is equal to the sum of initial and incremented\n>       assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n            \"The number of estimators after the second fit should be equal to the sum of n_estimators_initial and n_estimators_incremented\"\nE       AssertionError: The number of estimators after the second fit should be equal to the sum of n_estimators_initial and n_estimators_incremented\nE       assert 20 == (10 + 20)\n\nsklearn/tests/test_4wcuyjcb.py:39: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 3370,
+      "num_statements": 69515,
+      "percent_covered": 4.683208362789296,
+      "percent_covered_display": "5",
+      "missing_lines": 66145,
+      "excluded_lines": 5,
+      "num_branches": 16772,
+      "num_partial_branches": 138,
+      "covered_branches": 671,
+      "missing_branches": 16101
+    },
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start_behavior():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to the sum of initial and incremented\n    assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n        \"The number of estimators after the second fit should be equal to the sum of n_estimators_initial and n_estimators_incremented\"\n\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start_behavior():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to the sum of initial and incremented\n    assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n        \"The number of estimators after the second fit should be equal to the sum of n_estimators_initial and n_estimators_incremented\"\n\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start_behavior():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to the sum of initial and incremented\n    assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n        \"The number of estimators after the second fit should be equal to the sum of n_estimators_initial and n_estimators_incremented\"\n\n",
+    "error": "    def test_isolation_forest_warm_start_behavior():\n        # Create a synthetic dataset\n        X = np.random.rand(100, 2)\n    \n        # Initial number of estimators\n        n_estimators_initial = 10\n        n_estimators_incremented = 20\n    \n        # Initialize IsolationForest without warm_start in __init__\n        model = IsolationForest(n_estimators=n_estimators_initial)\n    \n        # Manually set warm_start to True\n        model.warm_start = True\n    \n        # Fit the model with the initial number of estimators\n        model.fit(X)\n    \n        # Store the number of estimators after the first fit\n        n_estimators_after_first_fit = len(model.estimators_)\n    \n        # Increment n_estimators\n        model.n_estimators = n_estimators_incremented\n    \n        # Fit the model again with the same data\n        model.fit(X)\n    \n        # Store the number of estimators after the second fit\n        n_estimators_after_second_fit = len(model.estimators_)\n    \n        # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n        assert n_estimators_after_first_fit == n_estimators_initial, \\\n            \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n    \n        # Assert that the number of estimators after the second fit is equal to the sum of initial and incremented\n>       assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n            \"The number of estimators after the second fit should be equal to the sum of n_estimators_initial and n_estimators_incremented\"\nE       AssertionError: The number of estimators after the second fit should be equal to the sum of n_estimators_initial and n_estimators_incremented\nE       assert 20 == (10 + 20)\n\nsklearn/tests/test_4wcuyjcb.py:39: AssertionError\n",
+    "revealing": true,
+    "reason": "The test is attempting to verify the behavior of the `warm_start` parameter in the `IsolationForest` class. The issue ticket suggests that `warm_start` should allow the model to incrementally add new trees to the ensemble when `n_estimators` is increased. The test sets `warm_start` to `True` and expects that after fitting the model twice, the total number of estimators should be the sum of the initial and incremented `n_estimators`. However, the test fails because the number of estimators after the second fit is not as expected. The failure indicates that the `warm_start` behavior is not functioning as intended, as the number of estimators after the second fit is only equal to the incremented value, not the sum of the initial and incremented values. This suggests that the test correctly reproduces the bug described in the issue ticket, as the `warm_start` functionality is not working as expected."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nfrom sklearn.ensemble import IsolationForest\nimport numpy as np\n\ndef test_isolation_forest_warm_start_behavior():\n    # Create a synthetic dataset\n    X = np.random.rand(100, 2)\n\n    # Initial number of estimators\n    n_estimators_initial = 10\n    n_estimators_incremented = 20\n\n    # Initialize IsolationForest without warm_start in __init__\n    model = IsolationForest(n_estimators=n_estimators_initial)\n\n    # Manually set warm_start to True\n    model.warm_start = True\n\n    # Fit the model with the initial number of estimators\n    model.fit(X)\n\n    # Store the number of estimators after the first fit\n    n_estimators_after_first_fit = len(model.estimators_)\n\n    # Increment n_estimators\n    model.n_estimators = n_estimators_incremented\n\n    # Fit the model again with the same data\n    model.fit(X)\n\n    # Store the number of estimators after the second fit\n    n_estimators_after_second_fit = len(model.estimators_)\n\n    # Assert that the number of estimators after the first fit is equal to n_estimators_initial\n    assert n_estimators_after_first_fit == n_estimators_initial, \\\n        \"BUG: The number of estimators after the first fit should be equal to n_estimators_initial\"\n\n    # Assert that the number of estimators after the second fit is equal to the sum of initial and incremented\n    assert n_estimators_after_second_fit == n_estimators_initial + n_estimators_incremented, \\\n        \"The number of estimators after the second fit should be equal to the sum of n_estimators_initial and n_estimators_incremented\"\n\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.2077275
+  }
+]

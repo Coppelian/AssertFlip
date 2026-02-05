@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "scikit-learn__scikit-learn-15100",
+    "problem_statement": [
+      "strip_accents_unicode fails to strip accents from strings that are already in NFKD form\n<!--\r\nIf your issue is a usage question, submit it here instead:\r\n- StackOverflow with the scikit-learn tag: https://stackoverflow.com/questions/tagged/scikit-learn\r\n- Mailing List: https://mail.python.org/mailman/listinfo/scikit-learn\r\nFor more information, see User Questions: http://scikit-learn.org/stable/support.html#user-questions\r\n-->\r\n\r\n<!-- Instructions For Filing a Bug: https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md#filing-bugs -->\r\n\r\n#### Description\r\n<!-- Example: Joblib Error thrown when calling fit on LatentDirichletAllocation with evaluate_every > 0-->\r\n\r\nThe `strip_accents=\"unicode\"` feature of `CountVectorizer` and related does not work as expected when it processes strings that contain accents, if those strings are already in NFKD form.\r\n\r\n#### Steps/Code to Reproduce\r\n\r\n```python\r\nfrom sklearn.feature_extraction.text import strip_accents_unicode\r\n\r\n# This string contains one code point, \"LATIN SMALL LETTER N WITH TILDE\"\r\ns1 = chr(241)\r\n\r\n# This string contains two code points, \"LATIN SMALL LETTER N\" followed by \"COMBINING TILDE\"\r\ns2 = chr(110) + chr(771)\r\n\r\n# They are visually identical, as expected\r\nprint(s1) # => \u00f1\r\nprint(s2) # => n\u0303\r\n\r\n# The tilde is removed from s1, as expected\r\nprint(strip_accents_unicode(s1)) # => n\r\n\r\n# But strip_accents_unicode returns s2 unchanged\r\nprint(strip_accents_unicode(s2) == s2) # => True\r\n```\r\n\r\n#### Expected Results\r\n\r\n`s1` and `s2` should both be normalized to the same string, `\"n\"`.\r\n\r\n#### Actual Results\r\n`s2` is not changed, because `strip_accent_unicode` does nothing if the string is already in NFKD form.\r\n\r\n#### Versions\r\n```\r\nSystem:\r\n    python: 3.7.4 (default, Jul  9 2019, 15:11:16)  [GCC 7.4.0]\r\nexecutable: /home/dgrady/.local/share/virtualenvs/profiling-data-exploration--DO1bU6C/bin/python3.7\r\n   machine: Linux-4.4.0-17763-Microsoft-x86_64-with-Ubuntu-18.04-bionic\r\n\r\nPython deps:\r\n       pip: 19.2.2\r\nsetuptools: 41.2.0\r\n   sklearn: 0.21.3\r\n     numpy: 1.17.2\r\n     scipy: 1.3.1\r\n    Cython: None\r\n    pandas: 0.25.1\r\n```\r\n\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nfrom sklearn.feature_extraction.text import strip_accents_unicode\n\ndef test_strip_accents_unicode_bug():\n    # Test strings\n    s1 = chr(241)  # \"\u00f1\" as a single code point\n    s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n\n    # Expected behavior: both should be stripped to \"n\"\n    assert strip_accents_unicode(s1) == \"n\"\n    \n    # BUG: this behavior is incorrect but currently happens due to the bug\n    # s2 should be stripped to \"n\", but it is returned unchanged\n    assert strip_accents_unicode(s2) == s2\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_gpc9i5pf.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 762,
+      "num_statements": 76067,
+      "percent_covered": 0.9424418295085458,
+      "percent_covered_display": "1",
+      "missing_lines": 75305,
+      "excluded_lines": 5,
+      "num_branches": 17838,
+      "num_partial_branches": 11,
+      "covered_branches": 123,
+      "missing_branches": 17715
+    },
+    "test_code": "import pytest\nfrom sklearn.feature_extraction.text import strip_accents_unicode\n\ndef test_strip_accents_unicode_bug():\n    # Test strings\n    s1 = chr(241)  # \"\u00f1\" as a single code point\n    s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n\n    # Expected behavior: both should be stripped to \"n\"\n    assert strip_accents_unicode(s1) == \"n\"\n    \n    # BUG: this behavior is incorrect but currently happens due to the bug\n    # s2 should be stripped to \"n\", but it is returned unchanged\n    assert strip_accents_unicode(s2) == s2\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nfrom sklearn.feature_extraction.text import strip_accents_unicode\n\ndef test_strip_accents_unicode_bug():\n    # Test strings\n    s1 = chr(241)  # \"\u00f1\" as a single code point\n    s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n\n    # Expected behavior: both should be stripped to \"n\"\n    assert strip_accents_unicode(s1) == \"n\"\n    \n    # BUG: this behavior is incorrect but currently happens due to the bug\n    # s2 should be stripped to \"n\", but it is returned unchanged\n    assert strip_accents_unicode(s2) == s2\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nfrom sklearn.feature_extraction.text import strip_accents_unicode\n\ndef test_strip_accents_unicode_bug():\n    # Test strings\n    s1 = chr(241)  # \"\u00f1\" as a single code point\n    s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n\n    # Expected behavior: both should be stripped to \"n\"\n    assert strip_accents_unicode(s1) == \"n\"\n    \n    # Correct the assertion to expose the bug\n    assert strip_accents_unicode(s2) == \"n\"\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/sklearn/tests/test_eg664se4.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_strip_accents_unicode_bug():\n        # Test strings\n        s1 = chr(241)  # \"\u00f1\" as a single code point\n        s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n    \n        # Expected behavior: both should be stripped to \"n\"\n        assert strip_accents_unicode(s1) == \"n\"\n    \n        # Correct the assertion to expose the bug\n>       assert strip_accents_unicode(s2) == \"n\"\nE       AssertionError: assert 'n\u0303' == 'n'\nE         - n\nE         + n\u0303\n\nsklearn/tests/test_eg664se4.py:13: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 762,
+      "num_statements": 76067,
+      "percent_covered": 0.9424418295085458,
+      "percent_covered_display": "1",
+      "missing_lines": 75305,
+      "excluded_lines": 5,
+      "num_branches": 17838,
+      "num_partial_branches": 11,
+      "covered_branches": 123,
+      "missing_branches": 17715
+    },
+    "test_code": "import pytest\nfrom sklearn.feature_extraction.text import strip_accents_unicode\n\ndef test_strip_accents_unicode_bug():\n    # Test strings\n    s1 = chr(241)  # \"\u00f1\" as a single code point\n    s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n\n    # Expected behavior: both should be stripped to \"n\"\n    assert strip_accents_unicode(s1) == \"n\"\n    \n    # Correct the assertion to expose the bug\n    assert strip_accents_unicode(s2) == \"n\"\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nfrom sklearn.feature_extraction.text import strip_accents_unicode\n\ndef test_strip_accents_unicode_bug():\n    # Test strings\n    s1 = chr(241)  # \"\u00f1\" as a single code point\n    s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n\n    # Expected behavior: both should be stripped to \"n\"\n    assert strip_accents_unicode(s1) == \"n\"\n    \n    # Correct the assertion to expose the bug\n    assert strip_accents_unicode(s2) == \"n\"\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nfrom sklearn.feature_extraction.text import strip_accents_unicode\n\ndef test_strip_accents_unicode_bug():\n    # Test strings\n    s1 = chr(241)  # \"\u00f1\" as a single code point\n    s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n\n    # Expected behavior: both should be stripped to \"n\"\n    assert strip_accents_unicode(s1) == \"n\"\n    \n    # Correct the assertion to expose the bug\n    assert strip_accents_unicode(s2) == \"n\"\n",
+    "error": "    def test_strip_accents_unicode_bug():\n        # Test strings\n        s1 = chr(241)  # \"\u00f1\" as a single code point\n        s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n    \n        # Expected behavior: both should be stripped to \"n\"\n        assert strip_accents_unicode(s1) == \"n\"\n    \n        # Correct the assertion to expose the bug\n>       assert strip_accents_unicode(s2) == \"n\"\nE       AssertionError: assert 'n\u0303' == 'n'\nE         - n\nE         + n\u0303\n\nsklearn/tests/test_eg664se4.py:13: AssertionError\n",
+    "revealing": true,
+    "reason": "The test code is designed to verify the behavior of the `strip_accents_unicode` function when handling strings in different Unicode forms. The issue ticket describes a problem where the function fails to strip accents from strings that are already in NFKD form. The test code provides two strings: `s1`, which is a single code point for '\u00f1', and `s2`, which is a combination of 'n' and a combining tilde. The expected behavior, as per the issue ticket, is that both strings should be normalized to 'n'. The test correctly asserts that `strip_accents_unicode(s1)` should return 'n', which passes. However, the assertion for `s2` fails, as `strip_accents_unicode(s2)` returns 'n\u0303' instead of 'n'. This failure aligns with the reported issue, confirming that the test accurately reproduces the bug. The test is valid as it directly tests the functionality described in the issue ticket and reveals the bug by showing that the function does not handle NFKD strings as expected."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nfrom sklearn.feature_extraction.text import strip_accents_unicode\n\ndef test_strip_accents_unicode_bug():\n    # Test strings\n    s1 = chr(241)  # \"\u00f1\" as a single code point\n    s2 = chr(110) + chr(771)  # \"n\" followed by a combining tilde\n\n    # Expected behavior: both should be stripped to \"n\"\n    assert strip_accents_unicode(s1) == \"n\"\n    \n    # Correct the assertion to expose the bug\n    assert strip_accents_unicode(s2) == \"n\"\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.04193500000000001
+  }
+]

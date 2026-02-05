@@ -1,0 +1,144 @@
+[
+  {
+    "instance_id": "sympy__sympy-15349",
+    "problem_statement": [
+      "Incorrect result with Quaterniont.to_rotation_matrix()\nhttps://github.com/sympy/sympy/blob/ab14b02dba5a7e3e4fb1e807fc8a954f1047a1a1/sympy/algebras/quaternion.py#L489\r\n\r\nThere appears to be an error in the `Quaternion.to_rotation_matrix()` output.  The simplest example I created to illustrate the problem is as follows:\r\n\r\n```\r\n>>import sympy\r\n>>print('Sympy version: ', sympy.__version__)\r\nSympy version: 1.2\r\n\r\n>> from sympy import *\r\n>> x = symbols('x')\r\n>> q = Quaternion(cos(x/2), sin(x/2), 0, 0)\r\n>> trigsimp(q.to_rotation_matrix())\r\nMatrix([\r\n[1,      0,      0],\r\n[0, cos(x), sin(x)],\r\n[0, sin(x), cos(x)]])\r\n```\r\nOne of the `sin(x)` functions should be negative.  What was the reference of the original equations?  \n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from sympy.algebras.quaternion import Quaternion\nfrom sympy import symbols, cos, sin, trigsimp, Matrix\n\ndef test_quaternion_to_rotation_matrix_bug():\n    # Define a symbolic variable\n    x = symbols('x')\n    \n    # Create a quaternion with known parameters\n    q = Quaternion(cos(x/2), sin(x/2), 0, 0)\n    \n    # Generate the rotation matrix using to_rotation_matrix()\n    rotation_matrix = trigsimp(q.to_rotation_matrix())\n    \n    # Expected incorrect matrix due to the bug\n    expected_matrix = Matrix([\n        [1, 0, 0],\n        [0, cos(x), sin(x)],  # BUG: this should be [0, cos(x), -sin(x)]\n        [0, sin(x), cos(x)]   # BUG: this should be [0, sin(x), cos(x)]\n    ])\n    \n    # Assert that the matrix matches the expected incorrect form\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected incorrect form.\"\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "/testbed/bin/test",
+      "-C",
+      "--verbose",
+      "/testbed/sympy/algebras/tests/test_i9w_atqq.py"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "sympy",
+      "HOSTNAME": "f37ee3f2a723",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PYTHONWARNINGS": "ignore::UserWarning,ignore::SyntaxWarning",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use sympy.utilities.pytest\n\nFor example:\n\n```python\nfrom sympy.utilities.pytest import raises, XFAIL\nfrom sympy.core import Symbol, S, Rational, Integer, Dummy, Wild, Pow\n\n@XFAIL\ndef test_symbol_infinitereal_mul():\n    ix = Symbol('ix', infinite=True, extended_real=True)\n    assert (-ix).is_extended_positive is None\n\ndef test_sanitize_assumptions():\n    # issue 6666\n    for cls in (Symbol, Dummy, Wild):\n        x = cls('x', real=1, positive=0)\n        assert x.is_real is True\n        assert x.is_positive is False\n        assert cls('', real=True, positive=None).is_positive is None\n        raises(ValueError, lambda: cls('', commutative=None))\n    raises(ValueError, lambda: Symbol._sanitize(dict(commutative=None)))\n\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/bin"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 19092,
+      "num_statements": 98628,
+      "percent_covered": 14.00279097303469,
+      "percent_covered_display": "14",
+      "missing_lines": 79536,
+      "excluded_lines": 294,
+      "num_branches": 43258,
+      "num_partial_branches": 356,
+      "covered_branches": 776,
+      "missing_branches": 42482
+    },
+    "test_code": "from sympy.algebras.quaternion import Quaternion\nfrom sympy import symbols, cos, sin, trigsimp, Matrix\n\ndef test_quaternion_to_rotation_matrix_bug():\n    # Define a symbolic variable\n    x = symbols('x')\n    \n    # Create a quaternion with known parameters\n    q = Quaternion(cos(x/2), sin(x/2), 0, 0)\n    \n    # Generate the rotation matrix using to_rotation_matrix()\n    rotation_matrix = trigsimp(q.to_rotation_matrix())\n    \n    # Expected incorrect matrix due to the bug\n    expected_matrix = Matrix([\n        [1, 0, 0],\n        [0, cos(x), sin(x)],  # BUG: this should be [0, cos(x), -sin(x)]\n        [0, sin(x), cos(x)]   # BUG: this should be [0, sin(x), cos(x)]\n    ])\n    \n    # Assert that the matrix matches the expected incorrect form\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected incorrect form.\"\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from sympy.algebras.quaternion import Quaternion\nfrom sympy import symbols, cos, sin, trigsimp, Matrix\n\ndef test_quaternion_to_rotation_matrix_bug():\n    # Define a symbolic variable\n    x = symbols('x')\n    \n    # Create a quaternion with known parameters\n    q = Quaternion(cos(x/2), sin(x/2), 0, 0)\n    \n    # Generate the rotation matrix using to_rotation_matrix()\n    rotation_matrix = trigsimp(q.to_rotation_matrix())\n    \n    # Expected incorrect matrix due to the bug\n    expected_matrix = Matrix([\n        [1, 0, 0],\n        [0, cos(x), sin(x)],  # BUG: this should be [0, cos(x), -sin(x)]\n        [0, sin(x), cos(x)]   # BUG: this should be [0, sin(x), cos(x)]\n    ])\n    \n    # Assert that the matrix matches the expected incorrect form\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected incorrect form.\"\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from sympy.algebras.quaternion import Quaternion\nfrom sympy import symbols, cos, sin, trigsimp, Matrix\n\ndef test_quaternion_to_rotation_matrix_bug():\n    # Define a symbolic variable\n    x = symbols('x')\n    \n    # Create a quaternion with known parameters\n    q = Quaternion(cos(x/2), sin(x/2), 0, 0)\n    \n    # Generate the rotation matrix using to_rotation_matrix()\n    rotation_matrix = trigsimp(q.to_rotation_matrix())\n    \n    # Expected correct matrix after the bug is fixed\n    expected_matrix = Matrix([\n        [1, 0, 0],\n        [0, cos(x), -sin(x)],  # Corrected: [0, cos(x), -sin(x)]\n        [0, sin(x), cos(x)]    # Corrected: [0, sin(x), cos(x)]\n    ])\n    \n    # Assert that the matrix matches the expected correct form\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected correct form.\"\n\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "/testbed/bin/test",
+      "-C",
+      "--verbose",
+      "/testbed/sympy/algebras/tests/test_xx6z77ii.py"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "sympy",
+      "HOSTNAME": "f37ee3f2a723",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PYTHONWARNINGS": "ignore::UserWarning,ignore::SyntaxWarning",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use sympy.utilities.pytest\n\nFor example:\n\n```python\nfrom sympy.utilities.pytest import raises, XFAIL\nfrom sympy.core import Symbol, S, Rational, Integer, Dummy, Wild, Pow\n\n@XFAIL\ndef test_symbol_infinitereal_mul():\n    ix = Symbol('ix', infinite=True, extended_real=True)\n    assert (-ix).is_extended_positive is None\n\ndef test_sanitize_assumptions():\n    # issue 6666\n    for cls in (Symbol, Dummy, Wild):\n        x = cls('x', real=1, positive=0)\n        assert x.is_real is True\n        assert x.is_positive is False\n        assert cls('', real=True, positive=None).is_positive is None\n        raises(ValueError, lambda: cls('', commutative=None))\n    raises(ValueError, lambda: Symbol._sanitize(dict(commutative=None)))\n\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/bin"
+    },
+    "error": "============================= test process starts ==============================\nexecutable:         /opt/miniconda3/envs/testbed/bin/python  (3.9.20-final-0) [CPython]\narchitecture:       64-bit\ncache:              no\nground types:       python \nnumpy:              None\nrandom seed:        96698127\nhash randomization: on (PYTHONHASHSEED=618152817)\n\nsympy/algebras/tests/test_xx6z77ii.py[1] \ntest_quaternion_to_rotation_matrix_bug F                                  [FAIL]\n\n\n________________________________________________________________________________\n_ sympy/algebras/tests/test_xx6z77ii.py:test_quaternion_to_rotation_matrix_bug _\nTraceback (most recent call last):\n  File \"/testbed/sympy/algebras/tests/test_xx6z77ii.py\", line 22, in test_quaternion_to_rotation_matrix_bug\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected correct form.\"\nAssertionError: The rotation matrix does not match the expected correct form.\n\n============= tests finished: 0 passed, 1 failed, in 0.16 seconds ==============\nDO *NOT* COMMIT!\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 19092,
+      "num_statements": 98628,
+      "percent_covered": 14.00279097303469,
+      "percent_covered_display": "14",
+      "missing_lines": 79536,
+      "excluded_lines": 294,
+      "num_branches": 43258,
+      "num_partial_branches": 356,
+      "covered_branches": 776,
+      "missing_branches": 42482
+    },
+    "test_code": "from sympy.algebras.quaternion import Quaternion\nfrom sympy import symbols, cos, sin, trigsimp, Matrix\n\ndef test_quaternion_to_rotation_matrix_bug():\n    # Define a symbolic variable\n    x = symbols('x')\n    \n    # Create a quaternion with known parameters\n    q = Quaternion(cos(x/2), sin(x/2), 0, 0)\n    \n    # Generate the rotation matrix using to_rotation_matrix()\n    rotation_matrix = trigsimp(q.to_rotation_matrix())\n    \n    # Expected correct matrix after the bug is fixed\n    expected_matrix = Matrix([\n        [1, 0, 0],\n        [0, cos(x), -sin(x)],  # Corrected: [0, cos(x), -sin(x)]\n        [0, sin(x), cos(x)]    # Corrected: [0, sin(x), cos(x)]\n    ])\n    \n    # Assert that the matrix matches the expected correct form\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected correct form.\"\n\n"
+  },
+  {
+    "no_validation_ablation_test": "from sympy.algebras.quaternion import Quaternion\nfrom sympy import symbols, cos, sin, trigsimp, Matrix\n\ndef test_quaternion_to_rotation_matrix_bug():\n    # Define a symbolic variable\n    x = symbols('x')\n    \n    # Create a quaternion with known parameters\n    q = Quaternion(cos(x/2), sin(x/2), 0, 0)\n    \n    # Generate the rotation matrix using to_rotation_matrix()\n    rotation_matrix = trigsimp(q.to_rotation_matrix())\n    \n    # Expected correct matrix after the bug is fixed\n    expected_matrix = Matrix([\n        [1, 0, 0],\n        [0, cos(x), -sin(x)],  # Corrected: [0, cos(x), -sin(x)]\n        [0, sin(x), cos(x)]    # Corrected: [0, sin(x), cos(x)]\n    ])\n    \n    # Assert that the matrix matches the expected correct form\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected correct form.\"\n\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from sympy.algebras.quaternion import Quaternion\nfrom sympy import symbols, cos, sin, trigsimp, Matrix\n\ndef test_quaternion_to_rotation_matrix_bug():\n    # Define a symbolic variable\n    x = symbols('x')\n    \n    # Create a quaternion with known parameters\n    q = Quaternion(cos(x/2), sin(x/2), 0, 0)\n    \n    # Generate the rotation matrix using to_rotation_matrix()\n    rotation_matrix = trigsimp(q.to_rotation_matrix())\n    \n    # Expected correct matrix after the bug is fixed\n    expected_matrix = Matrix([\n        [1, 0, 0],\n        [0, cos(x), -sin(x)],  # Corrected: [0, cos(x), -sin(x)]\n        [0, sin(x), cos(x)]    # Corrected: [0, sin(x), cos(x)]\n    ])\n    \n    # Assert that the matrix matches the expected correct form\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected correct form.\"\n\n",
+    "error": "============================= test process starts ==============================\nexecutable:         /opt/miniconda3/envs/testbed/bin/python  (3.9.20-final-0) [CPython]\narchitecture:       64-bit\ncache:              no\nground types:       python \nnumpy:              None\nrandom seed:        96698127\nhash randomization: on (PYTHONHASHSEED=618152817)\n\nsympy/algebras/tests/test_xx6z77ii.py[1] \ntest_quaternion_to_rotation_matrix_bug F                                  [FAIL]\n\n\n________________________________________________________________________________\n_ sympy/algebras/tests/test_xx6z77ii.py:test_quaternion_to_rotation_matrix_bug _\nTraceback (most recent call last):\n  File \"/testbed/sympy/algebras/tests/test_xx6z77ii.py\", line 22, in test_quaternion_to_rotation_matrix_bug\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected correct form.\"\nAssertionError: The rotation matrix does not match the expected correct form.\n\n============= tests finished: 0 passed, 1 failed, in 0.16 seconds ==============\nDO *NOT* COMMIT!\n",
+    "revealing": true,
+    "reason": "The test code is designed to reproduce the reported bug in the Quaternion.to_rotation_matrix() method. The issue ticket describes a problem where the output matrix has an incorrect sign for one of the sine terms. The test code correctly sets up a quaternion and generates the rotation matrix using the to_rotation_matrix() method. It then compares the result to an expected matrix that has the corrected sign for the sine term. The test fails because the actual output does not match the expected output, which aligns with the reported issue. Therefore, the test is valid and correctly reproduces the bug."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "from sympy.algebras.quaternion import Quaternion\nfrom sympy import symbols, cos, sin, trigsimp, Matrix\n\ndef test_quaternion_to_rotation_matrix_bug():\n    # Define a symbolic variable\n    x = symbols('x')\n    \n    # Create a quaternion with known parameters\n    q = Quaternion(cos(x/2), sin(x/2), 0, 0)\n    \n    # Generate the rotation matrix using to_rotation_matrix()\n    rotation_matrix = trigsimp(q.to_rotation_matrix())\n    \n    # Expected correct matrix after the bug is fixed\n    expected_matrix = Matrix([\n        [1, 0, 0],\n        [0, cos(x), -sin(x)],  # Corrected: [0, cos(x), -sin(x)]\n        [0, sin(x), cos(x)]    # Corrected: [0, sin(x), cos(x)]\n    ])\n    \n    # Assert that the matrix matches the expected correct form\n    assert rotation_matrix == expected_matrix, \"The rotation matrix does not match the expected correct form.\"\n\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.03946
+  }
+]

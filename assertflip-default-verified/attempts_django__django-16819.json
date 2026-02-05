@@ -1,0 +1,210 @@
+[
+  {
+    "instance_id": "django__django-16819",
+    "problem_statement": [
+      "Reduce Add/RemoveIndex migration operations.\nDescription\n\t\nWe should reduce AddIndex/RemoveIndex operations when optimizing migration operations.\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are not optimized away, exposing the bug.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are still present, indicating the bug\n        self.assertIn(add_index_op, optimized_operations)\n        self.assertIn(remove_index_op, optimized_operations)\n        # BUG: The optimizer should reduce these operations, but it currently does not\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_orurb2pm"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "9fb9752d28c5",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "Testing against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\ntest_add_remove_index_not_optimized (test_orurb2pm.MigrationOptimizerTest.test_add_remove_index_not_optimized)\nTest that AddIndex followed by RemoveIndex on the same model and index ... ERROR\n\n======================================================================\nERROR: test_add_remove_index_not_optimized (test_orurb2pm.MigrationOptimizerTest.test_add_remove_index_not_optimized)\nTest that AddIndex followed by RemoveIndex on the same model and index\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_orurb2pm.py\", line 14, in test_add_remove_index_not_optimized\n    class TestModel(models.Model):\n  File \"/testbed/django/db/models/base.py\", line 134, in __new__\n    raise RuntimeError(\nRuntimeError: Model class test_orurb2pm.TestModel doesn't declare an explicit app_label and isn't in an application in INSTALLED_APPS.\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (errors=1)\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 15338,
+      "num_statements": 45713,
+      "percent_covered": 26.883294140862674,
+      "percent_covered_display": "27",
+      "missing_lines": 30375,
+      "excluded_lines": 0,
+      "num_branches": 15098,
+      "num_partial_branches": 524,
+      "covered_branches": 1010,
+      "missing_branches": 14088
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are not optimized away, exposing the bug.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are still present, indicating the bug\n        self.assertIn(add_index_op, optimized_operations)\n        self.assertIn(remove_index_op, optimized_operations)\n        # BUG: The optimizer should reduce these operations, but it currently does not\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "response": {
+      "content": "```python\nfrom django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are not optimized away, exposing the bug.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n            class Meta:\n                app_label = 'test_app'\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are still present, indicating the bug\n        self.assertIn(add_index_op, optimized_operations)\n        self.assertIn(remove_index_op, optimized_operations)\n        # BUG: The optimizer should reduce these operations, but it currently does not\n```",
+      "role": "assistant",
+      "tool_calls": null,
+      "function_call": null,
+      "annotations": []
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are not optimized away, exposing the bug.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n            class Meta:\n                app_label = 'test_app'\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are still present, indicating the bug\n        self.assertIn(add_index_op, optimized_operations)\n        self.assertIn(remove_index_op, optimized_operations)\n        # BUG: The optimizer should reduce these operations, but it currently does not\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 2,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_kbza82sl"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "9fb9752d28c5",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 15399,
+      "num_statements": 45715,
+      "percent_covered": 27.03040468320918,
+      "percent_covered_display": "27",
+      "missing_lines": 30316,
+      "excluded_lines": 0,
+      "num_branches": 15098,
+      "num_partial_branches": 541,
+      "covered_branches": 1039,
+      "missing_branches": 14059
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are not optimized away, exposing the bug.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n            class Meta:\n                app_label = 'test_app'\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are still present, indicating the bug\n        self.assertIn(add_index_op, optimized_operations)\n        self.assertIn(remove_index_op, optimized_operations)\n        # BUG: The optimizer should reduce these operations, but it currently does not\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are not optimized away, exposing the bug.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n            class Meta:\n                app_label = 'test_app'\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are still present, indicating the bug\n        self.assertIn(add_index_op, optimized_operations)\n        self.assertIn(remove_index_op, optimized_operations)\n        # BUG: The optimizer should reduce these operations, but it currently does not\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are optimized away, ensuring the bug is fixed.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n            class Meta:\n                app_label = 'test_app'\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are not present, indicating the bug is fixed\n        self.assertNotIn(add_index_op, optimized_operations)\n        self.assertNotIn(remove_index_op, optimized_operations)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_w41b9u17"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "9fb9752d28c5",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "Testing against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\ntest_add_remove_index_not_optimized (test_w41b9u17.MigrationOptimizerTest.test_add_remove_index_not_optimized)\nTest that AddIndex followed by RemoveIndex on the same model and index ... FAIL\n\n======================================================================\nFAIL: test_add_remove_index_not_optimized (test_w41b9u17.MigrationOptimizerTest.test_add_remove_index_not_optimized)\nTest that AddIndex followed by RemoveIndex on the same model and index\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_w41b9u17.py\", line 36, in test_add_remove_index_not_optimized\n    self.assertNotIn(add_index_op, optimized_operations)\nAssertionError: <AddIndex 'TestModel', <Index: fields=['field'] name='test_index'>> unexpectedly found in [<AddIndex 'TestModel', <Index: fields=['field'] name='test_index'>>, <RemoveIndex 'TestModel', 'test_index'>]\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 15401,
+      "num_statements": 45715,
+      "percent_covered": 27.033693453702334,
+      "percent_covered_display": "27",
+      "missing_lines": 30314,
+      "excluded_lines": 0,
+      "num_branches": 15098,
+      "num_partial_branches": 541,
+      "covered_branches": 1039,
+      "missing_branches": 14059
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are optimized away, ensuring the bug is fixed.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n            class Meta:\n                app_label = 'test_app'\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are not present, indicating the bug is fixed\n        self.assertNotIn(add_index_op, optimized_operations)\n        self.assertNotIn(remove_index_op, optimized_operations)\n"
+  },
+  {
+    "no_validation_ablation_test": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are optimized away, ensuring the bug is fixed.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n            class Meta:\n                app_label = 'test_app'\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are not present, indicating the bug is fixed\n        self.assertNotIn(add_index_op, optimized_operations)\n        self.assertNotIn(remove_index_op, optimized_operations)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are optimized away, ensuring the bug is fixed.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n            class Meta:\n                app_label = 'test_app'\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are not present, indicating the bug is fixed\n        self.assertNotIn(add_index_op, optimized_operations)\n        self.assertNotIn(remove_index_op, optimized_operations)\n",
+    "error": "Testing against Django installed in '/testbed/django'\nFound 1 test(s).\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\ntest_add_remove_index_not_optimized (test_w41b9u17.MigrationOptimizerTest.test_add_remove_index_not_optimized)\nTest that AddIndex followed by RemoveIndex on the same model and index ... FAIL\n\n======================================================================\nFAIL: test_add_remove_index_not_optimized (test_w41b9u17.MigrationOptimizerTest.test_add_remove_index_not_optimized)\nTest that AddIndex followed by RemoveIndex on the same model and index\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_w41b9u17.py\", line 36, in test_add_remove_index_not_optimized\n    self.assertNotIn(add_index_op, optimized_operations)\nAssertionError: <AddIndex 'TestModel', <Index: fields=['field'] name='test_index'>> unexpectedly found in [<AddIndex 'TestModel', <Index: fields=['field'] name='test_index'>>, <RemoveIndex 'TestModel', 'test_index'>]\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\n",
+    "revealing": true,
+    "reason": "The test is designed to verify that the MigrationOptimizer can optimize away a sequence of AddIndex followed by RemoveIndex operations on the same model and index. The test sets up a model with an index, creates AddIndex and RemoveIndex operations, and then attempts to optimize them using the MigrationOptimizer. The expectation is that both operations should be removed from the optimized operations list, indicating that the optimizer correctly identifies and removes redundant operations. However, the test fails because the AddIndex operation is still present in the optimized operations list, which suggests that the optimizer did not perform the expected optimization. This failure directly relates to the issue described in the ticket, which is about reducing AddIndex/RemoveIndex operations during optimization. Therefore, the test correctly reproduces the bug and is a valid test case."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "from django.test import SimpleTestCase\nfrom django.db.migrations.optimizer import MigrationOptimizer\nfrom django.db.migrations.operations.models import AddIndex, RemoveIndex\nfrom django.db.migrations.state import ProjectState\nfrom django.db import models\n\nclass MigrationOptimizerTest(SimpleTestCase):\n    def test_add_remove_index_not_optimized(self):\n        \"\"\"\n        Test that AddIndex followed by RemoveIndex on the same model and index\n        are optimized away, ensuring the bug is fixed.\n        \"\"\"\n        # Setup: Define a model and an index\n        class TestModel(models.Model):\n            field = models.IntegerField()\n\n            class Meta:\n                app_label = 'test_app'\n\n        index = models.Index(fields=['field'], name='test_index')\n\n        # Create AddIndex and RemoveIndex operations\n        add_index_op = AddIndex('TestModel', index)\n        remove_index_op = RemoveIndex('TestModel', 'test_index')\n\n        # List of operations to optimize\n        operations = [add_index_op, remove_index_op]\n\n        # Initialize the optimizer\n        optimizer = MigrationOptimizer()\n\n        # Optimize the operations\n        optimized_operations = optimizer.optimize(operations, 'test_app')\n\n        # Assert that both operations are not present, indicating the bug is fixed\n        self.assertNotIn(add_index_op, optimized_operations)\n        self.assertNotIn(remove_index_op, optimized_operations)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.09992000000000002
+  }
+]

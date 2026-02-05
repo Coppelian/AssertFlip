@@ -1,0 +1,23 @@
+from django.test import SimpleTestCase
+from django.template import Context, Template
+from django.utils.html import escape
+
+class EscapeseqFilterTests(SimpleTestCase):
+    def test_escapeseq_filter_with_join(self):
+        # Test input: list of strings that require escaping
+        input_list = ["<script>", "&", "\"quote\""]
+        delimiter = ","
+
+        # Expected output: each item should be escaped and then joined
+        expected_output = escape("<script>") + delimiter + escape("&") + delimiter + escape("\"quote\"")
+
+        # Template rendering with escapeseq and join filters
+        template_string = '{{ input_list|escapeseq|join:delimiter }}'
+        template = Template(template_string)
+        context = Context({'input_list': input_list, 'delimiter': delimiter})
+
+        # Render the template
+        output = template.render(context)
+
+        # Assert that the output is as expected
+        self.assertEqual(output, expected_output)

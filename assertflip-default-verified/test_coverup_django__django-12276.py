@@ -1,0 +1,18 @@
+from django import forms
+from django.test import SimpleTestCase
+
+class TestFileInputRequiredAttribute(SimpleTestCase):
+    def test_file_input_with_initial_data_shows_required(self):
+        class TestForm(forms.Form):
+            file_field = forms.FileField(widget=forms.ClearableFileInput(), required=True)
+
+        # Mock initial data with a file object that has a 'url' attribute
+        initial_data = {'file_field': type('MockFile', (object,), {'url': 'mock_url'})()}
+
+        # Create form with initial data
+        form_with_initial = TestForm(initial=initial_data)
+        rendered_html_with_initial = form_with_initial.as_p()
+
+        # Check if 'required' attribute is present in the HTML output
+        # The test should fail if 'required' is present, exposing the bug
+        self.assertIn('required', rendered_html_with_initial)  # This should fail, revealing the bug

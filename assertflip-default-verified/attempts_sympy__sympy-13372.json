@@ -1,0 +1,144 @@
+[
+  {
+    "instance_id": "sympy__sympy-13372",
+    "problem_statement": [
+      "UnboundLocalError in evalf\n```\r\n>>> Mul(x, Max(0, y), evaluate=False).evalf()\r\nx*Max(0, y)\r\n>>> Mul(Max(0, y), x, evaluate=False).evalf()\r\nTraceback (most recent call last):\r\n  File \"./sympy/core/evalf.py\", line 1285, in evalf\r\n    rf = evalf_table[x.func]\r\nKeyError: Max\r\n\r\nDuring handling of the above exception, another exception occurred:\r\n\r\nTraceback (most recent call last):\r\n  File \"<stdin>\", line 1, in <module>\r\n  File \"./sympy/core/evalf.py\", line 1394, in evalf\r\n    result = evalf(self, prec + 4, options)\r\n  File \"./sympy/core/evalf.py\", line 1286, in evalf\r\n    r = rf(x, prec, options)\r\n  File \"./sympy/core/evalf.py\", line 538, in evalf_mul\r\n    arg = evalf(arg, prec, options)\r\n  File \"./sympy/core/evalf.py\", line 1308, in evalf\r\n    r = re, im, reprec, imprec\r\nUnboundLocalError: local variable 'reprec' referenced before assignment\r\n```\r\n\r\nI found this after changing the order of Mul args in https://github.com/sympy/sympy/pull/13059.\r\n\r\nBased on the code, I think the elif clauses that define reprec and imprec should have an `else: raise NotImplementedError`. That appears to fix it, although I didn't try to debug to see why the arg order is mattering here. \n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from sympy import symbols, Mul, Max\nfrom sympy.utilities.pytest import raises\n\ndef test_mul_max_evalf_unboundlocalerror():\n    # Define symbolic variables\n    x, y = symbols('x y')\n\n    # Test that Mul(x, Max(0, y), evaluate=False).evalf() does not raise an error\n    expr1 = Mul(x, Max(0, y), evaluate=False)\n    result1 = expr1.evalf()\n    assert result1 == x * Max(0, y)  # This should not raise an error\n\n    # Test that Mul(Max(0, y), x, evaluate=False).evalf() raises UnboundLocalError\n    expr2 = Mul(Max(0, y), x, evaluate=False)\n    with raises(UnboundLocalError):\n        expr2.evalf()  # BUG: This should raise UnboundLocalError due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "/testbed/bin/test",
+      "-C",
+      "--verbose",
+      "/testbed/sympy/core/tests/test_ug8rrdv5.py"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "sympy",
+      "HOSTNAME": "f3098f807f30",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PYTHONWARNINGS": "ignore::UserWarning,ignore::SyntaxWarning",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use sympy.utilities.pytest\n\nFor example:\n\n```python\nfrom sympy.utilities.pytest import raises, XFAIL\nfrom sympy.core import Symbol, S, Rational, Integer, Dummy, Wild, Pow\n\n@XFAIL\ndef test_symbol_infinitereal_mul():\n    ix = Symbol('ix', infinite=True, extended_real=True)\n    assert (-ix).is_extended_positive is None\n\ndef test_sanitize_assumptions():\n    # issue 6666\n    for cls in (Symbol, Dummy, Wild):\n        x = cls('x', real=1, positive=0)\n        assert x.is_real is True\n        assert x.is_positive is False\n        assert cls('', real=True, positive=None).is_positive is None\n        raises(ValueError, lambda: cls('', commutative=None))\n    raises(ValueError, lambda: Symbol._sanitize(dict(commutative=None)))\n\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/bin"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 16668,
+      "num_statements": 86939,
+      "percent_covered": 13.767323849265557,
+      "percent_covered_display": "14",
+      "missing_lines": 70271,
+      "excluded_lines": 289,
+      "num_branches": 38394,
+      "num_partial_branches": 273,
+      "covered_branches": 587,
+      "missing_branches": 37807
+    },
+    "test_code": "from sympy import symbols, Mul, Max\nfrom sympy.utilities.pytest import raises\n\ndef test_mul_max_evalf_unboundlocalerror():\n    # Define symbolic variables\n    x, y = symbols('x y')\n\n    # Test that Mul(x, Max(0, y), evaluate=False).evalf() does not raise an error\n    expr1 = Mul(x, Max(0, y), evaluate=False)\n    result1 = expr1.evalf()\n    assert result1 == x * Max(0, y)  # This should not raise an error\n\n    # Test that Mul(Max(0, y), x, evaluate=False).evalf() raises UnboundLocalError\n    expr2 = Mul(Max(0, y), x, evaluate=False)\n    with raises(UnboundLocalError):\n        expr2.evalf()  # BUG: This should raise UnboundLocalError due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from sympy import symbols, Mul, Max\nfrom sympy.utilities.pytest import raises\n\ndef test_mul_max_evalf_unboundlocalerror():\n    # Define symbolic variables\n    x, y = symbols('x y')\n\n    # Test that Mul(x, Max(0, y), evaluate=False).evalf() does not raise an error\n    expr1 = Mul(x, Max(0, y), evaluate=False)\n    result1 = expr1.evalf()\n    assert result1 == x * Max(0, y)  # This should not raise an error\n\n    # Test that Mul(Max(0, y), x, evaluate=False).evalf() raises UnboundLocalError\n    expr2 = Mul(Max(0, y), x, evaluate=False)\n    with raises(UnboundLocalError):\n        expr2.evalf()  # BUG: This should raise UnboundLocalError due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from sympy import symbols, Mul, Max\n\ndef test_mul_max_evalf_unboundlocalerror():\n    # Define symbolic variables\n    x, y = symbols('x y')\n\n    # Test that Mul(x, Max(0, y), evaluate=False).evalf() does not raise an error\n    expr1 = Mul(x, Max(0, y), evaluate=False)\n    result1 = expr1.evalf()\n    assert result1 == x * Max(0, y)  # This should not raise an error\n\n    # Test that Mul(Max(0, y), x, evaluate=False).evalf() does not raise an error\n    expr2 = Mul(Max(0, y), x, evaluate=False)\n    result2 = expr2.evalf()\n    assert result2 == Max(0, y) * x  # This should not raise an error\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "/testbed/bin/test",
+      "-C",
+      "--verbose",
+      "/testbed/sympy/core/tests/test__6pnxh57.py"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "sympy",
+      "HOSTNAME": "f3098f807f30",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PYTHONWARNINGS": "ignore::UserWarning,ignore::SyntaxWarning",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use sympy.utilities.pytest\n\nFor example:\n\n```python\nfrom sympy.utilities.pytest import raises, XFAIL\nfrom sympy.core import Symbol, S, Rational, Integer, Dummy, Wild, Pow\n\n@XFAIL\ndef test_symbol_infinitereal_mul():\n    ix = Symbol('ix', infinite=True, extended_real=True)\n    assert (-ix).is_extended_positive is None\n\ndef test_sanitize_assumptions():\n    # issue 6666\n    for cls in (Symbol, Dummy, Wild):\n        x = cls('x', real=1, positive=0)\n        assert x.is_real is True\n        assert x.is_positive is False\n        assert cls('', real=True, positive=None).is_positive is None\n        raises(ValueError, lambda: cls('', commutative=None))\n    raises(ValueError, lambda: Symbol._sanitize(dict(commutative=None)))\n\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "LC_CTYPE": "C.UTF-8",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/bin"
+    },
+    "error": "/testbed/sympy/core/basic.py:3: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  from collections import Mapping, defaultdict\n/testbed/sympy/core/containers.py:271: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  class OrderedSet(collections.MutableSet):\n/testbed/sympy/plotting/plot.py:28: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  from collections import Callable\n/testbed/sympy/core/basic.py:3: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  from collections import Mapping, defaultdict\n/testbed/sympy/core/containers.py:271: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  class OrderedSet(collections.MutableSet):\n/testbed/sympy/plotting/plot.py:28: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  from collections import Callable\n============================= test process starts ==============================\nexecutable:         /opt/miniconda3/envs/testbed/bin/python  (3.9.21-final-0) [CPython]\narchitecture:       64-bit\ncache:              no\nground types:       python \nnumpy:              None\nrandom seed:        56307475\nhash randomization: on (PYTHONHASHSEED=3579740794)\n\nsympy/core/tests/test__6pnxh57.py[1] \ntest_mul_max_evalf_unboundlocalerror E                                    [FAIL]\n\n\n________________________________________________________________________________\n____ sympy/core/tests/test__6pnxh57.py:test_mul_max_evalf_unboundlocalerror ____\n  File \"/testbed/sympy/core/tests/test__6pnxh57.py\", line 14, in test_mul_max_evalf_unboundlocalerror\n    result2 = expr2.evalf()\n  File \"/testbed/sympy/core/evalf.py\", line 1396, in evalf\n    result = evalf(self, prec + 4, options)\n  File \"/testbed/sympy/core/evalf.py\", line 1288, in evalf\n    r = rf(x, prec, options)\n  File \"/testbed/sympy/core/evalf.py\", line 540, in evalf_mul\n    arg = evalf(arg, prec, options)\n  File \"/testbed/sympy/core/evalf.py\", line 1310, in evalf\n    r = re, im, reprec, imprec\nUnboundLocalError: local variable 'reprec' referenced before assignment\n\n=========== tests finished: 0 passed, 1 exceptions, in 0.01 seconds ============\nDO *NOT* COMMIT!\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 16668,
+      "num_statements": 86939,
+      "percent_covered": 13.767323849265557,
+      "percent_covered_display": "14",
+      "missing_lines": 70271,
+      "excluded_lines": 289,
+      "num_branches": 38394,
+      "num_partial_branches": 273,
+      "covered_branches": 587,
+      "missing_branches": 37807
+    },
+    "test_code": "from sympy import symbols, Mul, Max\n\ndef test_mul_max_evalf_unboundlocalerror():\n    # Define symbolic variables\n    x, y = symbols('x y')\n\n    # Test that Mul(x, Max(0, y), evaluate=False).evalf() does not raise an error\n    expr1 = Mul(x, Max(0, y), evaluate=False)\n    result1 = expr1.evalf()\n    assert result1 == x * Max(0, y)  # This should not raise an error\n\n    # Test that Mul(Max(0, y), x, evaluate=False).evalf() does not raise an error\n    expr2 = Mul(Max(0, y), x, evaluate=False)\n    result2 = expr2.evalf()\n    assert result2 == Max(0, y) * x  # This should not raise an error\n"
+  },
+  {
+    "no_validation_ablation_test": "from sympy import symbols, Mul, Max\n\ndef test_mul_max_evalf_unboundlocalerror():\n    # Define symbolic variables\n    x, y = symbols('x y')\n\n    # Test that Mul(x, Max(0, y), evaluate=False).evalf() does not raise an error\n    expr1 = Mul(x, Max(0, y), evaluate=False)\n    result1 = expr1.evalf()\n    assert result1 == x * Max(0, y)  # This should not raise an error\n\n    # Test that Mul(Max(0, y), x, evaluate=False).evalf() does not raise an error\n    expr2 = Mul(Max(0, y), x, evaluate=False)\n    result2 = expr2.evalf()\n    assert result2 == Max(0, y) * x  # This should not raise an error\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from sympy import symbols, Mul, Max\n\ndef test_mul_max_evalf_unboundlocalerror():\n    # Define symbolic variables\n    x, y = symbols('x y')\n\n    # Test that Mul(x, Max(0, y), evaluate=False).evalf() does not raise an error\n    expr1 = Mul(x, Max(0, y), evaluate=False)\n    result1 = expr1.evalf()\n    assert result1 == x * Max(0, y)  # This should not raise an error\n\n    # Test that Mul(Max(0, y), x, evaluate=False).evalf() does not raise an error\n    expr2 = Mul(Max(0, y), x, evaluate=False)\n    result2 = expr2.evalf()\n    assert result2 == Max(0, y) * x  # This should not raise an error\n",
+    "error": "/testbed/sympy/core/basic.py:3: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  from collections import Mapping, defaultdict\n/testbed/sympy/core/containers.py:271: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  class OrderedSet(collections.MutableSet):\n/testbed/sympy/plotting/plot.py:28: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  from collections import Callable\n/testbed/sympy/core/basic.py:3: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  from collections import Mapping, defaultdict\n/testbed/sympy/core/containers.py:271: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  class OrderedSet(collections.MutableSet):\n/testbed/sympy/plotting/plot.py:28: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working\n  from collections import Callable\n============================= test process starts ==============================\nexecutable:         /opt/miniconda3/envs/testbed/bin/python  (3.9.21-final-0) [CPython]\narchitecture:       64-bit\ncache:              no\nground types:       python \nnumpy:              None\nrandom seed:        56307475\nhash randomization: on (PYTHONHASHSEED=3579740794)\n\nsympy/core/tests/test__6pnxh57.py[1] \ntest_mul_max_evalf_unboundlocalerror E                                    [FAIL]\n\n\n________________________________________________________________________________\n____ sympy/core/tests/test__6pnxh57.py:test_mul_max_evalf_unboundlocalerror ____\n  File \"/testbed/sympy/core/tests/test__6pnxh57.py\", line 14, in test_mul_max_evalf_unboundlocalerror\n    result2 = expr2.evalf()\n  File \"/testbed/sympy/core/evalf.py\", line 1396, in evalf\n    result = evalf(self, prec + 4, options)\n  File \"/testbed/sympy/core/evalf.py\", line 1288, in evalf\n    r = rf(x, prec, options)\n  File \"/testbed/sympy/core/evalf.py\", line 540, in evalf_mul\n    arg = evalf(arg, prec, options)\n  File \"/testbed/sympy/core/evalf.py\", line 1310, in evalf\n    r = re, im, reprec, imprec\nUnboundLocalError: local variable 'reprec' referenced before assignment\n\n=========== tests finished: 0 passed, 1 exceptions, in 0.01 seconds ============\nDO *NOT* COMMIT!\n",
+    "revealing": true,
+    "reason": "The test code is designed to reproduce the bug described in the issue ticket, which is an UnboundLocalError occurring when calling evalf on a Mul object with Max as one of its arguments. The test code correctly sets up two expressions using Mul and Max, with the second expression being the one that triggers the error according to the issue ticket. The test error output confirms that the UnboundLocalError is indeed raised when evaluating the second expression, which matches the reported bug. Therefore, the test is valid and successfully reproduces the bug."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "from sympy import symbols, Mul, Max\n\ndef test_mul_max_evalf_unboundlocalerror():\n    # Define symbolic variables\n    x, y = symbols('x y')\n\n    # Test that Mul(x, Max(0, y), evaluate=False).evalf() does not raise an error\n    expr1 = Mul(x, Max(0, y), evaluate=False)\n    result1 = expr1.evalf()\n    assert result1 == x * Max(0, y)  # This should not raise an error\n\n    # Test that Mul(Max(0, y), x, evaluate=False).evalf() does not raise an error\n    expr2 = Mul(Max(0, y), x, evaluate=False)\n    result2 = expr2.evalf()\n    assert result2 == Max(0, y) * x  # This should not raise an error\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.04118
+  }
+]

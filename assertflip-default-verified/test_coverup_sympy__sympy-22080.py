@@ -1,0 +1,26 @@
+from sympy import Mod, lambdify, symbols
+
+def test_lambdify_mod_bug():
+    # Define symbols
+    x, y = symbols('x y')
+    
+    # Define the expression with a multiplier
+    expr = 2 * Mod(x, y)
+    
+    # Create lambdified functions
+    f = lambdify([x, y], expr)  # Default modules
+    g = lambdify([x, y], expr, modules=[])  # With modules=[]
+    
+    # Evaluate both functions with the same arguments
+    result_f = f(3, 7)
+    result_g = g(3, 7)
+    
+    # Assert the expected correct behavior
+    assert result_f == 2 * (3 % 7)  # Correct behavior
+    
+    # Assert the expected correct behavior for g
+    assert result_g == 2 * (3 % 7)  # Correct behavior
+
+    # Inspect the source code of the generated function to confirm the transformation
+    source_g = g.__code__.co_code
+    assert b'\x16\x00' not in source_g  # Ensure the incorrect transformation is not present

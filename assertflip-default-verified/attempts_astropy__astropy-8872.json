@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "astropy__astropy-8872",
+    "problem_statement": [
+      "float16 quantities get upgraded to float64 automatically\nWhen trying to create a `Quantity` from a `np.float16` (not something I actually intended to do, I was experimenting while investigating other issue) it gets upgraded automatically to `np.float64`, which is something that does not happen with other float types:\r\n\r\n```\r\nIn [73]: np.float16(1)\r\nOut[73]: 1.0\r\n\r\nIn [74]: (np.float16(1) * u.km)\r\nOut[74]: <Quantity 1. km>\r\n\r\nIn [75]: (np.float16(1) * u.km).dtype\r\nOut[75]: dtype('float64')\r\n```\r\n\r\nHowever:\r\n\r\n```\r\nIn [76]: (np.float32(1) * u.km).dtype\r\nOut[76]: dtype('float32')\r\n\r\nIn [77]: (np.float64(1) * u.km).dtype\r\nOut[77]: dtype('float64')\r\n\r\nIn [78]: (np.float128(1) * u.km).dtype\r\nOut[78]: dtype('float128')\r\n\r\nIn [79]: (np.float(1) * u.km).dtype\r\nOut[79]: dtype('float64')\r\n\r\nIn [80]: (np.float_(1) * u.km).dtype\r\nOut[80]: dtype('float64')\r\n```\r\n\r\nSomewhat related: #6389\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport numpy as np\nfrom astropy import units as u\nfrom astropy.units import Quantity\n\ndef test_quantity_float16_dtype_bug():\n    # Create a Quantity using np.float16\n    value = np.float16(1)\n    quantity = Quantity(value, unit=u.km)\n\n    # Retrieve the dtype of the resulting Quantity\n    dtype = quantity.dtype\n\n    # Assert that the dtype is float64, which is incorrect but currently happens due to the bug\n    assert dtype == np.float64, \"BUG: np.float16 should not be upgraded to np.float64\"\n\n    # Cleanup steps if necessary (not needed in this case as no state pollution occurs)\n\n# Note: The test will pass because the dtype is float64, exposing the bug.\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/astropy/tests/test_li3hq0g5.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 4342,
+      "num_statements": 11153,
+      "percent_covered": 33.91378073436379,
+      "percent_covered_display": "34",
+      "missing_lines": 6811,
+      "excluded_lines": 53,
+      "num_branches": 4180,
+      "num_partial_branches": 372,
+      "covered_branches": 858,
+      "missing_branches": 3322
+    },
+    "test_code": "import pytest\nimport numpy as np\nfrom astropy import units as u\nfrom astropy.units import Quantity\n\ndef test_quantity_float16_dtype_bug():\n    # Create a Quantity using np.float16\n    value = np.float16(1)\n    quantity = Quantity(value, unit=u.km)\n\n    # Retrieve the dtype of the resulting Quantity\n    dtype = quantity.dtype\n\n    # Assert that the dtype is float64, which is incorrect but currently happens due to the bug\n    assert dtype == np.float64, \"BUG: np.float16 should not be upgraded to np.float64\"\n\n    # Cleanup steps if necessary (not needed in this case as no state pollution occurs)\n\n# Note: The test will pass because the dtype is float64, exposing the bug.\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport numpy as np\nfrom astropy import units as u\nfrom astropy.units import Quantity\n\ndef test_quantity_float16_dtype_bug():\n    # Create a Quantity using np.float16\n    value = np.float16(1)\n    quantity = Quantity(value, unit=u.km)\n\n    # Retrieve the dtype of the resulting Quantity\n    dtype = quantity.dtype\n\n    # Assert that the dtype is float64, which is incorrect but currently happens due to the bug\n    assert dtype == np.float64, \"BUG: np.float16 should not be upgraded to np.float64\"\n\n    # Cleanup steps if necessary (not needed in this case as no state pollution occurs)\n\n# Note: The test will pass because the dtype is float64, exposing the bug.\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport numpy as np\nfrom astropy import units as u\nfrom astropy.units import Quantity\n\ndef test_quantity_float16_dtype_bug():\n    # Create a Quantity using np.float16\n    value = np.float16(1)\n    quantity = Quantity(value, unit=u.km)\n\n    # Retrieve the dtype of the resulting Quantity\n    dtype = quantity.dtype\n\n    # Assert that the dtype is float16, which is the expected correct behavior\n    assert dtype == np.float16, \"BUG: np.float16 should not be upgraded to np.float64\"\n\n    # Cleanup steps if necessary (not needed in this case as no state pollution occurs)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/astropy/tests/test_bfwt4rfe.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_quantity_float16_dtype_bug():\n        # Create a Quantity using np.float16\n        value = np.float16(1)\n        quantity = Quantity(value, unit=u.km)\n    \n        # Retrieve the dtype of the resulting Quantity\n        dtype = quantity.dtype\n    \n        # Assert that the dtype is float16, which is the expected correct behavior\n>       assert dtype == np.float16, \"BUG: np.float16 should not be upgraded to np.float64\"\nE       AssertionError: BUG: np.float16 should not be upgraded to np.float64\nE       assert dtype('float64') == <class 'numpy.float16'>\nE        +  where <class 'numpy.float16'> = np.float16\n\nastropy/tests/test_bfwt4rfe.py:15: AssertionError\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 4392,
+      "num_statements": 11153,
+      "percent_covered": 34.43553120720016,
+      "percent_covered_display": "34",
+      "missing_lines": 6761,
+      "excluded_lines": 53,
+      "num_branches": 4180,
+      "num_partial_branches": 390,
+      "covered_branches": 888,
+      "missing_branches": 3292
+    },
+    "test_code": "import pytest\nimport numpy as np\nfrom astropy import units as u\nfrom astropy.units import Quantity\n\ndef test_quantity_float16_dtype_bug():\n    # Create a Quantity using np.float16\n    value = np.float16(1)\n    quantity = Quantity(value, unit=u.km)\n\n    # Retrieve the dtype of the resulting Quantity\n    dtype = quantity.dtype\n\n    # Assert that the dtype is float16, which is the expected correct behavior\n    assert dtype == np.float16, \"BUG: np.float16 should not be upgraded to np.float64\"\n\n    # Cleanup steps if necessary (not needed in this case as no state pollution occurs)\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport numpy as np\nfrom astropy import units as u\nfrom astropy.units import Quantity\n\ndef test_quantity_float16_dtype_bug():\n    # Create a Quantity using np.float16\n    value = np.float16(1)\n    quantity = Quantity(value, unit=u.km)\n\n    # Retrieve the dtype of the resulting Quantity\n    dtype = quantity.dtype\n\n    # Assert that the dtype is float16, which is the expected correct behavior\n    assert dtype == np.float16, \"BUG: np.float16 should not be upgraded to np.float64\"\n\n    # Cleanup steps if necessary (not needed in this case as no state pollution occurs)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport numpy as np\nfrom astropy import units as u\nfrom astropy.units import Quantity\n\ndef test_quantity_float16_dtype_bug():\n    # Create a Quantity using np.float16\n    value = np.float16(1)\n    quantity = Quantity(value, unit=u.km)\n\n    # Retrieve the dtype of the resulting Quantity\n    dtype = quantity.dtype\n\n    # Assert that the dtype is float16, which is the expected correct behavior\n    assert dtype == np.float16, \"BUG: np.float16 should not be upgraded to np.float64\"\n\n    # Cleanup steps if necessary (not needed in this case as no state pollution occurs)\n",
+    "error": "    def test_quantity_float16_dtype_bug():\n        # Create a Quantity using np.float16\n        value = np.float16(1)\n        quantity = Quantity(value, unit=u.km)\n    \n        # Retrieve the dtype of the resulting Quantity\n        dtype = quantity.dtype\n    \n        # Assert that the dtype is float16, which is the expected correct behavior\n>       assert dtype == np.float16, \"BUG: np.float16 should not be upgraded to np.float64\"\nE       AssertionError: BUG: np.float16 should not be upgraded to np.float64\nE       assert dtype('float64') == <class 'numpy.float16'>\nE        +  where <class 'numpy.float16'> = np.float16\n\nastropy/tests/test_bfwt4rfe.py:15: AssertionError\n",
+    "revealing": true,
+    "reason": "The test is designed to verify that when a Quantity is created using a np.float16 value, the resulting dtype should remain np.float16. The issue ticket describes a problem where np.float16 values are being automatically upgraded to np.float64 when used to create a Quantity. The test code attempts to reproduce this issue by asserting that the dtype of the Quantity should be np.float16. However, the test fails because the dtype is actually np.float64, which matches the behavior described in the issue ticket. This indicates that the test correctly reproduces the reported bug, as the dtype is indeed being upgraded to np.float64 instead of remaining as np.float16. Therefore, the test is valid and successfully reveals the bug."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport numpy as np\nfrom astropy import units as u\nfrom astropy.units import Quantity\n\ndef test_quantity_float16_dtype_bug():\n    # Create a Quantity using np.float16\n    value = np.float16(1)\n    quantity = Quantity(value, unit=u.km)\n\n    # Retrieve the dtype of the resulting Quantity\n    dtype = quantity.dtype\n\n    # Assert that the dtype is float16, which is the expected correct behavior\n    assert dtype == np.float16, \"BUG: np.float16 should not be upgraded to np.float64\"\n\n    # Cleanup steps if necessary (not needed in this case as no state pollution occurs)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.0496675
+  }
+]

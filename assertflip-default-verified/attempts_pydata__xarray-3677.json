@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "pydata__xarray-3677",
+    "problem_statement": [
+      "Merging dataArray into dataset using dataset method fails\nWhile it's possible to merge a dataset and a dataarray object using the top-level `merge()` function, if you try the same thing with the `ds.merge()` method it fails.\r\n\r\n```python\r\nimport xarray as xr\r\n\r\nds = xr.Dataset({'a': 0})\r\nda = xr.DataArray(1, name='b')\r\n\r\nexpected = xr.merge([ds, da])  # works fine\r\nprint(expected)\r\n\r\nds.merge(da)  # fails\r\n```\r\n\r\nOutput:\r\n```\r\n<xarray.Dataset>\r\nDimensions:  ()\r\nData variables:\r\n    a        int64 0\r\n    b        int64 1\r\n\r\nTraceback (most recent call last):\r\n  File \"mwe.py\", line 6, in <module>\r\n    actual = ds.merge(da)\r\n  File \"/home/tegn500/Documents/Work/Code/xarray/xarray/core/dataset.py\", line 3591, in merge\r\n    fill_value=fill_value,\r\n  File \"/home/tegn500/Documents/Work/Code/xarray/xarray/core/merge.py\", line 835, in dataset_merge_method\r\n    objs, compat, join, priority_arg=priority_arg, fill_value=fill_value\r\n  File \"/home/tegn500/Documents/Work/Code/xarray/xarray/core/merge.py\", line 548, in merge_core\r\n    coerced = coerce_pandas_values(objects)\r\n  File \"/home/tegn500/Documents/Work/Code/xarray/xarray/core/merge.py\", line 394, in coerce_pandas_values\r\n    for k, v in obj.items():\r\n  File \"/home/tegn500/Documents/Work/Code/xarray/xarray/core/common.py\", line 233, in __getattr__\r\n    \"{!r} object has no attribute {!r}\".format(type(self).__name__, name)\r\nAttributeError: 'DataArray' object has no attribute 'items'\r\n```\r\n\r\n\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_merge_dataset_with_dataarray_raises_attribute_error():\n    # Create a Dataset and a DataArray\n    ds = xr.Dataset({'a': 0})\n    da = xr.DataArray(1, name='b')\n\n    # Attempt to merge using ds.merge() and expect an AttributeError\n    with pytest.raises(AttributeError, match=\"'DataArray' object has no attribute 'items'\"):\n        ds.merge(da)\n\n    # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/xarray/tests/test_w_q1tylr.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 3399,
+      "num_statements": 13466,
+      "percent_covered": 18.437990978663017,
+      "percent_covered_display": "18",
+      "missing_lines": 10067,
+      "excluded_lines": 92,
+      "num_branches": 6265,
+      "num_partial_branches": 125,
+      "covered_branches": 239,
+      "missing_branches": 6026
+    },
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_merge_dataset_with_dataarray_raises_attribute_error():\n    # Create a Dataset and a DataArray\n    ds = xr.Dataset({'a': 0})\n    da = xr.DataArray(1, name='b')\n\n    # Attempt to merge using ds.merge() and expect an AttributeError\n    with pytest.raises(AttributeError, match=\"'DataArray' object has no attribute 'items'\"):\n        ds.merge(da)\n\n    # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_merge_dataset_with_dataarray_raises_attribute_error():\n    # Create a Dataset and a DataArray\n    ds = xr.Dataset({'a': 0})\n    da = xr.DataArray(1, name='b')\n\n    # Attempt to merge using ds.merge() and expect an AttributeError\n    with pytest.raises(AttributeError, match=\"'DataArray' object has no attribute 'items'\"):\n        ds.merge(da)\n\n    # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_merge_dataset_with_dataarray():\n    # Create a Dataset and a DataArray\n    ds = xr.Dataset({'a': 0})\n    da = xr.DataArray(1, name='b')\n\n    # Attempt to merge using ds.merge() and check if it matches the expected result\n    expected = xr.merge([ds, da])\n    actual = ds.merge(da)\n\n    # Assert that the actual result matches the expected result\n    xr.testing.assert_identical(expected, actual)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/xarray/tests/test_irpfnmr0.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_merge_dataset_with_dataarray():\n        # Create a Dataset and a DataArray\n        ds = xr.Dataset({'a': 0})\n        da = xr.DataArray(1, name='b')\n    \n        # Attempt to merge using ds.merge() and check if it matches the expected result\n        expected = xr.merge([ds, da])\n>       actual = ds.merge(da)\n\nxarray/tests/test_irpfnmr0.py:11: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nxarray/core/dataset.py:3607: in merge\n    merge_result = dataset_merge_method(\nxarray/core/merge.py:834: in dataset_merge_method\n    return merge_core(\nxarray/core/merge.py:548: in merge_core\n    coerced = coerce_pandas_values(objects)\nxarray/core/merge.py:394: in coerce_pandas_values\n    for k, v in obj.items():\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <xarray.DataArray 'b' ()>\narray(1), name = 'items'\n\n    def __getattr__(self, name: str) -> Any:\n        if name not in {\"__dict__\", \"__setstate__\"}:\n            # this avoids an infinite loop when pickle looks for the\n            # __setstate__ attribute before the xarray object is initialized\n            for source in self._attr_sources:\n                with suppress(KeyError):\n                    return source[name]\n>       raise AttributeError(\n            \"{!r} object has no attribute {!r}\".format(type(self).__name__, name)\n        )\nE       AttributeError: 'DataArray' object has no attribute 'items'. Did you mean: 'item'?\n\nxarray/core/common.py:232: AttributeError\n=============================== warnings summary ===============================\nxarray/core/dask_array_compat.py:13\nxarray/core/dask_array_compat.py:13\n  /testbed/xarray/core/dask_array_compat.py:13: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) >= LooseVersion(\"2.0.0\"):\n\nxarray/core/dask_array_compat.py:100\nxarray/core/dask_array_compat.py:100\n  /testbed/xarray/core/dask_array_compat.py:100: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) >= LooseVersion(\"2.8.1\"):\n\nxarray/core/dask_array_compat.py:137\nxarray/core/dask_array_compat.py:137\n  /testbed/xarray/core/dask_array_compat.py:137: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) > LooseVersion(\"2.9.0\"):\n\nxarray/core/formatting_html.py:6\n  /testbed/xarray/core/formatting_html.py:6: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html\n    import pkg_resources\n\nxarray/core/pdcompat.py:45\n  /testbed/xarray/core/pdcompat.py:45: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(pd.__version__) < \"0.25.0\":\n\n../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345\n  /opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    other = LooseVersion(other)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 3558,
+      "num_statements": 13466,
+      "percent_covered": 19.623942020171302,
+      "percent_covered_display": "20",
+      "missing_lines": 9908,
+      "excluded_lines": 92,
+      "num_branches": 6265,
+      "num_partial_branches": 156,
+      "covered_branches": 314,
+      "missing_branches": 5951
+    },
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_merge_dataset_with_dataarray():\n    # Create a Dataset and a DataArray\n    ds = xr.Dataset({'a': 0})\n    da = xr.DataArray(1, name='b')\n\n    # Attempt to merge using ds.merge() and check if it matches the expected result\n    expected = xr.merge([ds, da])\n    actual = ds.merge(da)\n\n    # Assert that the actual result matches the expected result\n    xr.testing.assert_identical(expected, actual)\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport xarray as xr\n\ndef test_merge_dataset_with_dataarray():\n    # Create a Dataset and a DataArray\n    ds = xr.Dataset({'a': 0})\n    da = xr.DataArray(1, name='b')\n\n    # Attempt to merge using ds.merge() and check if it matches the expected result\n    expected = xr.merge([ds, da])\n    actual = ds.merge(da)\n\n    # Assert that the actual result matches the expected result\n    xr.testing.assert_identical(expected, actual)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_merge_dataset_with_dataarray():\n    # Create a Dataset and a DataArray\n    ds = xr.Dataset({'a': 0})\n    da = xr.DataArray(1, name='b')\n\n    # Attempt to merge using ds.merge() and check if it matches the expected result\n    expected = xr.merge([ds, da])\n    actual = ds.merge(da)\n\n    # Assert that the actual result matches the expected result\n    xr.testing.assert_identical(expected, actual)\n",
+    "error": "    def test_merge_dataset_with_dataarray():\n        # Create a Dataset and a DataArray\n        ds = xr.Dataset({'a': 0})\n        da = xr.DataArray(1, name='b')\n    \n        # Attempt to merge using ds.merge() and check if it matches the expected result\n        expected = xr.merge([ds, da])\n>       actual = ds.merge(da)\n\nxarray/tests/test_irpfnmr0.py:11: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nxarray/core/dataset.py:3607: in merge\n    merge_result = dataset_merge_method(\nxarray/core/merge.py:834: in dataset_merge_method\n    return merge_core(\nxarray/core/merge.py:548: in merge_core\n    coerced = coerce_pandas_values(objects)\nxarray/core/merge.py:394: in coerce_pandas_values\n    for k, v in obj.items():\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <xarray.DataArray 'b' ()>\narray(1), name = 'items'\n\n    def __getattr__(self, name: str) -> Any:\n        if name not in {\"__dict__\", \"__setstate__\"}:\n            # this avoids an infinite loop when pickle looks for the\n            # __setstate__ attribute before the xarray object is initialized\n            for source in self._attr_sources:\n                with suppress(KeyError):\n                    return source[name]\n>       raise AttributeError(\n            \"{!r} object has no attribute {!r}\".format(type(self).__name__, name)\n        )\nE       AttributeError: 'DataArray' object has no attribute 'items'. Did you mean: 'item'?\n\nxarray/core/common.py:232: AttributeError\n=============================== warnings summary ===============================\nxarray/core/dask_array_compat.py:13\nxarray/core/dask_array_compat.py:13\n  /testbed/xarray/core/dask_array_compat.py:13: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) >= LooseVersion(\"2.0.0\"):\n\nxarray/core/dask_array_compat.py:100\nxarray/core/dask_array_compat.py:100\n  /testbed/xarray/core/dask_array_compat.py:100: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) >= LooseVersion(\"2.8.1\"):\n\nxarray/core/dask_array_compat.py:137\nxarray/core/dask_array_compat.py:137\n  /testbed/xarray/core/dask_array_compat.py:137: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) > LooseVersion(\"2.9.0\"):\n\nxarray/core/formatting_html.py:6\n  /testbed/xarray/core/formatting_html.py:6: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html\n    import pkg_resources\n\nxarray/core/pdcompat.py:45\n  /testbed/xarray/core/pdcompat.py:45: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(pd.__version__) < \"0.25.0\":\n\n../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345\n  /opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    other = LooseVersion(other)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n",
+    "revealing": true,
+    "reason": "The test code is designed to reproduce the issue described in the ticket, which is about the failure of the `ds.merge()` method when attempting to merge a `Dataset` with a `DataArray`. The test creates a `Dataset` and a `DataArray`, then attempts to merge them using both the `xr.merge()` function and the `ds.merge()` method. The expected behavior is that both methods should produce the same result, but the `ds.merge()` method fails, as indicated by the AttributeError in the test error output. The error message states that a 'DataArray' object has no attribute 'items', which aligns with the issue described in the ticket. Therefore, the test correctly reproduces the bug and is a valid test case."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport xarray as xr\n\ndef test_merge_dataset_with_dataarray():\n    # Create a Dataset and a DataArray\n    ds = xr.Dataset({'a': 0})\n    da = xr.DataArray(1, name='b')\n\n    # Attempt to merge using ds.merge() and check if it matches the expected result\n    expected = xr.merge([ds, da])\n    actual = ds.merge(da)\n\n    # Assert that the actual result matches the expected result\n    xr.testing.assert_identical(expected, actual)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.07795500000000001
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "instance_id": "django__django-11790",
+    "problem_statement": [
+      "AuthenticationForm's username field doesn't set maxlength HTML attribute.\nDescription\n\t\nAuthenticationForm's username field doesn't render with maxlength HTML attribute anymore.\nRegression introduced in #27515 and 5ceaf14686ce626404afb6a5fbd3d8286410bf13.\n\u200bhttps://groups.google.com/forum/?utm_source=digest&utm_medium=email#!topic/django-developers/qnfSqro0DlA\n\u200bhttps://forum.djangoproject.com/t/possible-authenticationform-max-length-regression-in-django-2-1/241\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.contrib.auth.forms import AuthenticationForm\n\nclass AuthenticationFormMaxLengthTest(SimpleTestCase):\n    def test_username_field_maxlength_absence(self):\n        \"\"\"\n        Test that the maxlength attribute is missing in the username field's HTML.\n        This confirms the bug where maxlength is not set.\n        \"\"\"\n        form = AuthenticationForm()\n        form_html = form.as_p()\n        \n        # Extract the username field's HTML\n        username_field_html = form.fields['username'].widget.render('username', '')\n        \n        # Check that maxlength is not present in the username field's HTML\n        self.assertNotIn('maxlength', username_field_html)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_q4xsbpq2"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "1f0f819755b2",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 13892,
+      "num_statements": 39603,
+      "percent_covered": 30.846222222222224,
+      "percent_covered_display": "31",
+      "missing_lines": 25711,
+      "excluded_lines": 0,
+      "num_branches": 16647,
+      "num_partial_branches": 649,
+      "covered_branches": 3459,
+      "missing_branches": 13188
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.contrib.auth.forms import AuthenticationForm\n\nclass AuthenticationFormMaxLengthTest(SimpleTestCase):\n    def test_username_field_maxlength_absence(self):\n        \"\"\"\n        Test that the maxlength attribute is missing in the username field's HTML.\n        This confirms the bug where maxlength is not set.\n        \"\"\"\n        form = AuthenticationForm()\n        form_html = form.as_p()\n        \n        # Extract the username field's HTML\n        username_field_html = form.fields['username'].widget.render('username', '')\n        \n        # Check that maxlength is not present in the username field's HTML\n        self.assertNotIn('maxlength', username_field_html)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.contrib.auth.forms import AuthenticationForm\n\nclass AuthenticationFormMaxLengthTest(SimpleTestCase):\n    def test_username_field_maxlength_absence(self):\n        \"\"\"\n        Test that the maxlength attribute is missing in the username field's HTML.\n        This confirms the bug where maxlength is not set.\n        \"\"\"\n        form = AuthenticationForm()\n        form_html = form.as_p()\n        \n        # Extract the username field's HTML\n        username_field_html = form.fields['username'].widget.render('username', '')\n        \n        # Check that maxlength is not present in the username field's HTML\n        self.assertNotIn('maxlength', username_field_html)\n        # BUG: this behavior is incorrect but currently happens due to the bug\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.contrib.auth.forms import AuthenticationForm\n\nclass AuthenticationFormMaxLengthTest(SimpleTestCase):\n    def test_username_field_maxlength_presence(self):\n        \"\"\"\n        Test that the maxlength attribute is present in the username field's HTML.\n        This confirms the expected behavior where maxlength is set.\n        \"\"\"\n        form = AuthenticationForm()\n        form_html = form.as_p()\n        \n        # Extract the username field's HTML\n        username_field_html = form.fields['username'].widget.render('username', '')\n        \n        # Check that maxlength is present in the username field's HTML\n        self.assertIn('maxlength', username_field_html)\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "./tests/runtests.py",
+      "--verbosity",
+      "2",
+      "--settings=test_sqlite",
+      "--parallel",
+      "1",
+      "test_gkv_gedd"
+    ],
+    "test_command_env": {
+      "PROJECT_NAME": "django",
+      "HOSTNAME": "1f0f819755b2",
+      "LANGUAGE": "en_US:en",
+      "AZURE_API_VERSION": "2024-05-01-preview",
+      "PWD": "/testbed",
+      "TZ": "Etc/UTC",
+      "AZURE_API_BASE": "https://mayilcali.openai.azure.com/",
+      "HOME": "/root",
+      "LANG": "en_US.UTF-8",
+      "AZURE_API_KEY": "CyGE5XklWkErhG4nrQR7YzWOkXg4agibVBCJxzzzmYfNIhfE6lswJQQJ99ALAC4f1cMXJ3w3AAABACOG6tFG",
+      "SHLVL": "0",
+      "LC_ALL": "en_US.UTF-8",
+      "PATH": "/opt/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "CUSTOM_INSTRUCTIONS": "Do NOT use or import pytest you must use django.test\n\nFor example:\n\n```python\nfrom django.test import SimpleTestCase\nfrom django.test.utils import isolate_apps\n\n@isolate_apps(\"absolute_url_overrides\")\nclass AbsoluteUrlOverrideTests(SimpleTestCase):\n    def test_get_absolute_url(self):\n        \"\"\"\n        get_absolute_url() functions as a normal method.\n        \"\"\"\n\n        def get_absolute_url(o):\n            return \"/test-a/%s/\" % o.pk\n\n        TestA = self._create_model_class(\"TestA\", get_absolute_url)\n\n        self.assertTrue(hasattr(TestA, \"get_absolute_url\"))\n        obj = TestA(pk=1, name=\"Foo\")\n        self.assertEqual(\"/test-a/%s/\" % obj.pk, obj.get_absolute_url())\n```\n",
+      "_": "/opt/miniconda3/bin/coverup",
+      "TIKTOKEN_CACHE_DIR": "/opt/miniconda3/lib/python3.11/site-packages/litellm/litellm_core_utils/tokenizers",
+      "PYTHONPATH": "/testbed/tests"
+    },
+    "error": "test_username_field_maxlength_presence (test_gkv_gedd.AuthenticationFormMaxLengthTest) ... FAIL\n\n======================================================================\nFAIL: test_username_field_maxlength_presence (test_gkv_gedd.AuthenticationFormMaxLengthTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_gkv_gedd.py\", line 17, in test_username_field_maxlength_presence\n    self.assertIn('maxlength', username_field_html)\nAssertionError: 'maxlength' not found in '<input type=\"text\" name=\"username\" autofocus autocapitalize=\"none\" autocomplete=\"username\">'\n\n----------------------------------------------------------------------\nRan 1 test in 0.004s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 13893,
+      "num_statements": 39603,
+      "percent_covered": 30.848,
+      "percent_covered_display": "31",
+      "missing_lines": 25710,
+      "excluded_lines": 0,
+      "num_branches": 16647,
+      "num_partial_branches": 649,
+      "covered_branches": 3459,
+      "missing_branches": 13188
+    },
+    "test_code": "from django.test import SimpleTestCase\nfrom django.contrib.auth.forms import AuthenticationForm\n\nclass AuthenticationFormMaxLengthTest(SimpleTestCase):\n    def test_username_field_maxlength_presence(self):\n        \"\"\"\n        Test that the maxlength attribute is present in the username field's HTML.\n        This confirms the expected behavior where maxlength is set.\n        \"\"\"\n        form = AuthenticationForm()\n        form_html = form.as_p()\n        \n        # Extract the username field's HTML\n        username_field_html = form.fields['username'].widget.render('username', '')\n        \n        # Check that maxlength is present in the username field's HTML\n        self.assertIn('maxlength', username_field_html)\n"
+  },
+  {
+    "no_validation_ablation_test": "from django.test import SimpleTestCase\nfrom django.contrib.auth.forms import AuthenticationForm\n\nclass AuthenticationFormMaxLengthTest(SimpleTestCase):\n    def test_username_field_maxlength_presence(self):\n        \"\"\"\n        Test that the maxlength attribute is present in the username field's HTML.\n        This confirms the expected behavior where maxlength is set.\n        \"\"\"\n        form = AuthenticationForm()\n        form_html = form.as_p()\n        \n        # Extract the username field's HTML\n        username_field_html = form.fields['username'].widget.render('username', '')\n        \n        # Check that maxlength is present in the username field's HTML\n        self.assertIn('maxlength', username_field_html)\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "from django.test import SimpleTestCase\nfrom django.contrib.auth.forms import AuthenticationForm\n\nclass AuthenticationFormMaxLengthTest(SimpleTestCase):\n    def test_username_field_maxlength_presence(self):\n        \"\"\"\n        Test that the maxlength attribute is present in the username field's HTML.\n        This confirms the expected behavior where maxlength is set.\n        \"\"\"\n        form = AuthenticationForm()\n        form_html = form.as_p()\n        \n        # Extract the username field's HTML\n        username_field_html = form.fields['username'].widget.render('username', '')\n        \n        # Check that maxlength is present in the username field's HTML\n        self.assertIn('maxlength', username_field_html)\n",
+    "error": "test_username_field_maxlength_presence (test_gkv_gedd.AuthenticationFormMaxLengthTest) ... FAIL\n\n======================================================================\nFAIL: test_username_field_maxlength_presence (test_gkv_gedd.AuthenticationFormMaxLengthTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/testbed/tests/test_gkv_gedd.py\", line 17, in test_username_field_maxlength_presence\n    self.assertIn('maxlength', username_field_html)\nAssertionError: 'maxlength' not found in '<input type=\"text\" name=\"username\" autofocus autocapitalize=\"none\" autocomplete=\"username\">'\n\n----------------------------------------------------------------------\nRan 1 test in 0.004s\n\nFAILED (failures=1)\nTesting against Django installed in '/testbed/django'\nSkipping setup of unused database(s): default, other.\nSystem check identified no issues (0 silenced).\n",
+    "revealing": true,
+    "reason": "The test is designed to verify that the 'maxlength' attribute is present in the HTML output of the username field of the AuthenticationForm. The issue ticket reports that this attribute is missing, which is exactly what the test is checking for. The test failure shows that the 'maxlength' attribute is indeed missing from the HTML output, as the rendered HTML for the username field does not contain 'maxlength'. This confirms that the test is correctly reproducing the reported bug. The test is valid because it directly addresses the issue described in the ticket by checking for the presence of the 'maxlength' attribute in the username field's HTML, which is the expected behavior that has regressed."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "from django.test import SimpleTestCase\nfrom django.contrib.auth.forms import AuthenticationForm\n\nclass AuthenticationFormMaxLengthTest(SimpleTestCase):\n    def test_username_field_maxlength_presence(self):\n        \"\"\"\n        Test that the maxlength attribute is present in the username field's HTML.\n        This confirms the expected behavior where maxlength is set.\n        \"\"\"\n        form = AuthenticationForm()\n        form_html = form.as_p()\n        \n        # Extract the username field's HTML\n        username_field_html = form.fields['username'].widget.render('username', '')\n        \n        # Check that maxlength is present in the username field's HTML\n        self.assertIn('maxlength', username_field_html)\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.049830000000000006
+  }
+]

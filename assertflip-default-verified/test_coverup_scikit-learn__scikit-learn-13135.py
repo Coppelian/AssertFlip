@@ -1,0 +1,15 @@
+import numpy as np
+import pytest
+from sklearn.preprocessing import KBinsDiscretizer
+
+def test_kmeans_strategy_unsorted_bin_edges():
+    # Test setup
+    X = np.array([0, 0.5, 2, 3, 9, 10]).reshape(-1, 1)
+    n_bins = 5
+    est = KBinsDiscretizer(n_bins=n_bins, strategy='kmeans', encode='ordinal')
+    
+    # Test that no ValueError is raised when bin_edges are sorted correctly
+    try:
+        est.fit_transform(X)
+    except ValueError as e:
+        assert False, f"Unexpected ValueError raised: {e}"

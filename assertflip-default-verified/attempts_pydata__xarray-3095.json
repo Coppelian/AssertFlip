@@ -1,0 +1,110 @@
+[
+  {
+    "instance_id": "pydata__xarray-3095",
+    "problem_statement": [
+      "REGRESSION: copy(deep=True) casts unicode indices to object\nDataset.copy(deep=True) and DataArray.copy (deep=True/False) accidentally cast IndexVariable's with dtype='<U*' to object. Same applies to copy.copy() and copy.deepcopy().\r\n\r\nThis is a regression in xarray >= 0.12.2. xarray 0.12.1 and earlier are unaffected.\r\n\r\n```\r\n\r\nIn [1]: ds = xarray.Dataset(\r\n   ...:     coords={'x': ['foo'], 'y': ('x', ['bar'])},\r\n   ...:     data_vars={'z': ('x', ['baz'])})                                                              \r\n\r\nIn [2]: ds                                                                                                                                                                                                                     \r\nOut[2]: \r\n<xarray.Dataset>\r\nDimensions:  (x: 1)\r\nCoordinates:\r\n  * x        (x) <U3 'foo'\r\n    y        (x) <U3 'bar'\r\nData variables:\r\n    z        (x) <U3 'baz'\r\n\r\nIn [3]: ds.copy()                                                                                                                                                                                                              \r\nOut[3]: \r\n<xarray.Dataset>\r\nDimensions:  (x: 1)\r\nCoordinates:\r\n  * x        (x) <U3 'foo'\r\n    y        (x) <U3 'bar'\r\nData variables:\r\n    z        (x) <U3 'baz'\r\n\r\nIn [4]: ds.copy(deep=True)                                                                                                                                                                                                     \r\nOut[4]: \r\n<xarray.Dataset>\r\nDimensions:  (x: 1)\r\nCoordinates:\r\n  * x        (x) object 'foo'\r\n    y        (x) <U3 'bar'\r\nData variables:\r\n    z        (x) <U3 'baz'\r\n\r\nIn [5]: ds.z                                                                                                                                                                                                                   \r\nOut[5]: \r\n<xarray.DataArray 'z' (x: 1)>\r\narray(['baz'], dtype='<U3')\r\nCoordinates:\r\n  * x        (x) <U3 'foo'\r\n    y        (x) <U3 'bar'\r\n\r\nIn [6]: ds.z.copy()                                                                                                                                                                                                            \r\nOut[6]: \r\n<xarray.DataArray 'z' (x: 1)>\r\narray(['baz'], dtype='<U3')\r\nCoordinates:\r\n  * x        (x) object 'foo'\r\n    y        (x) <U3 'bar'\r\n\r\nIn [7]: ds.z.copy(deep=True)                                                                                                                                                                                                   \r\nOut[7]: \r\n<xarray.DataArray 'z' (x: 1)>\r\narray(['baz'], dtype='<U3')\r\nCoordinates:\r\n  * x        (x) object 'foo'\r\n    y        (x) <U3 'bar'\r\n```\n"
+    ]
+  },
+  {
+    "generation_attempt": 0
+  },
+  {
+    "phase": "first_test",
+    "attempt": 1,
+    "sub_attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_deep_copy_unicode_index_cast_to_object():\n    # Create a Dataset with Unicode index variables\n    ds = xr.Dataset(\n        coords={'x': ['foo'], 'y': ('x', ['bar'])},\n        data_vars={'z': ('x', ['baz'])}\n    )\n    \n    # Perform a deep copy of the dataset\n    ds_copy = ds.copy(deep=True)\n    \n    # Assert that the dtype of the 'x' coordinate in the copied dataset is 'object'\n    # BUG: this behavior is incorrect but currently happens due to the bug\n    assert ds_copy.coords['x'].dtype == object, \"Expected dtype 'object' due to bug, but got different dtype\"\n    \n    # Assert that the 'y' coordinate and 'z' data variable retain their original dtype '<U3'\n    assert ds_copy.coords['y'].dtype == '<U3', \"Expected dtype '<U3' for 'y' coordinate\"\n    assert ds_copy['z'].dtype == '<U3', \"Expected dtype '<U3' for 'z' data variable\"\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/xarray/tests/test_bz4h33so.py"
+    ],
+    "test_command_env": {},
+    "status": "passing",
+    "coverage": {
+      "covered_lines": 3220,
+      "num_statements": 12450,
+      "percent_covered": 19.097298484515704,
+      "percent_covered_display": "19",
+      "missing_lines": 9230,
+      "excluded_lines": 90,
+      "num_branches": 5762,
+      "num_partial_branches": 122,
+      "covered_branches": 258,
+      "missing_branches": 5504
+    },
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_deep_copy_unicode_index_cast_to_object():\n    # Create a Dataset with Unicode index variables\n    ds = xr.Dataset(\n        coords={'x': ['foo'], 'y': ('x', ['bar'])},\n        data_vars={'z': ('x', ['baz'])}\n    )\n    \n    # Perform a deep copy of the dataset\n    ds_copy = ds.copy(deep=True)\n    \n    # Assert that the dtype of the 'x' coordinate in the copied dataset is 'object'\n    # BUG: this behavior is incorrect but currently happens due to the bug\n    assert ds_copy.coords['x'].dtype == object, \"Expected dtype 'object' due to bug, but got different dtype\"\n    \n    # Assert that the 'y' coordinate and 'z' data variable retain their original dtype '<U3'\n    assert ds_copy.coords['y'].dtype == '<U3', \"Expected dtype '<U3' for 'y' coordinate\"\n    assert ds_copy['z'].dtype == '<U3', \"Expected dtype '<U3' for 'z' data variable\"\n"
+  },
+  {
+    "phase": "generate_passing_test",
+    "used_test": "original",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_deep_copy_unicode_index_cast_to_object():\n    # Create a Dataset with Unicode index variables\n    ds = xr.Dataset(\n        coords={'x': ['foo'], 'y': ('x', ['bar'])},\n        data_vars={'z': ('x', ['baz'])}\n    )\n    \n    # Perform a deep copy of the dataset\n    ds_copy = ds.copy(deep=True)\n    \n    # Assert that the dtype of the 'x' coordinate in the copied dataset is 'object'\n    # BUG: this behavior is incorrect but currently happens due to the bug\n    assert ds_copy.coords['x'].dtype == object, \"Expected dtype 'object' due to bug, but got different dtype\"\n    \n    # Assert that the 'y' coordinate and 'z' data variable retain their original dtype '<U3'\n    assert ds_copy.coords['y'].dtype == '<U3', \"Expected dtype '<U3' for 'y' coordinate\"\n    assert ds_copy['z'].dtype == '<U3', \"Expected dtype '<U3' for 'z' data variable\"\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "status": "generated",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_deep_copy_unicode_index_cast_to_object():\n    # Create a Dataset with Unicode index variables\n    ds = xr.Dataset(\n        coords={'x': ['foo'], 'y': ('x', ['bar'])},\n        data_vars={'z': ('x', ['baz'])}\n    )\n    \n    # Perform a deep copy of the dataset\n    ds_copy = ds.copy(deep=True)\n    \n    # Assert that the dtype of the 'x' coordinate in the copied dataset is '<U3'\n    # This is the expected correct behavior\n    assert ds_copy.coords['x'].dtype == '<U3', \"Expected dtype '<U3' for 'x' coordinate\"\n    \n    # Assert that the 'y' coordinate and 'z' data variable retain their original dtype '<U3'\n    assert ds_copy.coords['y'].dtype == '<U3', \"Expected dtype '<U3' for 'y' coordinate\"\n    assert ds_copy['z'].dtype == '<U3', \"Expected dtype '<U3' for 'z' data variable\"\n\n"
+  },
+  {
+    "phase": "invert_to_failing",
+    "attempt": 1,
+    "test_command": [
+      "/opt/miniconda3/envs/testbed/bin/python",
+      "-m",
+      "coverage",
+      "run",
+      "--branch",
+      "-m",
+      "pytest",
+      "-rA",
+      "/testbed/xarray/tests/test_vw_zcter.py"
+    ],
+    "test_command_env": {},
+    "error": "    def test_deep_copy_unicode_index_cast_to_object():\n        # Create a Dataset with Unicode index variables\n        ds = xr.Dataset(\n            coords={'x': ['foo'], 'y': ('x', ['bar'])},\n            data_vars={'z': ('x', ['baz'])}\n        )\n    \n        # Perform a deep copy of the dataset\n        ds_copy = ds.copy(deep=True)\n    \n        # Assert that the dtype of the 'x' coordinate in the copied dataset is '<U3'\n        # This is the expected correct behavior\n>       assert ds_copy.coords['x'].dtype == '<U3', \"Expected dtype '<U3' for 'x' coordinate\"\nE       AssertionError: Expected dtype '<U3' for 'x' coordinate\nE       assert dtype('O') == '<U3'\nE        +  where dtype('O') = <xarray.DataArray 'x' (x: 1)>\\narray(['foo'], dtype=object)\\nCoordinates:\\n  * x        (x) object 'foo'\\n    y        (x) <U3 'bar'.dtype\n\nxarray/tests/test_vw_zcter.py:16: AssertionError\n=============================== warnings summary ===============================\nxarray/core/dask_array_ops.py:11\nxarray/core/dask_array_ops.py:11\n  /testbed/xarray/core/dask_array_ops.py:11: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask.__version__) <= LooseVersion('0.18.2'):\n\nxarray/core/npcompat.py:135\nxarray/core/npcompat.py:135\n  /testbed/xarray/core/npcompat.py:135: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(np.__version__) >= LooseVersion('1.13'):\n\nxarray/core/dask_array_compat.py:43\nxarray/core/dask_array_compat.py:43\n  /testbed/xarray/core/dask_array_compat.py:43: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) > LooseVersion('0.19.2'):\n\nxarray/plot/utils.py:17\nxarray/plot/utils.py:17\n  /testbed/xarray/plot/utils.py:17: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(nc_time_axis.__version__) < LooseVersion('1.2.0'):\n\nxarray/core/pdcompat.py:46\n  /testbed/xarray/core/pdcompat.py:46: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(pd.__version__) < '0.25.0':\n\n../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345\n../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345\n  /opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    other = LooseVersion(other)\n\nxarray/tests/__init__.py:57: 15 warnings\n  /testbed/xarray/tests/__init__.py:57: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    return version.LooseVersion(vstring)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n",
+    "status": "failing",
+    "coverage": {
+      "covered_lines": 3360,
+      "num_statements": 12450,
+      "percent_covered": 20.1680210849989,
+      "percent_covered_display": "20",
+      "missing_lines": 9090,
+      "excluded_lines": 90,
+      "num_branches": 5762,
+      "num_partial_branches": 157,
+      "covered_branches": 313,
+      "missing_branches": 5449
+    },
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_deep_copy_unicode_index_cast_to_object():\n    # Create a Dataset with Unicode index variables\n    ds = xr.Dataset(\n        coords={'x': ['foo'], 'y': ('x', ['bar'])},\n        data_vars={'z': ('x', ['baz'])}\n    )\n    \n    # Perform a deep copy of the dataset\n    ds_copy = ds.copy(deep=True)\n    \n    # Assert that the dtype of the 'x' coordinate in the copied dataset is '<U3'\n    # This is the expected correct behavior\n    assert ds_copy.coords['x'].dtype == '<U3', \"Expected dtype '<U3' for 'x' coordinate\"\n    \n    # Assert that the 'y' coordinate and 'z' data variable retain their original dtype '<U3'\n    assert ds_copy.coords['y'].dtype == '<U3', \"Expected dtype '<U3' for 'y' coordinate\"\n    assert ds_copy['z'].dtype == '<U3', \"Expected dtype '<U3' for 'z' data variable\"\n\n"
+  },
+  {
+    "no_validation_ablation_test": "import pytest\nimport xarray as xr\n\ndef test_deep_copy_unicode_index_cast_to_object():\n    # Create a Dataset with Unicode index variables\n    ds = xr.Dataset(\n        coords={'x': ['foo'], 'y': ('x', ['bar'])},\n        data_vars={'z': ('x', ['baz'])}\n    )\n    \n    # Perform a deep copy of the dataset\n    ds_copy = ds.copy(deep=True)\n    \n    # Assert that the dtype of the 'x' coordinate in the copied dataset is '<U3'\n    # This is the expected correct behavior\n    assert ds_copy.coords['x'].dtype == '<U3', \"Expected dtype '<U3' for 'x' coordinate\"\n    \n    # Assert that the 'y' coordinate and 'z' data variable retain their original dtype '<U3'\n    assert ds_copy.coords['y'].dtype == '<U3', \"Expected dtype '<U3' for 'y' coordinate\"\n    assert ds_copy['z'].dtype == '<U3', \"Expected dtype '<U3' for 'z' data variable\"\n\n"
+  },
+  {
+    "phase": "validate_bug_with_llm",
+    "test_code": "import pytest\nimport xarray as xr\n\ndef test_deep_copy_unicode_index_cast_to_object():\n    # Create a Dataset with Unicode index variables\n    ds = xr.Dataset(\n        coords={'x': ['foo'], 'y': ('x', ['bar'])},\n        data_vars={'z': ('x', ['baz'])}\n    )\n    \n    # Perform a deep copy of the dataset\n    ds_copy = ds.copy(deep=True)\n    \n    # Assert that the dtype of the 'x' coordinate in the copied dataset is '<U3'\n    # This is the expected correct behavior\n    assert ds_copy.coords['x'].dtype == '<U3', \"Expected dtype '<U3' for 'x' coordinate\"\n    \n    # Assert that the 'y' coordinate and 'z' data variable retain their original dtype '<U3'\n    assert ds_copy.coords['y'].dtype == '<U3', \"Expected dtype '<U3' for 'y' coordinate\"\n    assert ds_copy['z'].dtype == '<U3', \"Expected dtype '<U3' for 'z' data variable\"\n\n",
+    "error": "    def test_deep_copy_unicode_index_cast_to_object():\n        # Create a Dataset with Unicode index variables\n        ds = xr.Dataset(\n            coords={'x': ['foo'], 'y': ('x', ['bar'])},\n            data_vars={'z': ('x', ['baz'])}\n        )\n    \n        # Perform a deep copy of the dataset\n        ds_copy = ds.copy(deep=True)\n    \n        # Assert that the dtype of the 'x' coordinate in the copied dataset is '<U3'\n        # This is the expected correct behavior\n>       assert ds_copy.coords['x'].dtype == '<U3', \"Expected dtype '<U3' for 'x' coordinate\"\nE       AssertionError: Expected dtype '<U3' for 'x' coordinate\nE       assert dtype('O') == '<U3'\nE        +  where dtype('O') = <xarray.DataArray 'x' (x: 1)>\\narray(['foo'], dtype=object)\\nCoordinates:\\n  * x        (x) object 'foo'\\n    y        (x) <U3 'bar'.dtype\n\nxarray/tests/test_vw_zcter.py:16: AssertionError\n=============================== warnings summary ===============================\nxarray/core/dask_array_ops.py:11\nxarray/core/dask_array_ops.py:11\n  /testbed/xarray/core/dask_array_ops.py:11: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask.__version__) <= LooseVersion('0.18.2'):\n\nxarray/core/npcompat.py:135\nxarray/core/npcompat.py:135\n  /testbed/xarray/core/npcompat.py:135: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(np.__version__) >= LooseVersion('1.13'):\n\nxarray/core/dask_array_compat.py:43\nxarray/core/dask_array_compat.py:43\n  /testbed/xarray/core/dask_array_compat.py:43: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(dask_version) > LooseVersion('0.19.2'):\n\nxarray/plot/utils.py:17\nxarray/plot/utils.py:17\n  /testbed/xarray/plot/utils.py:17: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(nc_time_axis.__version__) < LooseVersion('1.2.0'):\n\nxarray/core/pdcompat.py:46\n  /testbed/xarray/core/pdcompat.py:46: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    if LooseVersion(pd.__version__) < '0.25.0':\n\n../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345\n../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345\n  /opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    other = LooseVersion(other)\n\nxarray/tests/__init__.py:57: 15 warnings\n  /testbed/xarray/tests/__init__.py:57: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n    return version.LooseVersion(vstring)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n",
+    "revealing": true,
+    "reason": "The test is designed to verify that the dtype of the 'x' coordinate in a deep-copied xarray Dataset remains '<U3', which is a Unicode string type. However, the test fails because the dtype of the 'x' coordinate in the copied dataset is 'object', not '<U3'. This behavior matches the issue described in the ticket, where deep copying a Dataset with Unicode index variables results in the dtype being cast to 'object'. The test correctly reproduces the bug as described in the issue ticket, confirming that the dtype of the 'x' coordinate changes from '<U3' to 'object' upon deep copying. Therefore, the test is valid and successfully reveals the reported bug."
+  },
+  {
+    "phase": "terminating",
+    "mode": "passing_first",
+    "final_test": "import pytest\nimport xarray as xr\n\ndef test_deep_copy_unicode_index_cast_to_object():\n    # Create a Dataset with Unicode index variables\n    ds = xr.Dataset(\n        coords={'x': ['foo'], 'y': ('x', ['bar'])},\n        data_vars={'z': ('x', ['baz'])}\n    )\n    \n    # Perform a deep copy of the dataset\n    ds_copy = ds.copy(deep=True)\n    \n    # Assert that the dtype of the 'x' coordinate in the copied dataset is '<U3'\n    # This is the expected correct behavior\n    assert ds_copy.coords['x'].dtype == '<U3', \"Expected dtype '<U3' for 'x' coordinate\"\n    \n    # Assert that the 'y' coordinate and 'z' data variable retain their original dtype '<U3'\n    assert ds_copy.coords['y'].dtype == '<U3', \"Expected dtype '<U3' for 'y' coordinate\"\n    assert ds_copy['z'].dtype == '<U3', \"Expected dtype '<U3' for 'z' data variable\"\n\n",
+    "outcome": "success"
+  },
+  {
+    "meta": "cost_summary",
+    "total_cost": 0.08308750000000001
+  }
+]

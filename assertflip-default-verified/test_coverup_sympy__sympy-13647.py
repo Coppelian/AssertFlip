@@ -1,0 +1,24 @@
+from sympy import eye, ones
+from sympy.utilities.pytest import raises
+
+def test_matrix_col_insert_bug():
+    # Create a 6x6 identity matrix
+    M = eye(6)
+    # Create a 6x2 matrix filled with the value 2
+    V = 2 * ones(6, 2)
+    # Insert the 6x2 matrix into the identity matrix at the 3rd column index
+    result = M.col_insert(3, V)
+    
+    # Assert the resulting matrix has the expected dimensions (6x8)
+    assert result.shape == (6, 8)
+    
+    # Assert that the identity matrix is shifted correctly
+    expected_correct_matrix = [
+        [1, 0, 0, 2, 2, 0, 0, 0],
+        [0, 1, 0, 2, 2, 0, 0, 0],
+        [0, 0, 1, 2, 2, 0, 0, 0],
+        [0, 0, 0, 2, 2, 1, 0, 0],
+        [0, 0, 0, 2, 2, 0, 1, 0],
+        [0, 0, 0, 2, 2, 0, 0, 1]
+    ]
+    assert result.tolist() == expected_correct_matrix

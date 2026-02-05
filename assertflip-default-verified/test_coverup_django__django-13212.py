@@ -1,0 +1,19 @@
+from django.test import SimpleTestCase
+from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
+
+class EmailValidatorTest(SimpleTestCase):
+    def test_email_validator_includes_value_in_error(self):
+        """
+        Test that the EmailValidator raises a ValidationError including
+        the provided value in the error message.
+        """
+        validator = EmailValidator(message="%(value)s is not a valid email address.")
+        invalid_email = "invalid-email"
+
+        with self.assertRaises(ValidationError) as cm:
+            validator(invalid_email)
+
+        error_message = str(cm.exception)
+        # The error message should include the invalid value.
+        self.assertIn(invalid_email, error_message)
