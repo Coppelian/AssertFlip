@@ -1,0 +1,13 @@
+{
+  "instance_id": "sympy__sympy-23950",
+  "problem_statement": "Contains.as_set returns Contains\n```py\r\n>>> Contains(x, Reals).as_set()\r\nContains(x, Reals)\r\n```\r\n\r\nThis is wrong because Contains is not a set (it's a boolean). It results in failures in other places because it doesn't have as_relational (since it isn't a set). For instance, from https://github.com/sympy/sympy/pull/14965#discussion_r205281989\r\n\r\n```pytb\r\n>>> Piecewise((6, Contains(x, Reals)), (7, True))\r\nTraceback (most recent call last):\r\n  File \"<stdin>\", line 1, in <module>\r\n  File \"./sympy/functions/elementary/piecewise.py\", line 136, in __new__\r\n    r = cls.eval(*newargs)\r\n  File \"./sympy/functions/elementary/piecewise.py\", line 185, in eval\r\n    c = c.as_set().as_relational(x)\r\nAttributeError: 'Contains' object has no attribute 'as_relational'\r\n```\n",
+  "localized_code": "[start of sympy/sets/contains.py]\n1: from sympy.core import S\n2: from sympy.core.relational import Eq, Ne\n3: from sympy.logic.boolalg import BooleanFunction\n4: from sympy.utilities.misc import func_name\n5: from .sets import Set\n6: \n7: \n8: class Contains(BooleanFunction):\n9:     \"\"\"\n10:     Asserts that x is an element of the set S.\n11: \n12:     Examples\n13:     ========\n14: \n15:     >>> from sympy import Symbol, Integer, S, Contains\n16:     >>> Contains(Integer(2), S.Integers)\n17:     True\n18:     >>> Contains(Integer(-2), S.Naturals)\n19:     False\n20:     >>> i = Symbol('i', integer=True)\n21:     >>> Contains(i, S.Naturals)\n22:     Contains(i, Naturals)\n23: \n24:     References\n25:     ==========\n26: \n27:     .. [1] https://en.wikipedia.org/wiki/Element_%28mathematics%29\n28:     \"\"\"\n29:     @classmethod\n30:     def eval(cls, x, s):\n31: \n32:         if not isinstance(s, Set):\n33:             raise TypeError('expecting Set, not %s' % func_name(s))\n34: \n35:         ret = s.contains(x)\n36:         if not isinstance(ret, Contains) and (\n37:                 ret in (S.true, S.false) or isinstance(ret, Set)):\n38:             return ret\n39: \n40:     @property\n41:     def binary_symbols(self):\n42:         return set().union(*[i.binary_symbols\n43:             for i in self.args[1].args\n44:             if i.is_Boolean or i.is_Symbol or\n45:             isinstance(i, (Eq, Ne))])\n46: \n47:     def as_set(self):\n48:         raise NotImplementedError()\n\n",
+  "line_level_localization": [
+    {
+      "filename": "/sympy/sets/contains.py",
+      "suspect_lines": [
+        48
+      ]
+    }
+  ]
+}

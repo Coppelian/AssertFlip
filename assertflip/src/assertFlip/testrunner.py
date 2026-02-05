@@ -13,7 +13,7 @@ async def measure_test_coverage(*, test: str, tests_dir: Path, test_command: str
         try:
             t.write(test)
             t.flush()
-            _executable = "/opt/miniconda3/envs/testbed/bin/python"
+            _executable = "/home/coppelia/Program/AssertFlip/.venv/bin/python"
             _cover = "coverage run"
             if "pytest" not in test_command:
                 pytest_args = ""

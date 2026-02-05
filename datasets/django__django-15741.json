@@ -1,0 +1,11 @@
+{
+  "instance_id": "django__django-15741",
+  "problem_statement": "django.utils.formats.get_format should allow lazy parameter\nDescription\n\t\nCommit [659d2421c7adb] (fixing #20296) triggered a regression when the date template filter (possibly others are affected too) receives a lazy string, like in some_date|date:_('Y-m-d').\nThis fails with: TypeError: getattr(): attribute name must be string in django.utils.formats.get_format.\n",
+  "localized_code": "[start of django/utils/formats.py]\n1: import datetime\n2: import decimal\n3: import functools\n4: import re\n5: import unicodedata\n6: from importlib import import_module\n7: \n8: from django.conf import settings\n9: from django.utils import dateformat, numberformat\n10: from django.utils.functional import lazy\n11: from django.utils.translation import check_for_language, get_language, to_locale\n12: \n13: # format_cache is a mapping from (format_type, lang) to the format string.\n14: # By using the cache, it is possible to avoid running get_format_modules\n15: # repeatedly.\n16: _format_cache = {}\n17: _format_modules_cache = {}\n18: \n19: ISO_INPUT_FORMATS = {\n20:     \"DATE_INPUT_FORMATS\": [\"%Y-%m-%d\"],\n21:     \"TIME_INPUT_FORMATS\": [\"%H:%M:%S\", \"%H:%M:%S.%f\", \"%H:%M\"],\n22:     \"DATETIME_INPUT_FORMATS\": [\n23:         \"%Y-%m-%d %H:%M:%S\",\n24:         \"%Y-%m-%d %H:%M:%S.%f\",\n25:         \"%Y-%m-%d %H:%M\",\n26:         \"%Y-%m-%d\",\n27:     ],\n28: }\n29: \n30: \n31: FORMAT_SETTINGS = frozenset(\n32:     [\n33:         \"DECIMAL_SEPARATOR\",\n34:         \"THOUSAND_SEPARATOR\",\n35:         \"NUMBER_GROUPING\",\n36:         \"FIRST_DAY_OF_WEEK\",\n37:         \"MONTH_DAY_FORMAT\",\n38:         \"TIME_FORMAT\",\n39:         \"DATE_FORMAT\",\n40:         \"DATETIME_FORMAT\",\n41:         \"SHORT_DATE_FORMAT\",\n42:         \"SHORT_DATETIME_FORMAT\",\n43:         \"YEAR_MONTH_FORMAT\",\n44:         \"DATE_INPUT_FORMATS\",\n45:         \"TIME_INPUT_FORMATS\",\n46:         \"DATETIME_INPUT_FORMATS\",\n47:     ]\n48: )\n49: \n50: \n51: def reset_format_cache():\n... Code Truncated ...\n\n",
+  "line_level_localization": [
+    {
+      "filename": "/django/utils/formats.py",
+      "suspect_lines": []
+    }
+  ]
+}

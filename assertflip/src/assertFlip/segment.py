@@ -30,8 +30,8 @@ class CodeSegment:
         self.missing_branches = missing_branches
         self.context = context
         self.imports = imports
-        self.problem_statement=problem_statement,
-        self.buggy_files=buggy_files,
+        self.problem_statement=problem_statement
+        self.buggy_files=buggy_files
         self.line_level_localization=line_level_localization
         self.instance_id = instance_id
         self.previous_missed_coverage = None

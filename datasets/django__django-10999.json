@@ -1,0 +1,15 @@
+{
+  "instance_id": "django__django-10999",
+  "problem_statement": "Fix parse_duration() for some negative durations\nDescription\n\t\nThe ​https://docs.djangoproject.com/en/2.1/_modules/django/utils/dateparse/ defines:\nstandard_duration_re = re.compile(\n\tr'^'\n\tr'(?:(?P<days>-?\\d+) (days?, )?)?'\n\tr'((?:(?P<hours>-?\\d+):)(?=\\d+:\\d+))?'\n\tr'(?:(?P<minutes>-?\\d+):)?'\n\tr'(?P<seconds>-?\\d+)'\n\tr'(?:\\.(?P<microseconds>\\d{1,6})\\d{0,6})?'\n\tr'$'\n)\nthat doesn't match to negative durations, because of the <hours> definition final (lookahead) part does not have '-?' in it. The following will work:\n\tr'((?:(?P<hours>-?\\d+):)(?=-?\\d+:-?\\d+))?'\n(Thanks to Konstantin Senichev for finding the fix.)\n",
+  "localized_code": "[start of django/utils/dateparse.py]\n1: \"\"\"Functions to parse datetime objects.\"\"\"\n2: \n3: # We're using regular expressions rather than time.strptime because:\n4: # - They provide both validation and parsing.\n5: # - They're more flexible for datetimes.\n6: # - The date/datetime/time constructors produce friendlier error messages.\n7: \n8: import datetime\n9: import re\n10: \n11: from django.utils.timezone import get_fixed_timezone, utc\n12: \n13: date_re = re.compile(\n14:     r'(?P<year>\\d{4})-(?P<month>\\d{1,2})-(?P<day>\\d{1,2})$'\n15: )\n16: \n17: time_re = re.compile(\n18:     r'(?P<hour>\\d{1,2}):(?P<minute>\\d{1,2})'\n19:     r'(?::(?P<second>\\d{1,2})(?:\\.(?P<microsecond>\\d{1,6})\\d{0,6})?)?'\n20: )\n21: \n22: datetime_re = re.compile(\n23:     r'(?P<year>\\d{4})-(?P<month>\\d{1,2})-(?P<day>\\d{1,2})'\n24:     r'[T ](?P<hour>\\d{1,2}):(?P<minute>\\d{1,2})'\n25:     r'(?::(?P<second>\\d{1,2})(?:\\.(?P<microsecond>\\d{1,6})\\d{0,6})?)?'\n26:     r'(?P<tzinfo>Z|[+-]\\d{2}(?::?\\d{2})?)?$'\n27: )\n28: \n29: standard_duration_re = re.compile(\n30:     r'^'\n31:     r'(?:(?P<days>-?\\d+) (days?, )?)?'\n32:     r'((?:(?P<hours>-?\\d+):)(?=\\d+:\\d+))?'\n33:     r'(?:(?P<minutes>-?\\d+):)?'\n34:     r'(?P<seconds>-?\\d+)'\n35:     r'(?:\\.(?P<microseconds>\\d{1,6})\\d{0,6})?'\n36:     r'$'\n37: )\n38: \n39: # Support the sections of ISO 8601 date representation that are accepted by\n40: # timedelta\n41: iso8601_duration_re = re.compile(\n42:     r'^(?P<sign>[-+]?)'\n43:     r'P'\n44:     r'(?:(?P<days>\\d+(.\\d+)?)D)?'\n45:     r'(?:T'\n46:     r'(?:(?P<hours>\\d+(.\\d+)?)H)?'\n47:     r'(?:(?P<minutes>\\d+(.\\d+)?)M)?'\n48:     r'(?:(?P<seconds>\\d+(.\\d+)?)S)?'\n49:     r')?'\n50:     r'$'\n51: )\n... Code Truncated ...\n\n",
+  "line_level_localization": [
+    {
+      "filename": "/django/utils/dateparse.py",
+      "suspect_lines": [
+        32,
+        33,
+        34
+      ]
+    }
+  ]
+}

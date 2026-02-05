@@ -1,0 +1,45 @@
+{
+  "instance_id": "django__django-10973",
+  "problem_statement": "Use subprocess.run and PGPASSWORD for client in postgres backend\nDescription\n\t\n​subprocess.run was added in python 3.5 (which is the minimum version since Django 2.1). This function allows you to pass a custom environment for the subprocess.\nUsing this in django.db.backends.postgres.client to set PGPASSWORD simplifies the code and makes it more reliable.\n",
+  "localized_code": "[start of django/db/backends/postgresql/client.py]\n1: import os\n2: import signal\n3: import subprocess\n4: \n5: from django.core.files.temp import NamedTemporaryFile\n6: from django.db.backends.base.client import BaseDatabaseClient\n7: \n8: \n9: def _escape_pgpass(txt):\n10:     \"\"\"\n11:     Escape a fragment of a PostgreSQL .pgpass file.\n12:     \"\"\"\n13:     return txt.replace('\\\\', '\\\\\\\\').replace(':', '\\\\:')\n14: \n15: \n16: class DatabaseClient(BaseDatabaseClient):\n17:     executable_name = 'psql'\n18: \n19:     @classmethod\n20:     def runshell_db(cls, conn_params):\n21:         args = [cls.executable_name]\n22: \n23:         host = conn_params.get('host', '')\n24:         port = conn_params.get('port', '')\n25:         dbname = conn_params.get('database', '')\n26:         user = conn_params.get('user', '')\n27:         passwd = conn_params.get('password', '')\n28: \n29:         if user:\n30:             args += ['-U', user]\n31:         if host:\n32:             args += ['-h', host]\n33:         if port:\n34:             args += ['-p', str(port)]\n35:         args += [dbname]\n36: \n37:         temp_pgpass = None\n38:         sigint_handler = signal.getsignal(signal.SIGINT)\n39:         try:\n40:             if passwd:\n41:                 # Create temporary .pgpass file.\n42:                 temp_pgpass = NamedTemporaryFile(mode='w+')\n43:                 try:\n44:                     print(\n45:                         _escape_pgpass(host) or '*',\n46:                         str(port) or '*',\n47:                         _escape_pgpass(dbname) or '*',\n48:                         _escape_pgpass(user) or '*',\n49:                         _escape_pgpass(passwd),\n50:                         file=temp_pgpass,\n51:                         sep=':',\n52:                         flush=True,\n53:                     )\n54:                     os.environ['PGPASSFILE'] = temp_pgpass.name\n55:                 except UnicodeEncodeError:\n56:                     # If the current locale can't encode the data, let the\n57:                     # user input the password manually.\n58:                     pass\n59:             # Allow SIGINT to pass to psql to abort queries.\n60:             signal.signal(signal.SIGINT, signal.SIG_IGN)\n61:             subprocess.check_call(args)\n62:         finally:\n63:             # Restore the original SIGINT handler.\n64:             signal.signal(signal.SIGINT, sigint_handler)\n65:             if temp_pgpass:\n66:                 temp_pgpass.close()\n67:                 if 'PGPASSFILE' in os.environ:  # unit tests need cleanup\n68:                     del os.environ['PGPASSFILE']\n69: \n... Code Truncated ...\n\n",
+  "line_level_localization": [
+    {
+      "filename": "/django/db/backends/postgresql/client.py",
+      "suspect_lines": [
+        5,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        37,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        61,
+        65,
+        66,
+        67,
+        68
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "instance_id": "pydata__xarray-4356",
+  "problem_statement": "sum: min_count is not available for reduction with more than one dimensions\n**Is your feature request related to a problem? Please describe.**\r\n\r\n`sum` with `min_count` errors when passing more than one dim:\r\n\r\n```python\r\nimport xarray as xr\r\nda = xr.DataArray([[1., 2, 3], [4, 5, 6]])\r\nda.sum([\"dim_0\", \"dim_1\"], min_count=1)\r\n```\r\n\r\n**Describe the solution you'd like**\r\nThe logic to calculate the number of valid elements is here:\r\nhttps://github.com/pydata/xarray/blob/1be777fe725a85b8cc0f65a2bc41f4bc2ba18043/xarray/core/nanops.py#L35\r\n\r\nI *think* this can be fixed by replacing\r\n\r\n`mask.shape[axis]` with `np.take(a.shape, axis).prod()`\r\n\r\n**Additional context**\r\nPotentially relevant for #4351\r\n\n",
+  "localized_code": "[start of xarray/core/nanops.py]\n1: import numpy as np\n2: \n3: from . import dtypes, nputils, utils\n4: from .duck_array_ops import _dask_or_eager_func, count, fillna, isnull, where_method\n5: from .pycompat import dask_array_type\n6: \n7: try:\n8:     import dask.array as dask_array\n9: \n10:     from . import dask_array_compat\n11: except ImportError:\n12:     dask_array = None\n13:     dask_array_compat = None  # type: ignore\n14: \n15: \n16: def _replace_nan(a, val):\n17:     \"\"\"\n18:     replace nan in a by val, and returns the replaced array and the nan\n19:     position\n20:     \"\"\"\n21:     mask = isnull(a)\n22:     return where_method(val, mask, a), mask\n23: \n24: \n25: def _maybe_null_out(result, axis, mask, min_count=1):\n26:     \"\"\"\n27:     xarray version of pandas.core.nanops._maybe_null_out\n28:     \"\"\"\n29:     if hasattr(axis, \"__len__\"):  # if tuple or list\n30:         raise ValueError(\n31:             \"min_count is not available for reduction with more than one dimensions.\"\n32:         )\n33: \n34:     if axis is not None and getattr(result, \"ndim\", False):\n35:         null_mask = (mask.shape[axis] - mask.sum(axis) - min_count) < 0\n36:         if null_mask.any():\n37:             dtype, fill_value = dtypes.maybe_promote(result.dtype)\n38:             result = result.astype(dtype)\n39:             result[null_mask] = fill_value\n40: \n41:     elif getattr(result, \"dtype\", None) not in dtypes.NAT_TYPES:\n42:         null_mask = mask.size - mask.sum()\n43:         if null_mask < min_count:\n44:             result = np.nan\n45: \n46:     return result\n47: \n48: \n49: def _nan_argminmax_object(func, fill_value, value, axis=None, **kwargs):\n50:     \"\"\" In house nanargmin, nanargmax for object arrays. Always return integer\n51:     type\n... Code Truncated ...\n\n",
+  "line_level_localization": [
+    {
+      "filename": "/xarray/core/nanops.py",
+      "suspect_lines": [
+        29,
+        30,
+        31,
+        32,
+        35
+      ]
+    }
+  ]
+}

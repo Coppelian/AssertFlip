@@ -1,0 +1,11 @@
+{
+  "instance_id": "django__django-14089",
+  "problem_statement": "Allow calling reversed() on an OrderedSet\nDescription\n\t\nCurrently, ​OrderedSet isn't reversible (i.e. allowed to be passed as an argument to Python's ​reversed()). This would be natural to support given that OrderedSet is ordered. This should be straightforward to add by adding a __reversed__() method to OrderedSet.\n",
+  "localized_code": "[start of django/utils/datastructures.py]\n1: import copy\n2: from collections.abc import Mapping\n3: \n4: \n5: class OrderedSet:\n6:     \"\"\"\n7:     A set which keeps the ordering of the inserted items.\n8:     \"\"\"\n9: \n10:     def __init__(self, iterable=None):\n11:         self.dict = dict.fromkeys(iterable or ())\n12: \n13:     def add(self, item):\n14:         self.dict[item] = None\n15: \n16:     def remove(self, item):\n17:         del self.dict[item]\n18: \n19:     def discard(self, item):\n20:         try:\n21:             self.remove(item)\n22:         except KeyError:\n23:             pass\n24: \n25:     def __iter__(self):\n26:         return iter(self.dict)\n27: \n28:     def __contains__(self, item):\n29:         return item in self.dict\n30: \n31:     def __bool__(self):\n32:         return bool(self.dict)\n33: \n34:     def __len__(self):\n35:         return len(self.dict)\n36: \n37: \n38: class MultiValueDictKeyError(KeyError):\n39:     pass\n40: \n41: \n42: class MultiValueDict(dict):\n43:     \"\"\"\n44:     A subclass of dictionary customized to handle multiple values for the\n45:     same key.\n46: \n47:     >>> d = MultiValueDict({'name': ['Adrian', 'Simon'], 'position': ['Developer']})\n48:     >>> d['name']\n49:     'Simon'\n50:     >>> d.getlist('name')\n51:     ['Adrian', 'Simon']\n... Code Truncated ...\n\n",
+  "line_level_localization": [
+    {
+      "filename": "/django/utils/datastructures.py",
+      "suspect_lines": []
+    }
+  ]
+}

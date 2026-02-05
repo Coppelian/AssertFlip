@@ -1,0 +1,14 @@
+{
+  "instance_id": "sympy__sympy-20916",
+  "problem_statement": "pprint unicode does not format subscripts on Greek letters\nGood:\r\n\r\n[ -t₀⋅w₀   -t₁⋅w₀   -t₂⋅w₀]\r\n\r\n\r\nBad:\r\n\r\n[ -t₀⋅ω0   -t₁⋅ω0   -t₂⋅ω0]\r\n\r\n\r\n\n",
+  "localized_code": "[start of sympy/printing/conventions.py]\n1: \"\"\"\n2: A few practical conventions common to all printers.\n3: \"\"\"\n4: \n5: import re\n6: \n7: from collections.abc import Iterable\n8: from sympy import Derivative\n9: \n10: _name_with_digits_p = re.compile(r'^([a-zA-Z]+)([0-9]+)$')\n11: \n12: \n13: def split_super_sub(text):\n14:     \"\"\"Split a symbol name into a name, superscripts and subscripts\n15: \n16:     The first part of the symbol name is considered to be its actual\n17:     'name', followed by super- and subscripts. Each superscript is\n18:     preceded with a \"^\" character or by \"__\". Each subscript is preceded\n19:     by a \"_\" character.  The three return values are the actual name, a\n20:     list with superscripts and a list with subscripts.\n21: \n22:     Examples\n23:     ========\n24: \n25:     >>> from sympy.printing.conventions import split_super_sub\n26:     >>> split_super_sub('a_x^1')\n27:     ('a', ['1'], ['x'])\n28:     >>> split_super_sub('var_sub1__sup_sub2')\n29:     ('var', ['sup'], ['sub1', 'sub2'])\n30: \n31:     \"\"\"\n32:     if not text:\n33:         return text, [], []\n34: \n35:     pos = 0\n36:     name = None\n37:     supers = []\n38:     subs = []\n39:     while pos < len(text):\n40:         start = pos + 1\n41:         if text[pos:pos + 2] == \"__\":\n42:             start += 1\n43:         pos_hat = text.find(\"^\", start)\n44:         if pos_hat < 0:\n45:             pos_hat = len(text)\n46:         pos_usc = text.find(\"_\", start)\n47:         if pos_usc < 0:\n48:             pos_usc = len(text)\n49:         pos_next = min(pos_hat, pos_usc)\n50:         part = text[pos:pos_next]\n51:         pos = pos_next\n52:         if name is None:\n53:             name = part\n54:         elif part.startswith(\"^\"):\n55:             supers.append(part[1:])\n56:         elif part.startswith(\"__\"):\n57:             supers.append(part[2:])\n58:         elif part.startswith(\"_\"):\n59:             subs.append(part[1:])\n60:         else:\n61:             raise RuntimeError(\"This should never happen.\")\n62: \n63:     # make a little exception when a name ends with digits, i.e. treat them\n64:     # as a subscript too.\n... Code Truncated ...\n\n",
+  "line_level_localization": [
+    {
+      "filename": "/sympy/printing/conventions.py",
+      "suspect_lines": [
+        10,
+        63
+      ]
+    }
+  ]
+}
