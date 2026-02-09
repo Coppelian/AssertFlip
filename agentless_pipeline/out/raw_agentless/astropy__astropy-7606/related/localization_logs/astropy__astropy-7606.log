@@ -1,0 +1,1275 @@
+2026-02-09 05:17:57,851 - INFO - Processing bug astropy__astropy-7606
+2026-02-09 05:18:10,344 - INFO - ================ localize astropy__astropy-7606 ================
+2026-02-09 05:18:10,574 - INFO - prompting with message:
+2026-02-09 05:18:10,574 - INFO - 
+
+Please look through the following GitHub Problem Description and the Skeleton of Relevant Files.
+Identify all locations that need inspection or editing to fix the problem, including directly related areas as well as any potentially related global variables, functions, and classes.
+For each location you provide, either give the name of the class, the name of a method in a class, the name of a function, or the name of a global variable.
+
+### GitHub Problem Description ###
+Unit equality comparison with None raises TypeError for UnrecognizedUnit
+```
+In [12]: x = u.Unit('asdf', parse_strict='silent')
+
+In [13]: x == None  # Should be False
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-13-2486f2ccf928> in <module>()
+----> 1 x == None  # Should be False
+
+/Users/aldcroft/anaconda3/lib/python3.5/site-packages/astropy/units/core.py in __eq__(self, other)
+   1699 
+   1700     def __eq__(self, other):
+-> 1701         other = Unit(other, parse_strict='silent')
+   1702         return isinstance(other, UnrecognizedUnit) and self.name == other.name
+   1703 
+
+/Users/aldcroft/anaconda3/lib/python3.5/site-packages/astropy/units/core.py in __call__(self, s, represents, format, namespace, doc, parse_strict)
+   1808 
+   1809         elif s is None:
+-> 1810             raise TypeError("None is not a valid Unit")
+   1811 
+   1812         else:
+
+TypeError: None is not a valid Unit
+```
+
+
+### Skeleton of Relevant Files ###
+
+### File: astropy/units/core.py ###
+```python
+# -*- coding: utf-8 -*-
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+
+
+
+__all__ = [
+    'UnitsError', 'UnitsWarning', 'UnitConversionError', 'UnitTypeError',
+    'UnitBase', 'NamedUnit', 'IrreducibleUnit', 'Unit', 'CompositeUnit',
+    'PrefixUnit', 'UnrecognizedUnit', 'def_unit', 'get_current_unit_registry',
+    'set_enabled_units', 'add_enabled_units',
+    'set_enabled_equivalencies', 'add_enabled_equivalencies',
+    'dimensionless_unscaled', 'one']
+
+UNITY = 1.0
+
+
+def _flatten_units_collection(items):
+...
+
+
+def _normalize_equivalencies(equivalencies):
+...
+
+
+class _UnitRegistry:
+
+    def __init__(self, init=[], equivalencies=[]):
+...
+
+    def _reset_units(self):
+...
+
+    def _reset_equivalencies(self):
+...
+
+    @property
+    def registry(self):
+...
+
+    @property
+    def all_units(self):
+...
+
+    @property
+    def non_prefix_units(self):
+...
+
+    def set_enabled_units(self, units):
+...
+
+    def add_enabled_units(self, units):
+...
+
+    def get_units_with_physical_type(self, unit):
+...
+
+    @property
+    def equivalencies(self):
+...
+
+    def set_enabled_equivalencies(self, equivalencies):
+...
+
+    def add_enabled_equivalencies(self, equivalencies):
+...
+
+
+class _UnitContext:
+    def __init__(self, init=[], equivalencies=[]):
+...
+
+    def __enter__(self):
+...
+
+    def __exit__(self, type, value, tb):
+...
+
+
+_unit_registries = [_UnitRegistry()]
+
+
+def get_current_unit_registry():
+...
+
+
+def set_enabled_units(units):
+...
+
+
+def add_enabled_units(units):
+...
+
+
+def set_enabled_equivalencies(equivalencies):
+...
+
+
+def add_enabled_equivalencies(equivalencies):
+...
+
+
+class UnitsError(Exception):
+    pass
+
+
+class UnitScaleError(UnitsError, ValueError):
+    pass
+
+
+class UnitConversionError(UnitsError, ValueError):
+    pass
+
+
+class UnitTypeError(UnitsError, TypeError):
+    pass
+
+
+class UnitsWarning(AstropyWarning):
+    pass
+
+
+class UnitBase(metaclass=InheritDocstrings):
+    # Make sure that __rmul__ of units gets called over the __mul__ of Numpy
+    # arrays to avoid element-wise multiplication.
+    __array_priority__ = 1000
+
+    def __deepcopy__(self, memo):
+...
+
+    def _repr_latex_(self):
+...
+
+    def __bytes__(self):
+...
+
+    def __str__(self):
+...
+
+    def __repr__(self):
+...
+
+    def _get_physical_type_id(self):
+...
+
+    @property
+    def names(self):
+...
+
+    @property
+    def name(self):
+...
+
+    @property
+    def aliases(self):
+...
+
+    @property
+    def scale(self):
+...
+
+    @property
+    def bases(self):
+...
+
+    @property
+    def powers(self):
+...
+
+    def to_string(self, format=unit_format.Generic):
+...
+
+    def __format__(self, format_spec):
+...
+
+    @staticmethod
+    def _normalize_equivalencies(equivalencies):
+...
+
+    def __pow__(self, p):
+...
+
+    def __div__(self, m):
+...
+
+    def __rdiv__(self, m):
+...
+
+    __truediv__ = __div__
+
+    __rtruediv__ = __rdiv__
+
+    def __mul__(self, m):
+...
+
+    def __rmul__(self, m):
+...
+
+    def __hash__(self):
+...
+
+    def __eq__(self, other):
+...
+
+    def __ne__(self, other):
+...
+
+    def __le__(self, other):
+...
+
+    def __ge__(self, other):
+...
+
+    def __lt__(self, other):
+...
+
+    def __gt__(self, other):
+...
+
+    def __neg__(self):
+...
+
+    def is_equivalent(self, other, equivalencies=[]):
+...
+
+    def _is_equivalent(self, other, equivalencies=[]):
+...
+
+    def _apply_equivalencies(self, unit, other, equivalencies):
+...
+
+    def _get_converter(self, other, equivalencies=[]):
+...
+
+    def _to(self, other):
+...
+
+    def to(self, other, value=UNITY, equivalencies=[]):
+...
+
+    def in_units(self, other, value=1.0, equivalencies=[]):
+...
+
+    def decompose(self, bases=set()):
+...
+
+    def _compose(self, equivalencies=[], namespace=[], max_depth=2, depth=0,
+                 cached_results=None):
+...
+
+    def compose(self, equivalencies=[], units=None, max_depth=2,
+                include_prefix_units=None):
+...
+
+    def to_system(self, system):
+...
+
+    @lazyproperty
+    def si(self):
+...
+
+    @lazyproperty
+    def cgs(self):
+...
+
+    @property
+    def physical_type(self):
+...
+
+    def _get_units_with_same_physical_type(self, equivalencies=[]):
+...
+
+    class EquivalentUnitsList(list):
+
+        def __repr__(self):
+...
+
+    def find_equivalent_units(self, equivalencies=[], units=None,
+                              include_prefix_units=False):
+...
+
+    def is_unity(self):
+...
+
+
+class NamedUnit(UnitBase):
+
+    def __init__(self, st, doc=None, format=None, namespace=None):
+...
+
+    def _generate_doc(self):
+...
+
+    def get_format_name(self, format):
+...
+
+    @property
+    def names(self):
+...
+
+    @property
+    def name(self):
+...
+
+    @property
+    def aliases(self):
+...
+
+    @property
+    def short_names(self):
+...
+
+    @property
+    def long_names(self):
+...
+
+    def _inject(self, namespace=None):
+...
+
+
+def _recreate_irreducible_unit(cls, names, registered):
+...
+
+
+class IrreducibleUnit(NamedUnit):
+
+    def __reduce__(self):
+...
+
+    @property
+    def represents(self):
+...
+
+    def decompose(self, bases=set()):
+...
+
+
+class UnrecognizedUnit(IrreducibleUnit):
+    # For UnrecognizedUnits, we want to use "standard" Python
+    # pickling, not the special case that is used for
+    # IrreducibleUnits.
+    __reduce__ = object.__reduce__
+
+    def __repr__(self):
+...
+
+    def __bytes__(self):
+...
+
+    def __str__(self):
+...
+
+    def to_string(self, format=None):
+...
+
+    def _unrecognized_operator(self, *args, **kwargs):
+...
+
+    __pow__ = __div__ = __rdiv__ = __truediv__ = __rtruediv__ = __mul__ = \
+        __rmul__ = __lt__ = __gt__ = __le__ = __ge__ = __neg__ = \
+        _unrecognized_operator
+
+    def __eq__(self, other):
+...
+
+    def __ne__(self, other):
+...
+
+    def is_equivalent(self, other, equivalencies=None):
+...
+
+    def _get_converter(self, other, equivalencies=None):
+...
+
+    def get_format_name(self, format):
+...
+
+    def is_unity(self):
+...
+
+
+class _UnitMetaClass(InheritDocstrings):
+
+    def __call__(self, s, represents=None, format=None, namespace=None,
+                 doc=None, parse_strict='raise'):
+...
+
+
+class Unit(NamedUnit, metaclass=_UnitMetaClass):
+
+    def __init__(self, st, represents=None, doc=None,
+                 format=None, namespace=None):
+...
+
+    @property
+    def represents(self):
+...
+
+    def decompose(self, bases=set()):
+...
+
+    def is_unity(self):
+...
+
+    def __hash__(self):
+...
+
+    @classmethod
+    def _from_physical_type_id(cls, physical_type_id):
+...
+
+
+class PrefixUnit(Unit):
+    pass
+
+
+class CompositeUnit(UnitBase):
+
+    def __init__(self, scale, bases, powers, decompose=False,
+                 decompose_bases=set(), _error_check=True):
+...
+
+    def __repr__(self):
+...
+
+    def __hash__(self):
+...
+
+    @property
+    def scale(self):
+...
+
+    @property
+    def bases(self):
+...
+
+    @property
+    def powers(self):
+...
+
+    def _expand_and_gather(self, decompose=False, bases=set()):
+...
+
+    def __copy__(self):
+...
+
+    def decompose(self, bases=set()):
+...
+
+    def is_unity(self):
+...
+
+
+si_prefixes = [
+    (['Y'], ['yotta'], 1e24),
+    (['Z'], ['zetta'], 1e21),
+    (['E'], ['exa'], 1e18),
+    (['P'], ['peta'], 1e15),
+    (['T'], ['tera'], 1e12),
+    (['G'], ['giga'], 1e9),
+    (['M'], ['mega'], 1e6),
+    (['k'], ['kilo'], 1e3),
+    (['h'], ['hecto'], 1e2),
+    (['da'], ['deka', 'deca'], 1e1),
+    (['d'], ['deci'], 1e-1),
+    (['c'], ['centi'], 1e-2),
+    (['m'], ['milli'], 1e-3),
+    (['u'], ['micro'], 1e-6),
+    (['n'], ['nano'], 1e-9),
+    (['p'], ['pico'], 1e-12),
+    (['f'], ['femto'], 1e-15),
+    (['a'], ['atto'], 1e-18),
+    (['z'], ['zepto'], 1e-21),
+    (['y'], ['yocto'], 1e-24)
+]
+
+
+binary_prefixes = [
+    (['Ki'], ['kibi'], 2. ** 10),
+    (['Mi'], ['mebi'], 2. ** 20),
+    (['Gi'], ['gibi'], 2. ** 30),
+    (['Ti'], ['tebi'], 2. ** 40),
+    (['Pi'], ['pebi'], 2. ** 50),
+    (['Ei'], ['exbi'], 2. ** 60)
+]
+
+
+def _add_prefixes(u, excludes=[], namespace=None, prefixes=False):
+...
+
+
+def def_unit(s, represents=None, doc=None, format=None, prefixes=False,
+             exclude_prefixes=[], namespace=None):
+...
+
+
+def _condition_arg(value):
+...
+
+
+dimensionless_unscaled = CompositeUnit(1, [], [], _error_check=False)
+# Abbreviation of the above, see #1980
+one = dimensionless_unscaled
+
+# Maintain error in old location for backward compatibility
+# TODO: Is this still needed? Should there be a deprecation warning?
+unit_format.fits.UnitScaleError = UnitScaleError
+```
+
+### File: astropy/units/utils.py ###
+```python
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+
+
+
+_float_finfo = finfo(float)
+# take float here to ensure comparison with another float is fast
+# give a little margin since often multiple calculations happened
+_JUST_BELOW_UNITY = float(1.-4.*_float_finfo.epsneg)
+_JUST_ABOVE_UNITY = float(1.+4.*_float_finfo.eps)
+
+
+def _get_first_sentence(s):
+...
+
+
+def _iter_unit_summary(namespace):
+...
+
+
+def generate_unit_summary(namespace):
+...
+
+
+def generate_prefixonly_unit_summary(namespace):
+...
+
+
+def is_effectively_unity(value):
+...
+
+
+def sanitize_scale(scale):
+...
+
+
+def validate_power(p, support_tuples=False):
+...
+
+
+def resolve_fractions(a, b):
+...
+
+
+def quantity_asanyarray(a, dtype=None):
+...
+```
+
+### File: astropy/units/__init__.py ###
+```python
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+
+```
+
+
+###
+
+Please provide the complete set of locations as either a class name, a function name, or a variable name.
+Note that if you include a class, you do not need to list its specific methods.
+You can include either the entire class or don't include the class name and instead include specific methods in the class.
+### Examples:
+```
+full_path1/file1.py
+function: my_function_1
+class: MyClass1
+function: MyClass2.my_method
+
+full_path2/file2.py
+variable: my_var
+function: MyClass3.my_method
+
+full_path3/file3.py
+function: my_function_2
+function: my_function_3
+function: MyClass4.my_method_1
+class: MyClass5
+```
+
+Return just the locations wrapped with ```.
+
+2026-02-09 05:18:11,401 - INFO - prompting with message:
+
+Please look through the following GitHub Problem Description and the Skeleton of Relevant Files.
+Identify all locations that need inspection or editing to fix the problem, including directly related areas as well as any potentially related global variables, functions, and classes.
+For each location you provide, either give the name of the class, the name of a method in a class, the name of a function, or the name of a global variable.
+
+### GitHub Problem Description ###
+Unit equality comparison with None raises TypeError for UnrecognizedUnit
+```
+In [12]: x = u.Unit('asdf', parse_strict='silent')
+
+In [13]: x == None  # Should be False
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-13-2486f2ccf928> in <module>()
+----> 1 x == None  # Should be False
+
+/Users/aldcroft/anaconda3/lib/python3.5/site-packages/astropy/units/core.py in __eq__(self, other)
+   1699 
+   1700     def __eq__(self, other):
+-> 1701         other = Unit(other, parse_strict='silent')
+   1702         return isinstance(other, UnrecognizedUnit) and self.name == other.name
+   1703 
+
+/Users/aldcroft/anaconda3/lib/python3.5/site-packages/astropy/units/core.py in __call__(self, s, represents, format, namespace, doc, parse_strict)
+   1808 
+   1809         elif s is None:
+-> 1810             raise TypeError("None is not a valid Unit")
+   1811 
+   1812         else:
+
+TypeError: None is not a valid Unit
+```
+
+
+### Skeleton of Relevant Files ###
+
+### File: astropy/units/core.py ###
+```python
+# -*- coding: utf-8 -*-
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+
+
+
+__all__ = [
+    'UnitsError', 'UnitsWarning', 'UnitConversionError', 'UnitTypeError',
+    'UnitBase', 'NamedUnit', 'IrreducibleUnit', 'Unit', 'CompositeUnit',
+    'PrefixUnit', 'UnrecognizedUnit', 'def_unit', 'get_current_unit_registry',
+    'set_enabled_units', 'add_enabled_units',
+    'set_enabled_equivalencies', 'add_enabled_equivalencies',
+    'dimensionless_unscaled', 'one']
+
+UNITY = 1.0
+
+
+def _flatten_units_collection(items):
+...
+
+
+def _normalize_equivalencies(equivalencies):
+...
+
+
+class _UnitRegistry:
+
+    def __init__(self, init=[], equivalencies=[]):
+...
+
+    def _reset_units(self):
+...
+
+    def _reset_equivalencies(self):
+...
+
+    @property
+    def registry(self):
+...
+
+    @property
+    def all_units(self):
+...
+
+    @property
+    def non_prefix_units(self):
+...
+
+    def set_enabled_units(self, units):
+...
+
+    def add_enabled_units(self, units):
+...
+
+    def get_units_with_physical_type(self, unit):
+...
+
+    @property
+    def equivalencies(self):
+...
+
+    def set_enabled_equivalencies(self, equivalencies):
+...
+
+    def add_enabled_equivalencies(self, equivalencies):
+...
+
+
+class _UnitContext:
+    def __init__(self, init=[], equivalencies=[]):
+...
+
+    def __enter__(self):
+...
+
+    def __exit__(self, type, value, tb):
+...
+
+
+_unit_registries = [_UnitRegistry()]
+
+
+def get_current_unit_registry():
+...
+
+
+def set_enabled_units(units):
+...
+
+
+def add_enabled_units(units):
+...
+
+
+def set_enabled_equivalencies(equivalencies):
+...
+
+
+def add_enabled_equivalencies(equivalencies):
+...
+
+
+class UnitsError(Exception):
+    pass
+
+
+class UnitScaleError(UnitsError, ValueError):
+    pass
+
+
+class UnitConversionError(UnitsError, ValueError):
+    pass
+
+
+class UnitTypeError(UnitsError, TypeError):
+    pass
+
+
+class UnitsWarning(AstropyWarning):
+    pass
+
+
+class UnitBase(metaclass=InheritDocstrings):
+    # Make sure that __rmul__ of units gets called over the __mul__ of Numpy
+    # arrays to avoid element-wise multiplication.
+    __array_priority__ = 1000
+
+    def __deepcopy__(self, memo):
+...
+
+    def _repr_latex_(self):
+...
+
+    def __bytes__(self):
+...
+
+    def __str__(self):
+...
+
+    def __repr__(self):
+...
+
+    def _get_physical_type_id(self):
+...
+
+    @property
+    def names(self):
+...
+
+    @property
+    def name(self):
+...
+
+    @property
+    def aliases(self):
+...
+
+    @property
+    def scale(self):
+...
+
+    @property
+    def bases(self):
+...
+
+    @property
+    def powers(self):
+...
+
+    def to_string(self, format=unit_format.Generic):
+...
+
+    def __format__(self, format_spec):
+...
+
+    @staticmethod
+    def _normalize_equivalencies(equivalencies):
+...
+
+    def __pow__(self, p):
+...
+
+    def __div__(self, m):
+...
+
+    def __rdiv__(self, m):
+...
+
+    __truediv__ = __div__
+
+    __rtruediv__ = __rdiv__
+
+    def __mul__(self, m):
+...
+
+    def __rmul__(self, m):
+...
+
+    def __hash__(self):
+...
+
+    def __eq__(self, other):
+...
+
+    def __ne__(self, other):
+...
+
+    def __le__(self, other):
+...
+
+    def __ge__(self, other):
+...
+
+    def __lt__(self, other):
+...
+
+    def __gt__(self, other):
+...
+
+    def __neg__(self):
+...
+
+    def is_equivalent(self, other, equivalencies=[]):
+...
+
+    def _is_equivalent(self, other, equivalencies=[]):
+...
+
+    def _apply_equivalencies(self, unit, other, equivalencies):
+...
+
+    def _get_converter(self, other, equivalencies=[]):
+...
+
+    def _to(self, other):
+...
+
+    def to(self, other, value=UNITY, equivalencies=[]):
+...
+
+    def in_units(self, other, value=1.0, equivalencies=[]):
+...
+
+    def decompose(self, bases=set()):
+...
+
+    def _compose(self, equivalencies=[], namespace=[], max_depth=2, depth=0,
+                 cached_results=None):
+...
+
+    def compose(self, equivalencies=[], units=None, max_depth=2,
+                include_prefix_units=None):
+...
+
+    def to_system(self, system):
+...
+
+    @lazyproperty
+    def si(self):
+...
+
+    @lazyproperty
+    def cgs(self):
+...
+
+    @property
+    def physical_type(self):
+...
+
+    def _get_units_with_same_physical_type(self, equivalencies=[]):
+...
+
+    class EquivalentUnitsList(list):
+
+        def __repr__(self):
+...
+
+    def find_equivalent_units(self, equivalencies=[], units=None,
+                              include_prefix_units=False):
+...
+
+    def is_unity(self):
+...
+
+
+class NamedUnit(UnitBase):
+
+    def __init__(self, st, doc=None, format=None, namespace=None):
+...
+
+    def _generate_doc(self):
+...
+
+    def get_format_name(self, format):
+...
+
+    @property
+    def names(self):
+...
+
+    @property
+    def name(self):
+...
+
+    @property
+    def aliases(self):
+...
+
+    @property
+    def short_names(self):
+...
+
+    @property
+    def long_names(self):
+...
+
+    def _inject(self, namespace=None):
+...
+
+
+def _recreate_irreducible_unit(cls, names, registered):
+...
+
+
+class IrreducibleUnit(NamedUnit):
+
+    def __reduce__(self):
+...
+
+    @property
+    def represents(self):
+...
+
+    def decompose(self, bases=set()):
+...
+
+
+class UnrecognizedUnit(IrreducibleUnit):
+    # For UnrecognizedUnits, we want to use "standard" Python
+    # pickling, not the special case that is used for
+    # IrreducibleUnits.
+    __reduce__ = object.__reduce__
+
+    def __repr__(self):
+...
+
+    def __bytes__(self):
+...
+
+    def __str__(self):
+...
+
+    def to_string(self, format=None):
+...
+
+    def _unrecognized_operator(self, *args, **kwargs):
+...
+
+    __pow__ = __div__ = __rdiv__ = __truediv__ = __rtruediv__ = __mul__ = \
+        __rmul__ = __lt__ = __gt__ = __le__ = __ge__ = __neg__ = \
+        _unrecognized_operator
+
+    def __eq__(self, other):
+...
+
+    def __ne__(self, other):
+...
+
+    def is_equivalent(self, other, equivalencies=None):
+...
+
+    def _get_converter(self, other, equivalencies=None):
+...
+
+    def get_format_name(self, format):
+...
+
+    def is_unity(self):
+...
+
+
+class _UnitMetaClass(InheritDocstrings):
+
+    def __call__(self, s, represents=None, format=None, namespace=None,
+                 doc=None, parse_strict='raise'):
+...
+
+
+class Unit(NamedUnit, metaclass=_UnitMetaClass):
+
+    def __init__(self, st, represents=None, doc=None,
+                 format=None, namespace=None):
+...
+
+    @property
+    def represents(self):
+...
+
+    def decompose(self, bases=set()):
+...
+
+    def is_unity(self):
+...
+
+    def __hash__(self):
+...
+
+    @classmethod
+    def _from_physical_type_id(cls, physical_type_id):
+...
+
+
+class PrefixUnit(Unit):
+    pass
+
+
+class CompositeUnit(UnitBase):
+
+    def __init__(self, scale, bases, powers, decompose=False,
+                 decompose_bases=set(), _error_check=True):
+...
+
+    def __repr__(self):
+...
+
+    def __hash__(self):
+...
+
+    @property
+    def scale(self):
+...
+
+    @property
+    def bases(self):
+...
+
+    @property
+    def powers(self):
+...
+
+    def _expand_and_gather(self, decompose=False, bases=set()):
+...
+
+    def __copy__(self):
+...
+
+    def decompose(self, bases=set()):
+...
+
+    def is_unity(self):
+...
+
+
+si_prefixes = [
+    (['Y'], ['yotta'], 1e24),
+    (['Z'], ['zetta'], 1e21),
+    (['E'], ['exa'], 1e18),
+    (['P'], ['peta'], 1e15),
+    (['T'], ['tera'], 1e12),
+    (['G'], ['giga'], 1e9),
+    (['M'], ['mega'], 1e6),
+    (['k'], ['kilo'], 1e3),
+    (['h'], ['hecto'], 1e2),
+    (['da'], ['deka', 'deca'], 1e1),
+    (['d'], ['deci'], 1e-1),
+    (['c'], ['centi'], 1e-2),
+    (['m'], ['milli'], 1e-3),
+    (['u'], ['micro'], 1e-6),
+    (['n'], ['nano'], 1e-9),
+    (['p'], ['pico'], 1e-12),
+    (['f'], ['femto'], 1e-15),
+    (['a'], ['atto'], 1e-18),
+    (['z'], ['zepto'], 1e-21),
+    (['y'], ['yocto'], 1e-24)
+]
+
+
+binary_prefixes = [
+    (['Ki'], ['kibi'], 2. ** 10),
+    (['Mi'], ['mebi'], 2. ** 20),
+    (['Gi'], ['gibi'], 2. ** 30),
+    (['Ti'], ['tebi'], 2. ** 40),
+    (['Pi'], ['pebi'], 2. ** 50),
+    (['Ei'], ['exbi'], 2. ** 60)
+]
+
+
+def _add_prefixes(u, excludes=[], namespace=None, prefixes=False):
+...
+
+
+def def_unit(s, represents=None, doc=None, format=None, prefixes=False,
+             exclude_prefixes=[], namespace=None):
+...
+
+
+def _condition_arg(value):
+...
+
+
+dimensionless_unscaled = CompositeUnit(1, [], [], _error_check=False)
+# Abbreviation of the above, see #1980
+one = dimensionless_unscaled
+
+# Maintain error in old location for backward compatibility
+# TODO: Is this still needed? Should there be a deprecation warning?
+unit_format.fits.UnitScaleError = UnitScaleError
+```
+
+### File: astropy/units/utils.py ###
+```python
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+
+
+
+_float_finfo = finfo(float)
+# take float here to ensure comparison with another float is fast
+# give a little margin since often multiple calculations happened
+_JUST_BELOW_UNITY = float(1.-4.*_float_finfo.epsneg)
+_JUST_ABOVE_UNITY = float(1.+4.*_float_finfo.eps)
+
+
+def _get_first_sentence(s):
+...
+
+
+def _iter_unit_summary(namespace):
+...
+
+
+def generate_unit_summary(namespace):
+...
+
+
+def generate_prefixonly_unit_summary(namespace):
+...
+
+
+def is_effectively_unity(value):
+...
+
+
+def sanitize_scale(scale):
+...
+
+
+def validate_power(p, support_tuples=False):
+...
+
+
+def resolve_fractions(a, b):
+...
+
+
+def quantity_asanyarray(a, dtype=None):
+...
+```
+
+### File: astropy/units/__init__.py ###
+```python
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+
+```
+
+
+###
+
+Please provide the complete set of locations as either a class name, a function name, or a variable name.
+Note that if you include a class, you do not need to list its specific methods.
+You can include either the entire class or don't include the class name and instead include specific methods in the class.
+### Examples:
+```
+full_path1/file1.py
+function: my_function_1
+class: MyClass1
+function: MyClass2.my_method
+
+full_path2/file2.py
+variable: my_var
+function: MyClass3.my_method
+
+full_path3/file3.py
+function: my_function_2
+function: my_function_3
+function: MyClass4.my_method_1
+class: MyClass5
+```
+
+Return just the locations wrapped with ```.
+
+2026-02-09 05:18:11,401 - INFO - ================================================================================
+2026-02-09 05:18:11,401 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2026-02-09 05:18:11,415 - INFO - Creating API request
+2026-02-09 05:18:12,659 - INFO - API response ChatCompletion(id='chatcmpl-D7DwyMYcMHMHrQC8Q3WdLO1PVuk9k', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```\nastropy/units/core.py\nfunction: Unit.__eq__\nfunction: _UnitMetaClass.__call__\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1770614292, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_2eb0cd7572', usage=CompletionUsage(completion_tokens=25, prompt_tokens=3050, total_tokens=3075, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2026-02-09 05:18:12,659 - INFO - ==== raw output ====
+2026-02-09 05:18:12,659 - INFO - ```
+astropy/units/core.py
+function: Unit.__eq__
+function: _UnitMetaClass.__call__
+```
+2026-02-09 05:18:12,659 - INFO - ================================================================================
+2026-02-09 05:18:12,659 - INFO - ==== extracted locs ====
+2026-02-09 05:18:12,659 - INFO - astropy/units/core.py
+2026-02-09 05:18:12,659 - INFO - astropy/units/utils.py
+2026-02-09 05:18:12,659 - INFO - astropy/units/__init__.py
+2026-02-09 05:18:12,659 - INFO - ================================================================================
