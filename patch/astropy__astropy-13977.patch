@@ -1,0 +1,192 @@
+diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py
+index b98abfafb0..060976f61a 100644
+--- a/astropy/units/quantity.py
++++ b/astropy/units/quantity.py
+@@ -59,6 +59,22 @@ _UNIT_NOT_INITIALISED = "(Unit not initialised)"
+ _UFUNCS_FILTER_WARNINGS = {np.arcsin, np.arccos, np.arccosh, np.arctanh}
+ 
+ 
++class _UfuncCallContext:
++    """Lightweight container for __array_ufunc__ call state.
++
++    Bug-preserving: this stores values; it does not change control flow.
++    Useful as a seam for tests and future refactors.
++    """
++
++    def __init__(self, function, method, inputs, kwargs, converters, unit):
++        self.function = function
++        self.method = method
++        self.inputs = inputs
++        self.kwargs = kwargs
++        self.converters = converters
++        self.unit = unit
++
++
+ class Conf(_config.ConfigNamespace):
+     """
+     Configuration parameters for Quantity
+@@ -617,6 +633,30 @@ class Quantity(np.ndarray):
+             "https://github.com/astropy/astropy"
+         )
+ 
++    # --- Seams for testability (bug-preserving wrappers) ---
++
++    def _get_converters_and_unit_for_ufunc(self, function, method, *inputs):
++        """Overridable seam for converter/unit inference."""
++        return converters_and_unit(function, method, *inputs)
++
++    def _check_ufunc_output(self, out, unit, inputs, function=None):
++        """Overridable seam for output validation / out-view creation."""
++        return check_output(out, unit, inputs, function=function)
++
++    def _prepare_ufunc_input_arrays(self, inputs, converters):
++        """Sprout method: convert Quantity inputs to arrays and apply converters."""
++        arrays = []
++        for input_, converter in zip(inputs, converters):
++            input_ = getattr(input_, "value", input_)
++            arrays.append(converter(input_) if converter else input_)
++        return arrays
++
++    def _make_ufunc_call_context(
++        self, function, method, inputs, kwargs, converters, unit
++    ):
++        """Overridable factory seam for __array_ufunc__ context."""
++        return _UfuncCallContext(function, method, inputs, kwargs, converters, unit)
++
+     def __array_ufunc__(self, function, method, *inputs, **kwargs):
+         """Wrap numpy ufuncs, taking care of units.
+ 
+@@ -641,15 +681,18 @@ class Quantity(np.ndarray):
+         # consistent units between two inputs (e.g., in np.add) --
+         # and the unit of the result (or tuple of units for nout > 1).
+         converters, unit = converters_and_unit(function, method, *inputs)
++        ctx = self._make_ufunc_call_context(
++            function, method, inputs, kwargs, converters, unit
++        )
+ 
+-        out = kwargs.get("out", None)
++        out = ctx.kwargs.get("out", None)
+         # Avoid loop back by turning any Quantity output into array views.
+         if out is not None:
+             # If pre-allocated output is used, check it is suitable.
+             # This also returns array view, to ensure we don't loop back.
+             if function.nout == 1:
+                 out = out[0]
+-            out_array = check_output(out, unit, inputs, function=function)
++            out_array = check_output(out, ctx.unit, ctx.inputs, function=ctx.function)
+             # Ensure output argument remains a tuple.
+             kwargs["out"] = (out_array,) if function.nout == 1 else out_array
+ 
+@@ -664,10 +707,7 @@ class Quantity(np.ndarray):
+             )
+ 
+         # Same for inputs, but here also convert if necessary.
+-        arrays = []
+-        for input_, converter in zip(inputs, converters):
+-            input_ = getattr(input_, "value", input_)
+-            arrays.append(converter(input_) if converter else input_)
++        arrays = self._prepare_ufunc_input_arrays(inputs, converters)
+ 
+         # Call our superclass's __array_ufunc__
+         result = super().__array_ufunc__(function, method, *arrays, **kwargs)
+diff --git a/astropy/units/quantity_helper/converters.py b/astropy/units/quantity_helper/converters.py
+index 47b40c2072..1fbdb795c0 100644
+--- a/astropy/units/quantity_helper/converters.py
++++ b/astropy/units/quantity_helper/converters.py
+@@ -290,6 +290,11 @@ def converters_and_unit(function, method, *args):
+     return converters, result_unit
+ 
+ 
++def _can_cast_to_dtype(result_type, dtype, *, casting="same_kind"):
++    """Seam for dtype castability checks (override in tests if needed)."""
++    return np.can_cast(result_type, dtype, casting=casting)
++
++
+ def check_output(output, unit, inputs, function=None):
+     """Check that function output can be stored in the output array given.
+ 
+@@ -368,7 +373,7 @@ def check_output(output, unit, inputs, function=None):
+             result_type = np.result_type(*inputs)
+             if not (
+                 result_type.names
+-                or np.can_cast(result_type, output.dtype, casting="same_kind")
++                or _can_cast_to_dtype(result_type, output.dtype, casting="same_kind")
+             ):
+                 raise TypeError(
+                     "Arguments cannot be cast safely to inplace "
+diff --git a/astropy/units/quantity_helper/function_helpers.py b/astropy/units/quantity_helper/function_helpers.py
+index 2a8a287d90..e7f876cf25 100644
+--- a/astropy/units/quantity_helper/function_helpers.py
++++ b/astropy/units/quantity_helper/function_helpers.py
+@@ -1138,6 +1138,25 @@ def unstructured_to_structured(arr, dtype, *args, **kwargs):
+     return (arr.to_value(arr.unit), dtype) + args, kwargs, target_unit, None
+ 
+ 
++def _flatten_structured_units(seqarrays, *, flatten):
++    """Sprout method: normalize seqarrays -> (arrays, structured_unit)."""
++    from astropy.units import StructuredUnit
++
++    # Note: this also converts ndarray -> Quantity[dimensionless]
++    seqarrays = _as_quantities(*seqarrays)
++    arrays = tuple(q.value for q in seqarrays)
++    units = tuple(q.unit for q in seqarrays)
++
++    if flatten:
++        unit = StructuredUnit(tuple(_izip_units_flat(units)))
++    elif len(arrays) == 1:
++        unit = StructuredUnit(units[0])
++    else:
++        unit = StructuredUnit(units)
++
++    return arrays, unit
++
++
+ def _izip_units_flat(iterable):
+     """Returns an iterator of collapsing any nested unit structure.
+ 
+@@ -1191,16 +1210,7 @@ def merge_arrays(
+         seqarrays = (seqarrays,)
+ 
+     # Note: this also converts ndarray -> Quantity[dimensionless]
+-    seqarrays = _as_quantities(*seqarrays)
+-    arrays = tuple(q.value for q in seqarrays)
+-    units = tuple(q.unit for q in seqarrays)
+-
+-    if flatten:
+-        unit = StructuredUnit(tuple(_izip_units_flat(units)))
+-    elif len(arrays) == 1:
+-        unit = StructuredUnit(units[0])
+-    else:
+-        unit = StructuredUnit(units)
++    arrays, unit = _flatten_structured_units(seqarrays, flatten=flatten)
+ 
+     return (
+         (arrays,),
+diff --git a/astropy/units/quantity_helper/helpers.py b/astropy/units/quantity_helper/helpers.py
+index 9582edd1e6..75dc9be426 100644
+--- a/astropy/units/quantity_helper/helpers.py
++++ b/astropy/units/quantity_helper/helpers.py
+@@ -36,6 +36,13 @@ def get_converter(from_unit, to_unit):
+     return None if converter is unit_scale_converter else converter
+ 
+ 
++def _fallback_on_conversion_error(converters, changeable, unit2):
++    """Extracted fallback path for unit conversion failures (bug-preserving)."""
++    # special case: would be OK if unitless number is zero, inf, nan
++    converters[1 - changeable] = False
++    return converters, unit2
++
++
+ def get_converters_and_unit(f, unit1, unit2):
+     converters = [None, None]
+     # By default, we try adjusting unit2 to unit1, so that the result will
+@@ -61,8 +68,7 @@ def get_converters_and_unit(f, unit1, unit2):
+             converters[changeable] = get_converter(unit2, dimensionless_unscaled)
+         except UnitsError:
+             # special case: would be OK if unitless number is zero, inf, nan
+-            converters[1 - changeable] = False
+-            return converters, unit2
++            return _fallback_on_conversion_error(converters, changeable, unit2)
+         else:
+             return converters, dimensionless_unscaled
+     else:
