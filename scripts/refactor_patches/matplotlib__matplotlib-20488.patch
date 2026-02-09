@@ -1,0 +1,145 @@
+diff --git a/lib/matplotlib/cm.py b/lib/matplotlib/cm.py
+index 6d05be943b..4d45d0fb97 100644
+--- a/lib/matplotlib/cm.py
++++ b/lib/matplotlib/cm.py
+@@ -492,8 +492,17 @@ class ScalarMappable:
+ 
+     def changed(self):
+         """
+-        Call this whenever the mappable is changed to notify all the
+-        callbackSM listeners to the 'changed' signal.
++        Call this whenever the mappable is changed so observers can update.
++        """
++        self._notify_changed()
++
++    def _notify_changed(self):
++        """
++        Extracted notification step.
++
++        This is a seam: tests/subclasses can override to observe or suppress
++        notification side-effects without changing call sites.
+         """
+         self.callbacksSM.process('changed', self)
+         self.stale = True
++
+diff --git a/lib/matplotlib/image.py b/lib/matplotlib/image.py
+index 95bb42d75c..99b95f9b7b 100644
+--- a/lib/matplotlib/image.py
++++ b/lib/matplotlib/image.py
+@@ -300,8 +300,30 @@ class _ImageBase(martist.Artist, cm.ScalarMappable):
+         """
+         Call this whenever the mappable is changed so observers can update.
+         """
++        self._reset_image_cache()
++        self._scalar_mappable_changed()
++
++    def _reset_image_cache(self):
++        """
++        Extracted cache invalidation step.
++
++        Bug-preserving notes:
++        - Must clear the same fields as before.
++        - Must run before notifying observers (ScalarMappable.changed),
++          because downstream observers may trigger draw paths that read caches.
++        """
+         self._imcache = None
+         self._rgbacache = None
++
++    def _scalar_mappable_changed(self):
++        """
++        Seam wrapper around cm.ScalarMappable.changed(self).
++
++        Why this exists:
++        - Creates a safe interception/override point for tests/subclasses
++          without changing the call sites or control decisions.
++        - Default behavior must remain identical.
++        """
+         cm.ScalarMappable.changed(self)
+ 
+     def _make_image(self, A, in_bbox, out_bbox, clip_bbox, magnification=1.0,
+@@ -1451,6 +1473,49 @@ class BboxImage(_ImageBase):
+             bbox_in, bbox_out, clip, magnification, unsampled=unsampled)
+ 
+ 
++def _get_urlopen():
++    """
++    Seamed indirection for urllib.request.urlopen.
++
++    Kept as a tiny getter so tests can monkeypatch this function without
++    importing urllib at module import time.
++    """
++    from urllib import request
++    return request.urlopen
++
++
++def _get_ssl_context():
++    """
++    Seamed indirection for mpl._get_ssl_context().
++
++    Keeps behavior identical, but creates an interception point for tests.
++    """
++    return mpl._get_ssl_context()
++
++
++def _load_image_from_url(fname, ext):
++    """
++    Sprouted helper for imread()'s URL path.
++
++    Behavior MUST stay identical:
++    - use mpl ssl context
++    - keep the 'seek(0) else BytesIO(read())' fallback
++    - recurse into imread(response, format=ext)
++    """
++    ssl_ctx = _get_ssl_context()
++    if ssl_ctx is None:
++        _log.debug("Could not get certifi ssl context, https may not work.")
++
++    urlopen = _get_urlopen()
++    with urlopen(fname, context=ssl_ctx) as response:
++        import io
++        try:
++            response.seek(0)
++        except (AttributeError, io.UnsupportedOperation):
++            response = io.BytesIO(response.read())
++        return imread(response, format=ext)
++
++
+ def imread(fname, format=None):
+     """
+     Read an image from a file into an array.
+@@ -1518,27 +1583,15 @@ def imread(fname, format=None):
+         PIL.PngImagePlugin.PngImageFile if ext == 'png' else PIL.Image.open)
+     if isinstance(fname, str):
+         parsed = parse.urlparse(fname)
+-        if len(parsed.scheme) > 1:  # Pillow doesn't handle URLs directly.
++        if len(parsed.scheme) > 1:
++            # Pillow doesn't handle URLs directly.
+             _api.warn_deprecated(
+-                "3.4", message="Directly reading images from URLs is "
+-                "deprecated since %(since)s and will no longer be supported "
+-                "%(removal)s. Please open the URL for reading and pass the "
+-                "result to Pillow, e.g. with "
+-                "``PIL.Image.open(urllib.request.urlopen(url))``.")
+-            # hide imports to speed initial import on systems with slow linkers
+-            from urllib import request
+-            ssl_ctx = mpl._get_ssl_context()
+-            if ssl_ctx is None:
+-                _log.debug(
+-                    "Could not get certifi ssl context, https may not work."
+-                )
+-            with request.urlopen(fname, context=ssl_ctx) as response:
+-                import io
+-                try:
+-                    response.seek(0)
+-                except (AttributeError, io.UnsupportedOperation):
+-                    response = io.BytesIO(response.read())
+-                return imread(response, format=ext)
++                "3.4",
++                message="Directly reading images from URLs is deprecated since %(since)s "
++                        "and will not be supported %(removal)s. Please open the URL "
++                        "for reading and pass the result to imread.",
++            )
++            return _load_image_from_url(fname, ext)
+     with img_open(fname) as image:
+         return (_pil_png_to_float_array(image)
+                 if isinstance(image, PIL.PngImagePlugin.PngImageFile) else
