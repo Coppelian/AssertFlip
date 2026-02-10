@@ -5,6 +5,7 @@ import typing as T
 import json
 import os
 from .utils import subprocess_run
+import sys
 
 
 async def measure_test_coverage(*, test: str, tests_dir: Path, test_command: str, pytest_args='', test_attempt: dict = {}):
@@ -13,13 +14,13 @@ async def measure_test_coverage(*, test: str, tests_dir: Path, test_command: str
         try:
             t.write(test)
             t.flush()
-            _executable = "/home/coppelia/Program/AssertFlip/.venv/bin/python"
+            _executable = sys.executable
             _cover = "coverage run"
             if "pytest" not in test_command:
                 pytest_args = ""
                 is_module = False
                 test_command_dir = Path(test_command.split()[0]).parent
-                test_command_dir = "/testbed" / test_command_dir
+                test_command_dir = Path("/testbed") / test_command_dir
                 env = os.environ.copy()
                 env['PYTHONPATH'] = str(test_command_dir)
             else:

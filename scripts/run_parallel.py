@@ -181,7 +181,7 @@ def process_instance(instance: Dict[str, Any]) -> Dict[str, Any]:
         eval_commands = _spec.get("eval_commands", [])
         if isinstance(test_cmd, list):
             test_cmd = test_cmd[-1]
-        
+
         result = subprocess.run(["docker", "images", "-q", image_name], capture_output=True, text=True)
         imageStored =  bool(result.stdout.strip())
         if imageStored:
@@ -191,8 +191,9 @@ def process_instance(instance: Dict[str, Any]) -> Dict[str, Any]:
             subprocess.run(["docker", "pull", image_name], check=True)
 
         docker_client = docker.from_env()
-        
+
         env = {
+            "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY", ""),
             "AZURE_API_KEY": os.getenv("AZURE_API_KEY", ""),
             "AZURE_API_BASE": os.getenv("AZURE_API_BASE", ""),
             "AZURE_API_VERSION": os.getenv("AZURE_API_VERSION", ""),

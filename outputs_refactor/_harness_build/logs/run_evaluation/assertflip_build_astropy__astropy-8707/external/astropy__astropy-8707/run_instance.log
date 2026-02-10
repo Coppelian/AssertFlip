@@ -1,0 +1,405 @@
+2026-02-09 18:40:46,282 - INFO - Creating container for astropy__astropy-8707...
+2026-02-09 18:40:46,344 - INFO - Container for astropy__astropy-8707 created: f09a5418fd8e55f79cd70ca679b72c4522eea2a5512170b3811ae7fad175cbdd
+2026-02-09 18:40:46,535 - INFO - Container for astropy__astropy-8707 started: f09a5418fd8e55f79cd70ca679b72c4522eea2a5512170b3811ae7fad175cbdd
+2026-02-09 18:40:46,536 - INFO - Intermediate patch for astropy__astropy-8707 written to logs/run_evaluation/assertflip_build_astropy__astropy-8707/external/astropy__astropy-8707/patch.diff, now applying to container...
+2026-02-09 18:40:46,751 - INFO - >>>>> Applied Patch:
+Checking patch astropy/io/fits/card.py...
+Checking patch astropy/io/fits/header.py...
+Applied patch astropy/io/fits/card.py cleanly.
+Applied patch astropy/io/fits/header.py cleanly.
+
+2026-02-09 18:40:47,592 - INFO - Git diff before:
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..56c8d5684 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -323,14 +323,8 @@ class Card(_Verify):
+         if isinstance(value, float) and (np.isnan(value) or np.isinf(value)):
+             raise ValueError("Floating point {!r} values are not allowed "
+                              "in FITS headers.".format(value))
+-
+         elif isinstance(value, str):
+-            m = self._ascii_text_re.match(value)
+-            if not m:
+-                raise ValueError(
+-                    'FITS header values must contain standard printable ASCII '
+-                    'characters; {!r} contains characters not representable in '
+-                    'ASCII or non-printable characters.'.format(value))
++            value = self._normalize_string_value(value)
+         elif isinstance(value, bytes):
+             # Allow str, but only if they can be decoded to ASCII text; note
+             # this is not even allowed on Python 3 since the `bytes` type is
+@@ -378,6 +372,20 @@ class Card(_Verify):
+                     raise ValueError('value {} is not a float'.format(
+                             self._value))
+ 
++    def _normalize_string_value(self, value):
++        """Validate and normalize a string header value.
++
++        Extracted from the value setter to create a tiny seam for tests that
++        need to isolate ASCII validation behavior without altering semantics.
++        """
++        m = self._ascii_text_re.match(value)
++        if not m:
++            raise ValueError(
++                'FITS header values must contain standard printable ASCII '
++                'characters; {!r} contains characters not representable in '
++                'ASCII or non-printable characters.'.format(value))
++        return value
++
+     @value.deleter
+     def value(self):
+         if self._invalid:
+@@ -1065,6 +1073,14 @@ class Card(_Verify):
+             idx += maxlen
+         return ''.join(output)
+ 
++    def _match_value_regex(self, valuecomment):
++        """Seam for matching a value/comment field against the FSC regex.
++
++        Extracted from `_verify` so tests/APR harnesses can override or probe
++        matching behavior without changing verification control flow.
++        """
++        return self._value_FSC_RE.match(valuecomment)
++
+     def _verify(self, option='warn'):
+         self._verified = True
+ 
+@@ -1131,7 +1147,7 @@ class Card(_Verify):
+                              valuecomment),
+                     fixable=False))
+         else:
+-            m = self._value_FSC_RE.match(valuecomment)
++            m = self._match_value_regex(valuecomment)
+             if not m:
+                 errs.append(self.run_option(
+                     option,
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..49fdaa485 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -356,6 +356,18 @@ class Header:
+         # contains non-valid characters (namely \n) the cards may be split
+         # immediately at the separator
+         require_full_cardlength = set(sep).issubset(VALID_HEADER_CHARS)
++        cards = cls._build_cards_from_data(data, sep, require_full_cardlength)
++        return cls._fromcards(cards)
++
++    @classmethod
++    def _build_cards_from_data(cls, data, sep, require_full_cardlength):
++        """Build a list of `Card` objects from raw header data.
++
++        Extracted from `fromstring` to isolate the parsing loop and create a
++        seam for tests. IMPORTANT: this preserves original behavior (including
++        any bytes/str mismatch behavior) by not altering types or decoding.
++        """
++        cards = []
+ 
+         # Split the header into individual cards
+         idx = 0
+@@ -394,7 +406,7 @@ class Header:
+         if image:
+             cards.append(Card.fromstring(''.join(image)))
+ 
+-        return cls._fromcards(cards)
++        return cards
+ 
+     @classmethod
+     def fromfile(cls, fileobj, sep='', endcard=True, padding=True):
+@@ -1560,6 +1572,17 @@ class Header:
+ 
+         self._add_commentary('', value, before=before, after=after)
+ 
++    def _normalize_update_keyword(self, keyword):
++        """Normalize keyword for update lookups.
++
++        Extracted from `_update` to create a seam for tests and make keyword
++        normalization observable without changing update control flow.
++        """
++        keyword = keyword.upper()
++        if keyword.startswith('HIERARCH '):
++            keyword = keyword[9:]
++        return keyword
++
+     def _update(self, card):
+         """
+         The real update code.  If keyword already exists, its value and/or
+@@ -1573,9 +1596,7 @@ class Header:
+         keyword, value, comment = card
+ 
+         # Lookups for existing/known keywords are case-insensitive
+-        keyword = keyword.upper()
+-        if keyword.startswith('HIERARCH '):
+-            keyword = keyword[9:]
++        keyword = self._normalize_update_keyword(keyword)
+ 
+         if (keyword not in Card._commentary_keywords and
+                 keyword in self._keyword_indices):
+@@ -1603,35 +1624,50 @@ class Header:
+             # A new keyword! self.append() will handle updating _modified
+             self.append(card)
+ 
+-    def _cardindex(self, key):
+-        """Returns an index into the ._cards list given a valid lookup key."""
++    def _parse_cardindex_key(self, key):
++        """Parse a header key for `_cardindex`.
+ 
+-        # This used to just set key = (key, 0) and then go on to act as if the
+-        # user passed in a tuple, but it's much more common to just be given a
+-        # string as the key, so optimize more for that case
++        Extracted to create a seam for tests and to isolate key interpretation.
++        Returns either:
++          - int (direct index)
++          - slice
++          - (keyword: str, n: int)
++        """
+         if isinstance(key, str):
+-            keyword = key
+-            n = 0
+-        elif isinstance(key, int):
+-            # If < 0, determine the actual index
++            return (key, 0)
++
++        if isinstance(key, int):
+             if key < 0:
+                 key += len(self._cards)
+             if key < 0 or key >= len(self._cards):
+                 raise IndexError('Header index out of range.')
+             return key
+-        elif isinstance(key, slice):
++
++        if isinstance(key, slice):
+             return key
+-        elif isinstance(key, tuple):
++
++        if isinstance(key, tuple):
+             if (len(key) != 2 or not isinstance(key[0], str) or
+                     not isinstance(key[1], int)):
+                 raise ValueError(
+                     'Tuple indices must be 2-tuples consisting of a '
+                     'keyword string and an integer index.')
+-            keyword, n = key
+-        else:
+-            raise ValueError(
+-                'Header indices must be either a string, a 2-tuple, or '
+-                'an integer.')
++            return key
++
++        raise ValueError(
++            'Header indices must be either a string, a 2-tuple, or '
++            'an integer.')
++
++    def _cardindex(self, key):
++        """Returns an index into the ._cards list given a valid lookup key."""
++
++        # This used to just set key = (key, 0) and then go on to act as if the
++        # user passed in a tuple, but it's much more common to just be given a
++        # string as the key, so optimize more for that case
++        parsed = self._parse_cardindex_key(key)
++        if isinstance(parsed, (int, slice)):
++            return parsed
++        keyword, n = parsed
+ 
+         keyword = Card.normalize_keyword(keyword)
+         # Returns the index into _cards for the n-th card with the given
+2026-02-09 18:40:47,592 - INFO - Eval script for astropy__astropy-8707 written to logs/run_evaluation/assertflip_build_astropy__astropy-8707/external/astropy__astropy-8707/eval.sh; copying to container...
+2026-02-09 18:41:05,358 - INFO - Test runtime: 17.68 seconds
+2026-02-09 18:41:05,359 - INFO - Test output for astropy__astropy-8707 written to logs/run_evaluation/assertflip_build_astropy__astropy-8707/external/astropy__astropy-8707/test_output.txt
+2026-02-09 18:41:05,454 - INFO - Git diff after:
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..56c8d5684 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -323,14 +323,8 @@ class Card(_Verify):
+         if isinstance(value, float) and (np.isnan(value) or np.isinf(value)):
+             raise ValueError("Floating point {!r} values are not allowed "
+                              "in FITS headers.".format(value))
+-
+         elif isinstance(value, str):
+-            m = self._ascii_text_re.match(value)
+-            if not m:
+-                raise ValueError(
+-                    'FITS header values must contain standard printable ASCII '
+-                    'characters; {!r} contains characters not representable in '
+-                    'ASCII or non-printable characters.'.format(value))
++            value = self._normalize_string_value(value)
+         elif isinstance(value, bytes):
+             # Allow str, but only if they can be decoded to ASCII text; note
+             # this is not even allowed on Python 3 since the `bytes` type is
+@@ -378,6 +372,20 @@ class Card(_Verify):
+                     raise ValueError('value {} is not a float'.format(
+                             self._value))
+ 
++    def _normalize_string_value(self, value):
++        """Validate and normalize a string header value.
++
++        Extracted from the value setter to create a tiny seam for tests that
++        need to isolate ASCII validation behavior without altering semantics.
++        """
++        m = self._ascii_text_re.match(value)
++        if not m:
++            raise ValueError(
++                'FITS header values must contain standard printable ASCII '
++                'characters; {!r} contains characters not representable in '
++                'ASCII or non-printable characters.'.format(value))
++        return value
++
+     @value.deleter
+     def value(self):
+         if self._invalid:
+@@ -1065,6 +1073,14 @@ class Card(_Verify):
+             idx += maxlen
+         return ''.join(output)
+ 
++    def _match_value_regex(self, valuecomment):
++        """Seam for matching a value/comment field against the FSC regex.
++
++        Extracted from `_verify` so tests/APR harnesses can override or probe
++        matching behavior without changing verification control flow.
++        """
++        return self._value_FSC_RE.match(valuecomment)
++
+     def _verify(self, option='warn'):
+         self._verified = True
+ 
+@@ -1131,7 +1147,7 @@ class Card(_Verify):
+                              valuecomment),
+                     fixable=False))
+         else:
+-            m = self._value_FSC_RE.match(valuecomment)
++            m = self._match_value_regex(valuecomment)
+             if not m:
+                 errs.append(self.run_option(
+                     option,
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..49fdaa485 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -356,6 +356,18 @@ class Header:
+         # contains non-valid characters (namely \n) the cards may be split
+         # immediately at the separator
+         require_full_cardlength = set(sep).issubset(VALID_HEADER_CHARS)
++        cards = cls._build_cards_from_data(data, sep, require_full_cardlength)
++        return cls._fromcards(cards)
++
++    @classmethod
++    def _build_cards_from_data(cls, data, sep, require_full_cardlength):
++        """Build a list of `Card` objects from raw header data.
++
++        Extracted from `fromstring` to isolate the parsing loop and create a
++        seam for tests. IMPORTANT: this preserves original behavior (including
++        any bytes/str mismatch behavior) by not altering types or decoding.
++        """
++        cards = []
+ 
+         # Split the header into individual cards
+         idx = 0
+@@ -394,7 +406,7 @@ class Header:
+         if image:
+             cards.append(Card.fromstring(''.join(image)))
+ 
+-        return cls._fromcards(cards)
++        return cards
+ 
+     @classmethod
+     def fromfile(cls, fileobj, sep='', endcard=True, padding=True):
+@@ -1560,6 +1572,17 @@ class Header:
+ 
+         self._add_commentary('', value, before=before, after=after)
+ 
++    def _normalize_update_keyword(self, keyword):
++        """Normalize keyword for update lookups.
++
++        Extracted from `_update` to create a seam for tests and make keyword
++        normalization observable without changing update control flow.
++        """
++        keyword = keyword.upper()
++        if keyword.startswith('HIERARCH '):
++            keyword = keyword[9:]
++        return keyword
++
+     def _update(self, card):
+         """
+         The real update code.  If keyword already exists, its value and/or
+@@ -1573,9 +1596,7 @@ class Header:
+         keyword, value, comment = card
+ 
+         # Lookups for existing/known keywords are case-insensitive
+-        keyword = keyword.upper()
+-        if keyword.startswith('HIERARCH '):
+-            keyword = keyword[9:]
++        keyword = self._normalize_update_keyword(keyword)
+ 
+         if (keyword not in Card._commentary_keywords and
+                 keyword in self._keyword_indices):
+@@ -1603,35 +1624,50 @@ class Header:
+             # A new keyword! self.append() will handle updating _modified
+             self.append(card)
+ 
+-    def _cardindex(self, key):
+-        """Returns an index into the ._cards list given a valid lookup key."""
++    def _parse_cardindex_key(self, key):
++        """Parse a header key for `_cardindex`.
+ 
+-        # This used to just set key = (key, 0) and then go on to act as if the
+-        # user passed in a tuple, but it's much more common to just be given a
+-        # string as the key, so optimize more for that case
++        Extracted to create a seam for tests and to isolate key interpretation.
++        Returns either:
++          - int (direct index)
++          - slice
++          - (keyword: str, n: int)
++        """
+         if isinstance(key, str):
+-            keyword = key
+-            n = 0
+-        elif isinstance(key, int):
+-            # If < 0, determine the actual index
++            return (key, 0)
++
++        if isinstance(key, int):
+             if key < 0:
+                 key += len(self._cards)
+             if key < 0 or key >= len(self._cards):
+                 raise IndexError('Header index out of range.')
+             return key
+-        elif isinstance(key, slice):
++
++        if isinstance(key, slice):
+             return key
+-        elif isinstance(key, tuple):
++
++        if isinstance(key, tuple):
+             if (len(key) != 2 or not isinstance(key[0], str) or
+                     not isinstance(key[1], int)):
+                 raise ValueError(
+                     'Tuple indices must be 2-tuples consisting of a '
+                     'keyword string and an integer index.')
+-            keyword, n = key
+-        else:
+-            raise ValueError(
+-                'Header indices must be either a string, a 2-tuple, or '
+-                'an integer.')
++            return key
++
++        raise ValueError(
++            'Header indices must be either a string, a 2-tuple, or '
++            'an integer.')
++
++    def _cardindex(self, key):
++        """Returns an index into the ._cards list given a valid lookup key."""
++
++        # This used to just set key = (key, 0) and then go on to act as if the
++        # user passed in a tuple, but it's much more common to just be given a
++        # string as the key, so optimize more for that case
++        parsed = self._parse_cardindex_key(key)
++        if isinstance(parsed, (int, slice)):
++            return parsed
++        keyword, n = parsed
+ 
+         keyword = Card.normalize_keyword(keyword)
+         # Returns the index into _cards for the n-th card with the given
+2026-02-09 18:41:05,454 - INFO - Grading answer for astropy__astropy-8707...
+2026-02-09 18:41:05,498 - INFO - report: {'astropy__astropy-8707': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_from_bytes']}, 'PASS_TO_PASS': {'success': ['astropy/io/fits/tests/test_header.py::test_shallow_copy', 'astropy/io/fits/tests/test_header.py::test_init_with_header', 'astropy/io/fits/tests/test_header.py::test_init_with_dict', 'astropy/io/fits/tests/test_header.py::test_init_with_ordereddict'], 'failure': ['astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_rename_keyword', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_constructor_default_args', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_string_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_boolean_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_long_integer_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_floating_point_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_complex_value_card']}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for astropy__astropy-8707: resolved: False
+2026-02-09 18:41:05,499 - INFO - Attempting to stop container sweb.eval.astropy__astropy-8707.assertflip_build_astropy__astropy-8707...
