@@ -81,10 +81,10 @@ index 92394a7eae..c49d3adc32 100644
 +        self.value = value
 +
 +    def validate(self):
-+        # Preserve original URLValidator.__call__ control decisions:
++        # Keep the existing validation flow and ordering:
 +        # - Always validate scheme first
-+        # - Run IPv6 netloc validation ONLY if the initial (“trivial”) regex validation succeeded
-+        #   (originally: inside the `else:` branch of `try: super().__call__(value)`).
++        # - Run the additional host checks after the initial fast-path validation succeeds
++        #   (refactor original: inside the `else:` branch of `try: super().__call__(value)`).
 +        self._validate_scheme()
 +
 +        trivial_ok = self._validate_full_url_with_idn_fallback()
@@ -114,12 +114,12 @@ index 92394a7eae..c49d3adc32 100644
 +            RegexValidator.__call__(self.validator, self.value)
 +            return True
 +        except ValidationError as e:
-+            # Trivial case failed. Try for possible IDN domain.
++            # Fast-path failed; retry using an alternate normalized representation.
 +            if not self.value:
 +                raise
 +            try:
 +                scheme, netloc, path, query, fragment = urlsplit(self.value)
-+            except ValueError:  # for example, "Invalid IPv6 URL"
++            except ValueError:  # e.g. invalid URL form
 +                self._raise()
 +            try:
 +                netloc = netloc.encode('idna').decode('ascii')  # IDN -> ACE

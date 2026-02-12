@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# This is a backup copy of run_refactor_parallel working version.
 
 import os
 import json
@@ -12,8 +13,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import docker
 from dotenv import load_dotenv
 from tqdm import tqdm
-import time
-from subprocess import PIPE, STDOUT
 
 from constants import MAP_REPO_VERSION_TO_SPECS, CUSTOM_INSTRUCTIONS
 from config_refactor import (
@@ -145,61 +144,6 @@ def _run_shell(cmd: str, *, timeout: Optional[int] = None, capture: bool = True)
     )
 
 
-def _docker_exec_stream(
-    container_id: str,
-    cmd: str,
-    log_file: Path,
-    *,
-    timeout: Optional[int] = None,
-    prefix: str = "",
-) -> None:
-    """
-    Run `docker exec <id> bash -lc <cmd>` and:
-      - stream stdout+stderr to console (real-time)
-      - write the same stream to log_file
-    Raises subprocess.CalledProcessError on non-zero exit or timeout.
-    """
-    _ensure_dir(log_file.parent)
-
-    start = time.time()
-    docker_cmd = ["docker", "exec", container_id, "bash", "-lc", cmd]
-
-    with log_file.open("a", encoding="utf-8", errors="replace") as lf:
-        lf.write(f"\n\n===== {prefix} =====\n")
-        lf.write(f"$ {' '.join(shlex.quote(x) for x in docker_cmd)}\n\n")
-
-        p = subprocess.Popen(
-            docker_cmd,
-            stdout=PIPE,
-            stderr=STDOUT,
-            text=True,
-            bufsize=1,  # line-buffered
-        )
-
-        try:
-            assert p.stdout is not None
-            for line in p.stdout:
-                # real-time console output
-                print(line, end="")
-                # write to file
-                lf.write(line)
-
-                if timeout is not None and (time.time() - start) > timeout:
-                    p.kill()
-                    raise subprocess.TimeoutExpired(cmd, timeout)
-
-            rc = p.wait()
-            if rc != 0:
-                raise subprocess.CalledProcessError(rc, docker_cmd)
-
-        finally:
-            try:
-                if p.stdout:
-                    p.stdout.close()
-            except Exception:
-                pass
-
-
 def process_instance(
     instance: Dict[str, Any],
     patch_dir: Path,
@@ -271,7 +215,6 @@ def process_instance(
     # per-instance files on host
     temp_json_path = results_dir / f"{instance_id}.json"
     log_path = log_dir / f"log_{instance_id}.txt"
-    full_log_path = log_dir / f"full_{instance_id}.log"
 
     container = None
     docker_client = None
@@ -326,14 +269,7 @@ def process_instance(
             "conda activate testbed && "
             "python -m pip install coverage"
         )
-        # _run_shell(f'docker exec {container_id} bash -c "{prep_cmd}"', capture=True)
-        _docker_exec_stream(
-            container_id,
-            prep_cmd,
-            full_log_path,
-            timeout=timeout_s,
-            prefix="prep_cmd",
-        )
+        _run_shell(f'docker exec {container_id} bash -c "{prep_cmd}"', capture=True)
 
         # apply refactor patch (your existing logic; keep /testbed and flags)
         if patch_path is not None:
@@ -347,18 +283,14 @@ def process_instance(
                 "git apply --check --ignore-space-change --ignore-whitespace /tmp/refactor.patch"
             )
             try:
-                # _run_shell(f'docker exec {container_id} bash -c "{check_apply}"', capture=True)
-                _docker_exec_stream(
-                    container_id,
-                    check_apply,
-                    full_log_path,
-                    timeout=timeout_s,
-                    prefix="git apply --check",
-                )
-            except subprocess.CalledProcessError:
+                _run_shell(f'docker exec {container_id} bash -c "{check_apply}"', capture=True)
+            except subprocess.CalledProcessError as e:
                 outcome["status"] = "error"
                 outcome["error"] = "git apply --check failed"
-                _write_text(log_path, f"[git apply --check FAILED]\nSee: {full_log_path}\n")
+                _write_text(
+                    log_path,
+                    f"[git apply --check FAILED]\npatch={patch_path}\n\nSTDOUT:\n{e.stdout}\n\nSTDERR:\n{e.stderr}\n",
+                )
                 return outcome
 
             apply_cmd = (
@@ -366,18 +298,14 @@ def process_instance(
                 "git apply --ignore-space-change --ignore-whitespace /tmp/refactor.patch"
             )
             try:
-                # _run_shell(f'docker exec {container_id} bash -c "{apply_cmd}"', capture=True)
-                _docker_exec_stream(
-                    container_id,
-                    apply_cmd,
-                    full_log_path,
-                    timeout=timeout_s,
-                    prefix="git apply",
-                )
+                _run_shell(f'docker exec {container_id} bash -c "{apply_cmd}"', capture=True)
             except subprocess.CalledProcessError as e:
                 outcome["status"] = "error"
                 outcome["error"] = "git apply failed"
-                _write_text(log_path, f"[git apply FAILED]\nSee: {full_log_path}\n")
+                _write_text(
+                    log_path,
+                    f"[git apply FAILED]\npatch={patch_path}\n\nSTDOUT:\n{e.stdout}\n\nSTDERR:\n{e.stderr}\n",
+                )
                 return outcome
         else:
             # no patch is allowed; just record to log
@@ -407,18 +335,14 @@ def process_instance(
         )
 
         try:
-            # _run_shell(f'docker exec {container_id} bash -c "{bash_cmd}"', timeout=timeout_s, capture=True)
-            _docker_exec_stream(
-                container_id,
-                bash_cmd,
-                full_log_path,
-                timeout=timeout_s,
-                prefix="assertflip",
-            )
-        except subprocess.CalledProcessError:
+            _run_shell(f'docker exec {container_id} bash -c "{bash_cmd}"', timeout=timeout_s, capture=True)
+        except subprocess.CalledProcessError as e:
             outcome["status"] = "error"
             outcome["error"] = "assertflip failed"
-            _write_text(log_path, f"[assertflip FAILED]\nSee: {full_log_path}\n")
+            _write_text(
+                log_path,
+                f"[assertflip FAILED]\nCMD:\n{bash_cmd}\n\nSTDOUT:\n{e.stdout}\n\nSTDERR:\n{e.stderr}\n",
+            )
             return outcome
 
         # copy generated test back (same as run_parallel)

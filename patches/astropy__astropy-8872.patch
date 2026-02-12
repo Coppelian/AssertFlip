@@ -8,7 +8,7 @@ index ded609cbe9..bbe2e95e0c 100644
  
 +class _QuantityUfuncRunner:
 +    """
-+    Bug-preserving helper for Quantity.__array_ufunc__.
++    Helper for Quantity.__array_ufunc__.
 +
 +    This class exists to:
 +      - isolate the ufunc execution pipeline
@@ -53,10 +53,10 @@ index ded609cbe9..bbe2e95e0c 100644
 +            input_ = getattr(input_, 'value', input_)
 +            arrays.append(converter(input_) if converter else input_)
 +
-+        # 4) Delegate to ndarray/parent __array_ufunc__ (same as original).
++        # 4) Refactor ndarray/parent __array_ufunc__.
 +        result = self.q._super_array_ufunc(self.function, self.method, *arrays, **self.kwargs)
 +
-+        # 5) Preserve early returns (same as original).
++        # 5) Keep the existing short-circuit structure.
 +        if self.unit is None or result is None or result is NotImplemented:
 +            return result
 +

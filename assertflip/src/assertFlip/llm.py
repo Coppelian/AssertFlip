@@ -9,7 +9,6 @@ import traceback
 from aiolimiter import AsyncLimiter
 import json
 from pathlib import Path
-from .utils import get_results_dir
 
 # Suppress Pydantic serializer warnings
 import warnings
@@ -362,8 +361,7 @@ args:{args}
             return f'Error executing function: {e}'
         
     def _log_llm_chat(self, instance_id: str, messages: list, response: dict, ctx: object):
-        # path = Path(f"/results/llm_calls_{instance_id}.jsonl")
-        path = get_results_dir() / f"llm_calls_{instance_id}.jsonl"
+        path = Path(f"/results/llm_calls_{instance_id}.jsonl")
         path.parent.mkdir(parents=True, exist_ok=True)
 
         entry = {

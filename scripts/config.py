@@ -1,5 +1,5 @@
 # Path constants
-DATASET_PATH = "./datasets/SWT_Verified_Agentless_Test_Source_Skeleton.json"
+DATASET_PATH = "./datasets/SWT_Verified_Agentless_9Refactor.json"
 DATASET = "princeton-nlp/SWE-bench_Verified"
 ASSERTFLIP_DIR = "./assertflip"
 RESULTS_DIR = "./test"

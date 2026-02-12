@@ -2,7 +2,7 @@ import typing as T
 from .prompter import *
 import assertFlip.codeinfo as codeinfo
 import os
-from .. import llm
+from assertFlip import llm
 from pathlib import Path
 
 class GptV2Prompter(Prompter):
@@ -14,7 +14,7 @@ class GptV2Prompter(Prompter):
     @staticmethod
     def _get_planning_prompt(segment, mode:str) -> T.List[dict]:
         print("MODE IS", mode)
-        assert mode in ("passing_first", "failing_first"), f"UnsupportWed initial_prompt mode: {mode}"
+        assert mode in ("passing_first", "failing_first"), f"Unsupported initial_prompt mode: {mode}"
         if mode == "passing_first":
             goal = "pass if the bug is present and fail once the bug is fixed"
             plan_rules = """

@@ -15,7 +15,6 @@ from .segment import *
 from .prompt.prompter import Prompter
 from .testrunner import *
 from pydantic import BaseModel, Field
-from .utils import get_results_dir
 
 
 def load_dataset(dataset: Path):
@@ -667,9 +666,7 @@ async def save_test(args, seg, test_code, mode):
     state.inc_counter('G')
 
 async def save_attempt_log(seg, attempt_log):
-    # attempt_path = Path("/results") / f"attempts_{seg.instance_id}.json"
-    attempt_path = get_results_dir() / f"attempts_{seg.instance_id}.json"
-    
+    attempt_path = Path("/results") / f"attempts_{seg.instance_id}.json"
     attempt_path.parent.mkdir(parents=True, exist_ok=True)
     with open(attempt_path, "w") as f:
         json.dump(attempt_log, f, indent=2)

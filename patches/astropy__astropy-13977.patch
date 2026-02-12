@@ -9,7 +9,7 @@ index b98abfafb0..060976f61a 100644
 +class _UfuncCallContext:
 +    """Lightweight container for __array_ufunc__ call state.
 +
-+    Bug-preserving: this stores values; it does not change control flow.
++    Refactor: this stores values; it does not change control flow.
 +    Useful as a seam for tests and future refactors.
 +    """
 +
@@ -29,7 +29,7 @@ index b98abfafb0..060976f61a 100644
              "https://github.com/astropy/astropy"
          )
  
-+    # --- Seams for testability (bug-preserving wrappers) ---
++    # Small wrappers to keep related logic grouped
 +
 +    def _get_converters_and_unit_for_ufunc(self, function, method, *inputs):
 +        """Overridable seam for converter/unit inference."""
@@ -126,7 +126,7 @@ index 2a8a287d90..e7f876cf25 100644
 +    """Sprout method: normalize seqarrays -> (arrays, structured_unit)."""
 +    from astropy.units import StructuredUnit
 +
-+    # Note: this also converts ndarray -> Quantity[dimensionless]
++    # Note: this may also normalize array-like inputs to a dimensionless Quantity.
 +    seqarrays = _as_quantities(*seqarrays)
 +    arrays = tuple(q.value for q in seqarrays)
 +    units = tuple(q.unit for q in seqarrays)
@@ -171,7 +171,7 @@ index 9582edd1e6..75dc9be426 100644
  
  
 +def _fallback_on_conversion_error(converters, changeable, unit2):
-+    """Extracted fallback path for unit conversion failures (bug-preserving)."""
++    """Extracted fallback path for unit conversion failures (refactor)."""
 +    # special case: would be OK if unitless number is zero, inf, nan
 +    converters[1 - changeable] = False
 +    return converters, unit2
